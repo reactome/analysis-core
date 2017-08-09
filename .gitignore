@@ -1,0 +1,19 @@
+target/
+
+# Intellij project
+.idea/
+Golden.iml
+
+# Log files
+*.log
+
+# Compiled class files
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar

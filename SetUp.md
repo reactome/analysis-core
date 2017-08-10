@@ -1,6 +1,6 @@
 The objective of the project is to extend the pathway search or Reactome, particularly to include post translational modifications and peptides as additional  input.
 
-Reactome provides a Graph core library to interact with the contents of the knowledgebase directly. Therefore, it is useful to set up a project with those dependencies. 
+Reactome provides a [Graph core library](https://github.com/reactome/graph-core) to interact with the contents of the knowledgebase directly. Therefore, it is useful to set up a project with those dependencies. 
 
 # Reactome Graph Core Project set up
 

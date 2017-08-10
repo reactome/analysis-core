@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>no.uib</groupId>
-    <artifactId>GoldenEagle</artifactId>
+    <artifactId>Golden</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
-    <name>GoldenEagle</name>
+    <name>Golden</name>
 
     <organization>
         <name>The European Bioinformatics Institute</name>
@@ -16,10 +17,10 @@
 
     <developers>
         <developer>
-            <id></id>
-            <name></name>
-            <email></email>
-            <organization>http://www.ebi.ac.uk/</organization>
+            <id>francisco</id>
+            <name>Luis Francisco Hernández Sánchez</name>
+            <email>luis.sanchez AT uib.no</email>
+            <organization>http://www.uib.no</organization>
         </developer>
     </developers>
 
@@ -59,12 +60,10 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Add your dependencies here -->
-
     </dependencies>
 
     <build>
-        <finalName>GoldenEagle</finalName>
+        <finalName>Golden</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>

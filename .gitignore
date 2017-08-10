@@ -1,14 +1,9 @@
-target/
-
-# Intellij project
-.idea/
-Golden.iml
-
-# Log files
+# intelliJ idea git ignore
+*.iml
+*.idea
 *.log
-
-# Compiled class files
-*.class
+*target*
+*.txt
 
 # Package Files #
 *.jar

@@ -1,4 +1,4 @@
-package org.reactome.server.analysis.core.tools;
+package org.reactome.server.analysis.tools;
 
 import org.neo4j.ogm.config.Configuration;
 import org.neo4j.ogm.session.Session;

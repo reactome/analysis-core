@@ -83,6 +83,8 @@ public class PathwayHierarchyBuilder {
                         Pathway subPathway = (Pathway) event;
                         PathwayNode subPathwayNode = pathwayNode.addChild(subPathway.getStId(), subPathway.getDbId(), subPathway.getDisplayName(), subPathway.getHasDiagram());      // Add pathway to hierarchy
                         queue.add(new Pair<>(subPathway, subPathwayNode));      // Add pathway to queue to check further subpathways later
+                    } else {
+                        pathwayNode.setLowerLevelPathway(true);                 //if the pathways has other events than pathways means it is a lower level pathway
                     }
                 }
             }

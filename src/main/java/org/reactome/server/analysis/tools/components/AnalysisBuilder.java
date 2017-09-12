@@ -15,6 +15,9 @@ public class AnalysisBuilder {
     @Autowired
     private PathwayHierarchyBuilder pathwayHierarchyBuilder;
 
+    @Autowired
+    private PhysicalEntityHierarchyBuilder peBuilder;
+
     public void build(String fileName){
         this.pathwayHierarchyBuilder = new PathwayHierarchyBuilder();
         this.pathwayHierarchyBuilder.build();       // Build memory data structure for the pathway hierarchy for each species

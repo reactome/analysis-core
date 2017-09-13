@@ -45,3 +45,5 @@ test.txt
 
 *.log
 *.out
+
+.DS_Store

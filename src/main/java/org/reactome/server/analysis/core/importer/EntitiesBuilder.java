@@ -1,0 +1,177 @@
+package org.reactome.server.analysis.core.importer;
+
+import org.reactome.server.analysis.core.Main;
+import org.reactome.server.analysis.core.importer.query.*;
+import org.reactome.server.analysis.core.model.*;
+import org.reactome.server.analysis.core.model.identifier.MainIdentifier;
+import org.reactome.server.analysis.core.model.resource.MainResource;
+import org.reactome.server.analysis.core.model.resource.Resource;
+import org.reactome.server.analysis.core.model.resource.ResourceFactory;
+import org.reactome.server.analysis.core.util.MapSet;
+import org.reactome.server.graph.exception.CustomQueryException;
+import org.reactome.server.graph.service.AdvancedDatabaseObjectService;
+import org.reactome.server.graph.utils.ReactomeGraphCore;
+
+import java.util.*;
+
+public class EntitiesBuilder {
+
+    public static final String splitter = ":";
+    //Will contain the RADIX-TREE with the map (identifiers -> [EntityNode])
+    private IdentifiersMap<EntityNode> entitiesMap;
+
+    //A graph representation of the PhysicalEntities in Reactome
+    private EntitiesContainer entitiesContainer;
+
+    private AdvancedDatabaseObjectService ados = ReactomeGraphCore.getService(AdvancedDatabaseObjectService.class);
+
+    public void build(Set<SpeciesNode> speciesNodes) {
+        this.entitiesMap = new IdentifiersMap<>();
+        this.entitiesContainer = new EntitiesContainer();
+
+        Map<String, PsiModNode> psiModNodeMap = PsiModImporter.getPsiModTree().flatten();
+
+        String msgPrefix = "\rCreating the entities container ";
+
+        String query;
+        Map<String, Object> paramsMap = new HashMap<>();
+        paramsMap.put("splitter", splitter);
+        for (SpeciesNode species : speciesNodes) {
+            if (Main.TEST_MAIN_SPECIES && !species.getTaxID().equals(Main.MAIN_SPECIES_TAX_ID)) continue;
+
+            paramsMap.put("taxId", species.getTaxID());
+
+            String speciesPrefix = "for '" + species.getName() + "'";
+            if (Main.VERBOSE) System.out.print(msgPrefix + speciesPrefix + " >> retrieving xrefs...");
+
+            query = "MATCH (:Species{taxId:{taxId}})<-[:species]-(:Pathway)-[:hasEvent]->(rle:ReactionLikeEvent), " +
+                    "      (rle)-[:input|output|catalystActivity|entityFunctionalStatus|physicalEntity|regulatedBy|regulator|hasComponent|hasMember|hasCandidate|repeatedUnit|referenceEntity*]->(re:ReferenceEntity) " +
+                    "WITH DISTINCT re " +
+                    "OPTIONAL MATCH (re)-[:crossReference]->(dbi:DatabaseIdentifier) " +
+                    "RETURN DISTINCT re.dbId AS referenceEntity, " +
+                    "                re.secondaryIdentifier AS  secondaryIdentifiers, " +
+                    "                re.geneName AS geneNames, " +
+                    "                re.otherIdentifier AS otherIdentifier, " +
+                    "                [re.databaseName + {splitter} + re.identifier] + COLLECT(DISTINCT dbi.databaseName + {splitter} + dbi.identifier) AS xrefs";
+
+            Map<Long, ReferenceEntityIdentifiers> xrefMap = new HashMap<>();
+            try {
+                for (ReferenceEntityIdentifiers aux : ados.customQueryForObjects(ReferenceEntityIdentifiers.class, query, paramsMap)) {
+                    xrefMap.put(aux.getReferenceEntity(), aux);
+                }
+            } catch (CustomQueryException e) {
+                throw new RuntimeException(e);
+            }
+
+            if (Main.VERBOSE) System.out.print(msgPrefix + speciesPrefix + " >> retrieving participants...");
+
+            query = "MATCH (:Species{taxId:{taxId}})<-[:species]-(p:Pathway)-[:hasEvent]->(rle:ReactionLikeEvent), " +
+                    "      (rle)-[:input|output|catalystActivity|entityFunctionalStatus|physicalEntity|regulatedBy|regulator|hasComponent|hasMember|hasCandidate|repeatedUnit*]->(pe:PhysicalEntity)-[:referenceEntity]->(re:ReferenceEntity) " +
+                    "WITH DISTINCT p, pe, re, COLLECT(DISTINCT rle.dbId + {splitter} + rle.stId) AS rles " +
+                    "OPTIONAL MATCH (pe)-[:hasModifiedResidue]->(tm:TranslationalModification)-[:psiMod]->(mod:PsiMod) " +
+                    "RETURN DISTINCT p.dbId AS pathway, " +
+                    "                pe.dbId AS physicalEntity, " +
+                    "                re.dbId as referenceEntity, " +
+                    "                re.identifier AS identifier, " +
+                    "                re.variantIdentifier AS variantIdentifier, " +
+                    "                rles AS reactions, COLLECT(CASE WHEN tm.coordinate IS NOT NULL THEN tm.coordinate ELSE \"null\" END + {splitter} + mod.identifier) AS mods";
+
+            Collection<EntitiesQueryResult> result;
+            try {
+                result = ados.customQueryForObjects(EntitiesQueryResult.class, query, paramsMap);
+            } catch (CustomQueryException e) {
+                throw new RuntimeException(e);
+            }
+
+            int i = 0; int tot = result.size();
+            for (EntitiesQueryResult current : result) {
+                if (Main.VERBOSE && ++i % 25 == 0) System.out.print(msgPrefix + speciesPrefix + " >> " + i + "/" + tot + "   ");
+
+                MapSet<Long, AnalysisReaction> pathwayReactions = new MapSet<>();
+                pathwayReactions.add(current.getPathway(), current.getReactions());
+
+                ReferenceEntityIdentifiers rei = xrefMap.get(current.getReferenceEntity());
+                List<XRef> xrefs = rei.getXrefs();
+                final String databaseName = xrefs.get(0).getDatabaseName();
+                final String identifier = xrefs.get(0).getIdentifier();
+                Resource resource = ResourceFactory.getResource(databaseName);
+                if (resource instanceof MainResource) {
+                    List<Modification> modifications = new ArrayList<>();
+                    for (Mod mod : current.getMods()) {
+                        modifications.add(new Modification(mod.getCoordinate(), psiModNodeMap.get(mod.getMod())));
+                    }
+                    MainResource mainResource = (MainResource) resource;
+                    //IMPORTANT: Add checks for duplicates and returns the right entity node to "play with"
+                    EntityNode node = entitiesContainer.add(new EntityNode(species, mainResource, identifier, modifications));
+                    node.addPathwayReactions(pathwayReactions);
+
+                    //Adding every possible xRef to the RadixTree
+                    for (XRef xref : xrefs) {
+                        resource = ResourceFactory.getResource(xref.getDatabaseName());
+                        entitiesMap.add(xref.getIdentifier(), resource, node);
+                    }
+
+                    resource = ResourceFactory.getResource("#" + databaseName);
+
+                    for (String secondaryIdentifier : rei.getSecondaryIdentifiers()) {
+                        entitiesMap.add(secondaryIdentifier, resource, node);
+                    }
+
+                    for (String geneName : rei.getGeneNames()) {
+                        entitiesMap.add(geneName, resource, node);
+                    }
+
+                    for (String otherIdentifier : rei.getOtherIdentifiers()) {
+                        entitiesMap.add(otherIdentifier, resource, node);
+                    }
+
+                } else {
+                    System.err.println("Something's wrong with " + current.getPhysicalEntity());
+                }
+            }
+        }
+
+        if (Main.VERBOSE) System.out.println(msgPrefix + " >> Done. ");
+    }
+
+    public void setOrthologous() {
+        String query = "" +
+                "MATCH (re1:ReferenceEntity)<-[:referenceEntity]-(:PhysicalEntity)-[:inferredTo]->(:PhysicalEntity)-[:referenceEntity]->(re2:ReferenceEntity) " +
+                "RETURN DISTINCT re1.databaseName AS originDatabaseName, re1.identifier AS originIdentifier, re2.databaseName AS inferredToDatabaseName, re2.identifier AS inferredToIdentifier";
+        Map<String, Object> paramsMap = new HashMap<>();
+
+        Collection<OrthologyResult> orthologyResults;
+        try {
+            orthologyResults = ados.customQueryForObjects(OrthologyResult.class, query, paramsMap);
+        } catch (CustomQueryException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        for (OrthologyResult orthologyResult : orthologyResults) {
+            MainResource originResource = (MainResource) ResourceFactory.getResource(orthologyResult.getOriginDatabaseName());
+            MainResource inferredToResource = (MainResource) ResourceFactory.getResource(orthologyResult.getInferredToDatabaseName());
+
+            MainIdentifier origin = new MainIdentifier(originResource, new AnalysisIdentifier(orthologyResult.getOriginIdentifier()));
+            MainIdentifier inferredTo = new MainIdentifier(inferredToResource, new AnalysisIdentifier(orthologyResult.getInferredToIdentifier()));
+
+            Set<EntityNode> nodesFrom = entitiesContainer.getNodes(origin);
+            Set<EntityNode> nodesTo = entitiesContainer.getNodes(inferredTo);
+            if (nodesFrom != null && !nodesFrom.isEmpty() && nodesTo != null && !nodesTo.isEmpty()){
+                for (EntityNode from : nodesFrom) {
+                    for (EntityNode to : nodesTo) {
+                        from.addInferredTo(to);
+                    }
+                }
+            }
+        }
+    }
+
+    public EntitiesContainer getEntitiesContainer() {
+        return entitiesContainer;
+    }
+
+    public IdentifiersMap<EntityNode> getEntitiesMap() {
+        return entitiesMap;
+    }
+}

@@ -8,9 +8,6 @@
 *.ear
 *.class
 
-#logs
-*.log
-
 # eclipse specific git ignore
 *.pydevproject
 .project
@@ -33,5 +30,18 @@ local.properties
 # Locally stored "Eclipse launch configurations"
 *.launch
 
-# Log files
+# Custom
+ReactomeInteractorsCore.log
+
+#Header Footer
+footer.jsp
+header.jsp
+
+#Execution time file
+test.txt
+
+*.lic
+*.lic.xml
+
+*.log
 *.out

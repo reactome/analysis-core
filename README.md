@@ -1,17 +1,37 @@
 <img src=https://cloud.githubusercontent.com/assets/6883670/22938783/bbef4474-f2d4-11e6-92a5-07c1a6964491.png width=220 height=100 />
 
-# Analysis Tools
-The aim of this project is to offer to users an intuitive Pathway enrichment and expression analysis as well as species comparison tool. 
+# Analysis Core
 
-A working version of the Analysis Tools can be found [here](http://www.reactome.org/PathwayBrowser/#TOOL=AT)
+## What is Reactome Analysis Core?
+Reactome Analysis Core is a project that can be directly executed to create the analysis data content or mapping files,
+but it's also used as part of the AnalysisService (as a dependency).
+The project is split into 'Builder' and 'Exporter':
+  * Builder: queries the MySql database and creates/populates the data structures needed for the analysis.
+  * Exporter: generates mapping files from different resources to reactome content.
 
-## Core
-The Core project can be directly executed to create the analysis data content or mapping files. 
-It also has the domain model and the core functionalities that will be reused in the Analysis Service
+## Builder Tool
 
-More info [here](Core).
+Creates the intermediate binary file to be used for the analysis service and the exporters:
 
-## Service
-Provides an API for pathway overrepresentation and expression analysis as well as species comparison tool. All the available analysis tools can be easily integrated into third party software.
+```console
+java -jar tools-jar-with-dependencies.jar build \
+      -d db \ 
+      -u user \
+      -p passwd \
+      -o pathTO/analysis_vXX.bin
+```
 
-More info [here](Service).
+Add ```--verbose``` to see the building status on the screen.
+
+Please note XX refers to the current Reactome release number. The analysis_vXX.bin file has to be copied in the 
+corresponding "AnalysisService/input/" folder and then change the symlink of analysis.bin in that folder to point
+to the new file.
+
+Once the AnalysisService is restarted the new data will be used.
+
+#### Recommendation
+It is recommended to specify the initial and maximum memory allocation pool for the Java Virtual Machine
+
+```console
+-Xms2048M -Xmx5120M
+```

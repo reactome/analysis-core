@@ -1,5 +1,4 @@
-
-package org.reactome.server;
+package org.reactome.server.analysis.core;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

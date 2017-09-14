@@ -2,6 +2,7 @@ package org.reactome.server.analysis.core.importer.query;
 
 import org.reactome.server.analysis.core.importer.EntitiesBuilder;
 import org.reactome.server.analysis.core.model.AnalysisReaction;
+import org.reactome.server.analysis.core.util.MapSet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,8 +12,6 @@ public class EntitiesQueryResult {
     private Long physicalEntity;
 
     private Long referenceEntity;
-    private String identifier;
-    private String variantIdentifier;
 
     private List<String> reactions;
     private List<String> mods;
@@ -44,18 +43,6 @@ public class EntitiesQueryResult {
         this.referenceEntity = referenceEntity;
     }
 
-    public String getIdentifier() {
-        return variantIdentifier!=null && !variantIdentifier.isEmpty() ? variantIdentifier : identifier;
-    }
-
-    public void setIdentifier(String identifier) {
-        this.identifier = identifier;
-    }
-
-    public void setVariantIdentifier(String variantIdentifier) {
-        this.variantIdentifier = variantIdentifier;
-    }
-
     public List<AnalysisReaction> getReactions() {
         List<AnalysisReaction> rtn = new ArrayList<>();
         for (String reaction : reactions) {
@@ -67,6 +54,12 @@ public class EntitiesQueryResult {
 
     public void setReactions(List<String> reactions) {
         this.reactions = reactions;
+    }
+
+    public MapSet<Long, AnalysisReaction> getPathwayReactions(){
+        MapSet<Long, AnalysisReaction> rtn = new MapSet<>();
+        rtn.add(getPathway(), getReactions());
+        return rtn;
     }
 
     public List<Mod> getMods() {

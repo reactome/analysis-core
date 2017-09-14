@@ -35,9 +35,4 @@ public class EntitiesContainer {
         return nodes.values();
     }
 
-    public void setOrthologiesCrossLinks() {
-        for (EntityNode node : getAllNodes()) {
-            node.setOrthologiesCrossLinks();
-        }
-    }
 }

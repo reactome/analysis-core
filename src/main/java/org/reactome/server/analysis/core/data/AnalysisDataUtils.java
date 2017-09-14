@@ -4,6 +4,7 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.shaded.org.objenesis.strategy.StdInstantiatorStrategy;
+import org.reactome.server.analysis.core.Main;
 import org.reactome.server.analysis.core.model.DataContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +24,6 @@ public class AnalysisDataUtils {
         logger.info(String.format("Loading %s file...", DataContainer.class.getSimpleName()));
         long start = System.currentTimeMillis();
         DataContainer container = (DataContainer) AnalysisDataUtils.read(file);
-        container.initialize();
         long end = System.currentTimeMillis();
         logger.info(String.format("%s file loaded in %d ms", DataContainer.class.getSimpleName() , end-start));
         return container;
@@ -40,7 +40,7 @@ public class AnalysisDataUtils {
     }
 
     public static void kryoSerialisation(DataContainer container, String fileName){
-        logger.trace(String.format("Saving %s data into file %s", container.getClass().getSimpleName(), fileName));
+        if(Main.VERBOSE) System.out.println(String.format("Saving %s data into file %s", container.getClass().getSimpleName(), fileName));
         try {
             Kryo kryo = new Kryo();
             kryo.setInstantiatorStrategy(new StdInstantiatorStrategy());
@@ -48,7 +48,6 @@ public class AnalysisDataUtils {
             Output output = new Output(file);
             kryo.writeClassAndObject(output, container);
             output.close();
-            container.initialize(); //At the end the data structure remains the same
         } catch (FileNotFoundException e) {
             logger.error(e.getMessage(), e);
             e.printStackTrace();

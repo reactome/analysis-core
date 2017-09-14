@@ -73,7 +73,8 @@ public class EntitiesBuilder {
                     "RETURN DISTINCT p.dbId AS pathway, " +
                     "                pe.dbId AS physicalEntity, " +
                     "                re.dbId as referenceEntity, " +
-                    "                rles AS reactions, COLLECT(CASE WHEN tm.coordinate IS NOT NULL THEN tm.coordinate ELSE \"null\" END + {splitter} + mod.identifier) AS mods";
+                    "                rles AS reactions, " +
+                    "                COLLECT(CASE WHEN tm.coordinate IS NOT NULL THEN tm.coordinate ELSE \"null\" END + {splitter} + mod.identifier) AS mods";
 
             Collection<EntitiesQueryResult> result;
             try {

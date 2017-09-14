@@ -134,6 +134,11 @@ public class EntitiesBuilder {
     }
 
     public void setOrthologous() {
+        if (Main.TEST_MAIN_SPECIES) return;
+
+        String msgPrefix = "\rSetting orthologies between species entities >> ";
+        if (Main.VERBOSE) System.out.print(msgPrefix);
+
         String query = "" +
                 "MATCH (re1:ReferenceEntity)<-[:referenceEntity]-(:PhysicalEntity)-[:inferredTo]->(:PhysicalEntity)-[:referenceEntity]->(re2:ReferenceEntity) " +
                 "RETURN DISTINCT re1.databaseName AS originDatabaseName, re1.identifier AS originIdentifier, re2.databaseName AS inferredToDatabaseName, re2.identifier AS inferredToIdentifier";
@@ -147,7 +152,10 @@ public class EntitiesBuilder {
             return;
         }
 
+        int i = 0; int t = orthologyResults.size();
         for (OrthologyResult orthologyResult : orthologyResults) {
+            if (Main.VERBOSE) System.out.print(msgPrefix + (++i) + " / " + t);
+
             MainResource originResource = (MainResource) ResourceFactory.getResource(orthologyResult.getOriginDatabaseName());
             MainResource inferredToResource = (MainResource) ResourceFactory.getResource(orthologyResult.getInferredToDatabaseName());
 
@@ -165,6 +173,8 @@ public class EntitiesBuilder {
                 }
             }
         }
+
+        if(Main.VERBOSE) System.out.println(msgPrefix + "Done.");
     }
 
     public EntitiesContainer getEntitiesContainer() {

@@ -91,27 +91,17 @@ public class EnrichmentAnalysis {
                 MapSet<Resource, InteractorNode> interactors = interactorsMap.get(identifier);
                 for (Resource resource : interactors.keySet()) {
                     //Note: It goes only once
-                    for (InteractorNode interactorNode : interactors.getElements(resource)) {
-                        InteractorIdentifier interactorIdentifier = new InteractorIdentifier(identifier, interactorNode.getAccession());
-                        for (EntityNode node : interactorNode.getInteractsWith()) {
-                            //When there is projection, for the time being the hit interactors for other species are not
-                            //taken into account (please read comment bellow the following line)
-                            if(speciesNode != null && !node.getSpecies().equals(speciesNode)) continue;
-                            //TODO: Projection for the interactors cannot be done until the orthologs are included in the interactors-core
-                            //if (speciesNode != null) node = node.getProjection(speciesNode);
-                            //if (node == null) continue;
+                    for (InteractorNode interactor : interactors.getElements(resource)) {
+                        InteractorIdentifier interactorIdentifier = new InteractorIdentifier(identifier, interactor.getAccession());
+                        MapSet<Long, AnalysisReaction> pathwayReactions = interactor.getPathwayReactions();
+                        for (MainIdentifier mainIdentifier : interactor.getInteractsWith()) {
                             found = true;
-                            AnalysisIdentifier ai = new AnalysisIdentifier(interactorNode.getAccession(), identifier.getExp());
-                            MainIdentifier mainAux = new MainIdentifier(node.getIdentifier().getResource(), ai);
-                            newSample.add(mainAux);
-
-                            for (Long pathwayId : node.getPathwayIds()) {
+                            newSample.add(mainIdentifier);
+                            for (Long pathwayId : pathwayReactions.keySet()) {
+                                Set<AnalysisReaction> reactions = pathwayReactions.getElements(pathwayId);
                                 Set<PathwayNode> pNodes = hierarchies.getPathwayLocation().getElements(pathwayId);
-                                if (pNodes == null) continue;
                                 for (PathwayNode pNode : pNodes) {
-                                    //TODO: INTERACTORS REACTIONS!!!!!
-                                    Set<AnalysisReaction> reactions = node.getReactions(pathwayId);
-                                    pNode.processInteractor(interactorIdentifier, node.getIdentifier(), reactions);
+                                    pNode.processInteractor(interactorIdentifier, mainIdentifier, reactions);
                                 }
                             }
                         }

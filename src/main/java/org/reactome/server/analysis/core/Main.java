@@ -20,9 +20,9 @@ import java.util.Set;
 
 public class Main {
 
-    public static final boolean VERBOSE = true;
+    public static boolean TEST_MAIN_SPECIES;
     public static final String MAIN_SPECIES_TAX_ID = "9606";
-    public static final boolean TEST_MAIN_SPECIES = true;
+    public static boolean VERBOSE;
 
     public static void main(String[] args) throws JSAPException {
 
@@ -37,6 +37,8 @@ public class Main {
                         "The file where the results are written to")
                         , new FlaggedOption("interactors-database-path", JSAP.STRING_PARSER, null, JSAP.REQUIRED, 'g', "interactors-database-path",
                         "Interactor Database Path")
+                        , new QualifiedSwitch("test", JSAP.BOOLEAN_PARSER, null, JSAP.NOT_REQUIRED, 't', "test",
+                        "Requests verbose output")
                         , new QualifiedSwitch("verbose", JSAP.BOOLEAN_PARSER, null, JSAP.NOT_REQUIRED, 'v', "verbose",
                         "Requests verbose output")
                 }
@@ -58,6 +60,9 @@ public class Main {
             throw new RuntimeException("Interactor database does not exist");
         }
 
+        TEST_MAIN_SPECIES = config.getBoolean("test");
+        VERBOSE = config.getBoolean("verbose");
+
         String fileName = config.getString("output");
         FileUtil.checkFileName(fileName);
 
@@ -76,7 +81,7 @@ public class Main {
         entitiesBuilder.setOrthologous();
 
         InteractorsBuilder interactorsBuilder = new InteractorsBuilder();
-//        interactorsBuilder.build(entitiesBuilder.getEntitiesContainer(), interactorsDatabase);
+        interactorsBuilder.build(hierarchyBuilder.getHierarchies().keySet(), entitiesBuilder.getEntitiesContainer(), interactorsDatabase);
 
         calculateNumbersInHierarchyNodesForMainResources(hierarchyBuilder, entitiesBuilder, interactorsBuilder);
 
@@ -86,20 +91,6 @@ public class Main {
                 entitiesBuilder.getEntitiesMap(),
                 interactorsBuilder.getInteractorsMap());
         AnalysisDataUtils.kryoSerialisation(container, fileName);
-
-        /*
-        if(VERBOSE) System.out.println("The intermediate data file has been generated.");
-
-        HierarchiesDataProducer.initializeProducer(container);
-        AnalysisData analysisData = new AnalysisData(container);
-        EnrichmentAnalysis ora = new EnrichmentAnalysis(analysisData);
-
-        Set<AnalysisIdentifier> identifiers = new HashSet<>();
-        identifiers.add(new AnalysisIdentifier("PTEN"));
-        HierarchiesData result = ora.overRepresentation(identifiers, SpeciesNodeFactory.getHumanNode(), false);
-        System.out.println("DONE");
-        HierarchiesDataProducer.interruptProducer();
-        */
     }
 
 
@@ -127,16 +118,13 @@ public class Main {
 
         for (InteractorNode interactorNode : interactorsMap.values()) {
             InteractorIdentifier identifier = new InteractorIdentifier(interactorNode.getAccession());
-            for (EntityNode physicalEntityNode : interactorNode.getInteractsWith()) {
-                MainIdentifier mainIdentifier = physicalEntityNode.getIdentifier();
-                if (mainIdentifier != null) {
-                    for (Long pathwayId : physicalEntityNode.getPathwayIds()) {
-                        Set<PathwayNode> pNodes = pathwayLocation.getElements(pathwayId);
-                        if (pNodes == null) continue;
-                        for (PathwayNode pathwayNode : pNodes) {
-                            Set<AnalysisReaction> reactions = physicalEntityNode.getReactions(pathwayId);
-                            pathwayNode.processInteractor(identifier, mainIdentifier, reactions);
-                        }
+            MapSet<Long, AnalysisReaction> pathwayReactions = interactorNode.getPathwayReactions();
+            for (MainIdentifier mainIdentifier : interactorNode.getInteractsWith()) {
+                for (Long pathwayId : pathwayReactions.keySet()) {
+                    Set<AnalysisReaction> reactions = pathwayReactions.getElements(pathwayId);
+                    Set<PathwayNode> pNodes = pathwayLocation.getElements(pathwayId);
+                    for (PathwayNode pNode : pNodes) {
+                        pNode.processInteractor(identifier, mainIdentifier, reactions);
                     }
                 }
             }

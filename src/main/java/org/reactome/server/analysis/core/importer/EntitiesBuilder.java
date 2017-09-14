@@ -36,12 +36,13 @@ public class EntitiesBuilder {
         String query;
         Map<String, Object> paramsMap = new HashMap<>();
         paramsMap.put("splitter", splitter);
+        int s = 0; int st = speciesNodes.size();
         for (SpeciesNode species : speciesNodes) {
             if (Main.TEST_MAIN_SPECIES && !species.getTaxID().equals(Main.MAIN_SPECIES_TAX_ID)) continue;
 
             paramsMap.put("taxId", species.getTaxID());
 
-            String speciesPrefix = "for '" + species.getName() + "'";
+            String speciesPrefix = "for '" + species.getName() + "' (" + (s++) + "/" + st + ")";
             if (Main.VERBOSE) System.out.print(msgPrefix + speciesPrefix + " >> retrieving xrefs...");
 
             query = "MATCH (:Species{taxId:{taxId}})<-[:species]-(:Pathway)-[:hasEvent]->(rle:ReactionLikeEvent), " +
@@ -51,8 +52,8 @@ public class EntitiesBuilder {
                     "RETURN DISTINCT re.dbId AS referenceEntity, " +
                     "                re.secondaryIdentifier AS  secondaryIdentifiers, " +
                     "                re.geneName AS geneNames, " +
-                    "                re.otherIdentifier AS otherIdentifier, " +
-                    "                [re.databaseName + {splitter} + re.identifier] + COLLECT(DISTINCT dbi.databaseName + {splitter} + dbi.identifier) AS xrefs";
+                    "                re.otherIdentifier AS otherIdentifiers, " +
+                    "                [re.databaseName + {splitter} + CASE WHEN re.variantIdentifier IS NOT NULL THEN re.variantIdentifier ELSE re.identifier END] + COLLECT(DISTINCT dbi.databaseName + {splitter} + dbi.identifier) AS xrefs";
 
             Map<Long, ReferenceEntityIdentifiers> xrefMap = new HashMap<>();
             try {
@@ -72,8 +73,6 @@ public class EntitiesBuilder {
                     "RETURN DISTINCT p.dbId AS pathway, " +
                     "                pe.dbId AS physicalEntity, " +
                     "                re.dbId as referenceEntity, " +
-                    "                re.identifier AS identifier, " +
-                    "                re.variantIdentifier AS variantIdentifier, " +
                     "                rles AS reactions, COLLECT(CASE WHEN tm.coordinate IS NOT NULL THEN tm.coordinate ELSE \"null\" END + {splitter} + mod.identifier) AS mods";
 
             Collection<EntitiesQueryResult> result;
@@ -161,6 +160,7 @@ public class EntitiesBuilder {
                 for (EntityNode from : nodesFrom) {
                     for (EntityNode to : nodesTo) {
                         from.addInferredTo(to);
+                        to.addInferredFrom(from);
                     }
                 }
             }

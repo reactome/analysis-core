@@ -7,7 +7,6 @@ import org.reactome.server.analysis.core.model.identifier.MainIdentifier;
 import org.reactome.server.analysis.core.model.resource.MainResource;
 import org.reactome.server.analysis.core.model.resource.Resource;
 import org.reactome.server.analysis.core.model.resource.ResourceFactory;
-import org.reactome.server.analysis.core.util.MapSet;
 import org.reactome.server.graph.exception.CustomQueryException;
 import org.reactome.server.graph.service.AdvancedDatabaseObjectService;
 import org.reactome.server.graph.utils.ReactomeGraphCore;
@@ -42,7 +41,7 @@ public class EntitiesBuilder {
 
             paramsMap.put("taxId", species.getTaxID());
 
-            String speciesPrefix = "for '" + species.getName() + "' (" + (s++) + "/" + st + ")";
+            String speciesPrefix = "for '" + species.getName() + "' (" + (++s) + "/" + st + ")";
             if (Main.VERBOSE) System.out.print(msgPrefix + speciesPrefix + " >> retrieving xrefs...");
 
             query = "MATCH (:Species{taxId:{taxId}})<-[:species]-(:Pathway)-[:hasEvent]->(rle:ReactionLikeEvent), " +
@@ -87,9 +86,6 @@ public class EntitiesBuilder {
             for (EntitiesQueryResult current : result) {
                 if (Main.VERBOSE && ++i % 25 == 0) System.out.print(msgPrefix + speciesPrefix + " >> " + i + "/" + tot + "   ");
 
-                MapSet<Long, AnalysisReaction> pathwayReactions = new MapSet<>();
-                pathwayReactions.add(current.getPathway(), current.getReactions());
-
                 ReferenceEntityIdentifiers rei = xrefMap.get(current.getReferenceEntity());
                 List<XRef> xrefs = rei.getXrefs();
                 final String databaseName = xrefs.get(0).getDatabaseName();
@@ -103,7 +99,7 @@ public class EntitiesBuilder {
                     MainResource mainResource = (MainResource) resource;
                     //IMPORTANT: Add checks for duplicates and returns the right entity node to "play with"
                     EntityNode node = entitiesContainer.add(new EntityNode(species, mainResource, identifier, modifications));
-                    node.addPathwayReactions(pathwayReactions);
+                    node.addPathwayReactions(current.getPathwayReactions());
 
                     //Adding every possible xRef to the RadixTree
                     for (XRef xref : xrefs) {

@@ -88,7 +88,7 @@ public class EntitiesBuilder {
 
             int i = 0; int tot = result.size();
             for (EntitiesQueryResult current : result) {
-                if (Main.VERBOSE && ++i % 25 == 0) System.out.print(msgPrefix + speciesPrefix + " >> " + i + "/" + tot + "   ");
+                if (Main.VERBOSE && ++i % 25 == 0) System.out.print(msgPrefix + speciesPrefix + " >> " + i + "/" + tot);
 
                 ReferenceEntityIdentifiers rei = xrefMap.get(current.getReferenceEntity());
                 List<XRef> xrefs = rei.getXrefs();
@@ -138,7 +138,7 @@ public class EntitiesBuilder {
         if (Main.TEST_MAIN_SPECIES) return;
 
         String msgPrefix = "\rSetting orthologies between species entities >> ";
-        if (Main.VERBOSE) System.out.print(msgPrefix);
+        if (Main.VERBOSE) System.out.print(msgPrefix + " retrieving relationships...");
 
         String query = "" +
                 "MATCH (re1:ReferenceEntity)<-[:referenceEntity]-(:PhysicalEntity)-[:inferredTo]->(:PhysicalEntity)-[:referenceEntity]->(re2:ReferenceEntity) " +

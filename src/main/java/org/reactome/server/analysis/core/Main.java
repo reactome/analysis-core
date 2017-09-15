@@ -98,9 +98,9 @@ public class Main {
 
         if(VERBOSE){
             System.out.println("Process summary:");
-            System.out.println("\tIntermediate data structure built in " + getTimeFormated(built-start));
-            System.out.println("\tIntermediate data structure stored in " + getTimeFormated(end-built));
-            System.out.println("\tTotal time: " + getTimeFormated(end-start));
+            System.out.println("\tIntermediate data structure built in " + getTimeFormatted(built-start));
+            System.out.println("\tIntermediate data structure stored in " + getTimeFormatted(end-built));
+            System.out.println("\tTotal time: " + getTimeFormatted(end-start));
         }
     }
 
@@ -144,7 +144,7 @@ public class Main {
         hierarchyBuilder.prepareToSerialise();
     }
 
-    private static String getTimeFormated(Long millis){
+    private static String getTimeFormatted(Long millis){
         return String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(millis),
                 TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1),
                 TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1));

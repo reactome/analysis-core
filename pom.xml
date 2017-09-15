@@ -130,7 +130,7 @@
                         <!--<exclude>**/importer/**</exclude>-->
                         <!--<exclude>**/Main.**</exclude>-->
                         <!--<exclude>**/log4j.properties</exclude>-->
-                        <!--<exclude>**/logback.xml</exclude>-->
+                        <exclude>**/logback.xml</exclude>
                     </excludes>
                 </configuration>
             </plugin>

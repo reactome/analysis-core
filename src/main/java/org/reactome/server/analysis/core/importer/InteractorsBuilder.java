@@ -18,6 +18,8 @@ import org.reactome.server.interactors.model.Interactor;
 import org.reactome.server.interactors.model.InteractorResource;
 import org.reactome.server.interactors.service.InteractionService;
 import org.reactome.server.interactors.service.InteractorResourceService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
@@ -28,6 +30,9 @@ import java.util.*;
  */
 @Component
 public class InteractorsBuilder {
+
+    private static Logger logger = LoggerFactory.getLogger(InteractorsBuilder.class.getName());
+
 
     private static final String splitter = ":";
 
@@ -44,8 +49,7 @@ public class InteractorsBuilder {
     private int n = 0;
 
     public void build(Set<SpeciesNode> speciesNodes, EntitiesContainer entities, InteractorsDatabase interactorsDatabase) {
-        String msgPrefix = "\rCreating the interactors container ";
-        if (Main.VERBOSE) System.out.print(msgPrefix);
+        if (Main.VERBOSE) System.out.print("Starting creation of the interactors container...");
 
         this.interactionService = new InteractionService(interactorsDatabase);
         InteractorResourceService interactorResourceService = new InteractorResourceService(interactorsDatabase);
@@ -54,7 +58,7 @@ public class InteractorsBuilder {
         try {
             resourceMap = interactorResourceService.getAllMappedById();
         } catch (SQLException e) {
-            System.err.println("Interactor Resource Map couldn't be loaded");
+            logger.error("Interactor Resource Map couldn't be loaded");
             return;
         }
 
@@ -69,8 +73,8 @@ public class InteractorsBuilder {
 
             paramsMap.put("taxId", species.getTaxID());
 
-            String speciesPrefix = "for '" + species.getName() + "' (" + (s++) + "/" + st + ")";
-            if (Main.VERBOSE) System.out.print(msgPrefix + speciesPrefix + " >> retrieving targets for interactors...");
+            String speciesPrefix = "'" + species.getName() + "' (" + (s++) + "/" + st + ")";
+            if (Main.VERBOSE) System.out.print("\rCreating the interactors container for " + speciesPrefix + " >> retrieving targets for interactors...");
 
             query = "MATCH (:Species{taxId:{taxId}})<-[:species]-(p:Pathway)-[:hasEvent]->(rle:ReactionLikeEvent), " +
                     "      (rle)-[:input|output|catalystActivity|entityFunctionalStatus|physicalEntity|regulatedBy|regulator*]->(pe:PhysicalEntity)-[:referenceEntity]->(re:ReferenceEntity) " +
@@ -90,13 +94,12 @@ public class InteractorsBuilder {
 
             int i = 0, tot = its.size();
             for (InteractorsTargetQueryResult target : its) {
-                if (Main.VERBOSE && ++i % 25 == 0) {
-                    System.out.print("\rRetrieving interactors for targets >> " + i + "/" + tot);
-                }
+                if (Main.VERBOSE) System.out.print("\rRetrieving interactors for targets in " + speciesPrefix + " >> " + i + "/" + tot);
 
                 MainResource mr = (MainResource) ResourceFactory.getResource(target.getDatabaseName());
                 AnalysisIdentifier ai = new AnalysisIdentifier(target.getIdentifier());
                 MainIdentifier interactsWith = new MainIdentifier(mr, ai);
+                if (entities.getNodes(interactsWith).isEmpty()) logger.error(interactsWith + " hasn't been previously created for '" + species.getName() +  "'.");
 
                 String acc = target.getIdentifier();
                 for (Interactor interactor : getInteractors(acc)) {
@@ -111,7 +114,7 @@ public class InteractorsBuilder {
                 }
             }
         }
-        if (Main.VERBOSE) System.out.println(msgPrefix + " >> " + n + " interactors successfully added to Reactome");
+        if (Main.VERBOSE) System.out.println("\rInteractors container successfully created >> " + n + " interactors have been added to Reactome.");
     }
 
     public IdentifiersMap<InteractorNode> getInteractorsMap() {
@@ -133,7 +136,6 @@ public class InteractorsBuilder {
     }
 
 
-
     private InteractorNode getOrCreate(Resource resource, String identifier) {
         MapSet<Resource, InteractorNode> map = interactorsMap.get(identifier);
         Set<InteractorNode> interactors = map.getElements(resource);
@@ -145,7 +147,7 @@ public class InteractorsBuilder {
         } else {
             //Using IdentifiersMap causes this "oddity" here, but is a minor inconvenient
             if (interactors.size() > 1)
-                System.err.println("Interactors duplication. There should not be more than one interactor for " + identifier + " [" + resource.getName() + "]");
+                logger.error("Interactors duplication. There should not be more than one interactor for " + identifier + " [" + resource.getName() + "]");
             return interactors.iterator().next();
         }
     }

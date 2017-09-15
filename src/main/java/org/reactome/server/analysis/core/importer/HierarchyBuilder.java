@@ -27,7 +27,7 @@ public class HierarchyBuilder {
     private MapSet<Long, PathwayNode> pathwayLocation = new MapSet<>();
 
     public void build() {
-        String msgPrefix = "\rCreating the pathway hierarchies >> ";
+        String msgPrefix = "\rCreating the pathway hierarchies";
 
         SpeciesService speciesService = ReactomeGraphCore.getService(SpeciesService.class);
         TopLevelPathwayService tlpService = ReactomeGraphCore.getService(TopLevelPathwayService.class);
@@ -39,7 +39,7 @@ public class HierarchyBuilder {
             //FOR TEST PURPOSES
             if(Main.TEST_MAIN_SPECIES && !species.getTaxId().equals(Main.MAIN_SPECIES_TAX_ID)) break;
 
-            if (Main.VERBOSE) System.out.print(msgPrefix + ++i + "/" + tot + " ");
+            if (Main.VERBOSE) System.out.print(msgPrefix + " '" + species.getDisplayName() + "' >> " + ++i + "/" + tot + " ");
 
             SpeciesNode speciesNode = SpeciesNodeFactory.getSpeciesNode(species.getDbId(), species.getTaxId(), species.getDisplayName());
             PathwayHierarchy pathwayHierarchy = new PathwayHierarchy(speciesNode);
@@ -55,7 +55,7 @@ public class HierarchyBuilder {
             }
         }
 
-        if(Main.VERBOSE) System.out.println(msgPrefix + " Done.");
+        if(Main.VERBOSE) System.out.println(msgPrefix + " >> Done.");
     }
 
     public Map<SpeciesNode, PathwayHierarchy> getHierarchies() {

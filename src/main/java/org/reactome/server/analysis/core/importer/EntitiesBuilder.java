@@ -10,10 +10,14 @@ import org.reactome.server.analysis.core.model.resource.ResourceFactory;
 import org.reactome.server.graph.exception.CustomQueryException;
 import org.reactome.server.graph.service.AdvancedDatabaseObjectService;
 import org.reactome.server.graph.utils.ReactomeGraphCore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 public class EntitiesBuilder {
+
+    private static Logger logger = LoggerFactory.getLogger(EntitiesBuilder.class.getName());
 
     public static final String splitter = ":";
     //Will contain the RADIX-TREE with the map (identifiers -> [EntityNode])
@@ -28,7 +32,7 @@ public class EntitiesBuilder {
         this.entitiesMap = new IdentifiersMap<>();
         this.entitiesContainer = new EntitiesContainer();
 
-        Map<String, PsiModNode> psiModNodeMap = PsiModImporter.getPsiModTree().flatten();
+        Map<String, PsiModNode> psiModNodeMap = PsiModImporter.getPsiModMap();
 
         String msgPrefix = "\rCreating the entities container ";
 
@@ -122,7 +126,7 @@ public class EntitiesBuilder {
                     }
 
                 } else {
-                    System.err.println("Something's wrong with " + current.getPhysicalEntity());
+                    logger.error("There is not main resource for physical entity " + current.getPhysicalEntity());
                 }
             }
         }

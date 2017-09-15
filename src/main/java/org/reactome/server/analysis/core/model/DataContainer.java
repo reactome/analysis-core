@@ -70,4 +70,8 @@ public class DataContainer implements Serializable {
         return interactorsMap;
     }
 
+    public void initialize() {
+        this.entitiesContainer.setOrthologiesCrossLinks();
+    }
+
 }

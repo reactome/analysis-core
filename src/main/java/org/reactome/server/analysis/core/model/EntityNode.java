@@ -42,12 +42,12 @@ public class EntityNode {
         this.inferredTo.put(inferredTo.getSpecies(), inferredTo);
     }
 
-    public void addInferredFrom(EntityNode inferredFrom){
+    public void addInferredFrom(EntityNode inferredFrom) {
         //We do NOT want cycles at this point
         EntityNode aux = inferredFrom.getInferredTo().get(this.species);
-        if(aux!=null && aux.equals(this)) return;
+        if (aux != null && aux.equals(this)) return;
 
-        if(this.inferredFrom==null){
+        if (this.inferredFrom == null) {
             this.inferredFrom = new HashMap<>();
         }
         this.inferredFrom.put(inferredFrom.getSpecies(), inferredFrom);
@@ -118,6 +118,21 @@ public class EntityNode {
 
     public MapSet<Long, AnalysisReaction> getPathwayReactions() {
         return pathwayReactions;
+    }
+
+    protected void setOrthologiesCrossLinks(){
+        for (SpeciesNode speciesNode : this.getInferredTo().keySet()) {
+            if(this.inferredTo.get(speciesNode).inferredFrom==null){
+                this.inferredTo.get(speciesNode).inferredFrom = new HashMap<>();
+            }
+            this.inferredTo.get(speciesNode).inferredFrom.put(this.species, this);
+        }
+        for (SpeciesNode speciesNode : this.getInferredFrom().keySet()) {
+            if(this.inferredFrom.get(speciesNode).inferredTo==null){
+                this.inferredFrom.get(speciesNode).inferredTo = new HashMap<>();
+            }
+            this.inferredFrom.get(speciesNode).inferredTo.put(this.species, this);
+        }
     }
 
     @Override

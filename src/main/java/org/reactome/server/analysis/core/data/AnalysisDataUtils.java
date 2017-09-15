@@ -25,6 +25,7 @@ public class AnalysisDataUtils {
         logger.info(String.format("Loading %s file...", DataContainer.class.getSimpleName()));
         long start = System.currentTimeMillis();
         DataContainer container = (DataContainer) AnalysisDataUtils.read(file);
+        container.initialize();
         long end = System.currentTimeMillis();
         logger.info(String.format("Time to load %s file >> %s", DataContainer.class.getSimpleName(), FormatUtils.getTimeFormatted(end - start)));
         return container;
@@ -50,6 +51,7 @@ public class AnalysisDataUtils {
             Output output = new Output(file);
             kryo.writeClassAndObject(output, container);
             output.close();
+            container.initialize(); //At the end the data structure remains the same
             if (Main.VERBOSE) System.out.println(msgPrefix + " >> Done.");
         } catch (FileNotFoundException e) {
             if (Main.VERBOSE) System.out.println(msgPrefix + " >> An error has occurred: " + e.getMessage());

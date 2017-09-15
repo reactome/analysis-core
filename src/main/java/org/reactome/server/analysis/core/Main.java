@@ -17,6 +17,7 @@ import org.reactome.server.interactors.database.InteractorsDatabase;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
 
@@ -73,6 +74,7 @@ public class Main {
             e.printStackTrace();
         }
 
+        Long start = System.currentTimeMillis();
         HierarchyBuilder hierarchyBuilder = new HierarchyBuilder();
         hierarchyBuilder.build();
 
@@ -84,6 +86,7 @@ public class Main {
         interactorsBuilder.build(hierarchyBuilder.getHierarchies().keySet(), entitiesBuilder.getEntitiesContainer(), interactorsDatabase);
 
         calculateNumbersInHierarchyNodesForMainResources(hierarchyBuilder, entitiesBuilder, interactorsBuilder);
+        Long built = System.currentTimeMillis();
 
         DataContainer container = new DataContainer(hierarchyBuilder.getHierarchies(),
                 hierarchyBuilder.getPathwayLocation(),
@@ -91,6 +94,14 @@ public class Main {
                 entitiesBuilder.getEntitiesMap(),
                 interactorsBuilder.getInteractorsMap());
         AnalysisDataUtils.kryoSerialisation(container, fileName);
+        Long end = System.currentTimeMillis();
+
+        if(VERBOSE){
+            System.out.println("Process summary:");
+            System.out.println("\tIntermediate data structure built in " + getTimeFormated(built-start));
+            System.out.println("\tIntermediate data structure stored in " + getTimeFormated(end-built));
+            System.out.println("\tTotal time: " + getTimeFormated(end-start));
+        }
     }
 
 
@@ -123,7 +134,7 @@ public class Main {
                 for (Long pathwayId : pathwayReactions.keySet()) {
                     Set<AnalysisReaction> reactions = pathwayReactions.getElements(pathwayId);
                     Set<PathwayNode> pNodes = pathwayLocation.getElements(pathwayId);
-                    for (PathwayNode pNode : pNodes) {
+                    for (PathwayNode pNode : pNodes) {  //TODO: Why is there a NullPointerException?
                         pNode.processInteractor(identifier, mainIdentifier, reactions);
                     }
                 }
@@ -131,5 +142,11 @@ public class Main {
         }
 
         hierarchyBuilder.prepareToSerialise();
+    }
+
+    private static String getTimeFormated(Long millis){
+        return String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(millis),
+                TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1),
+                TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1));
     }
 }

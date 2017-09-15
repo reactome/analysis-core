@@ -10,6 +10,7 @@ import org.reactome.server.analysis.core.model.*;
 import org.reactome.server.analysis.core.model.identifier.InteractorIdentifier;
 import org.reactome.server.analysis.core.model.identifier.MainIdentifier;
 import org.reactome.server.analysis.core.util.FileUtil;
+import org.reactome.server.analysis.core.util.FormatUtils;
 import org.reactome.server.analysis.core.util.MapSet;
 import org.reactome.server.graph.utils.ReactomeGraphCore;
 import org.reactome.server.interactors.database.InteractorsDatabase;
@@ -17,7 +18,6 @@ import org.reactome.server.interactors.database.InteractorsDatabase;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 public class Main {
 
@@ -98,9 +98,9 @@ public class Main {
 
         if(VERBOSE){
             System.out.println("Process summary:");
-            System.out.println("\tIntermediate data structure built in " + getTimeFormatted(built-start));
-            System.out.println("\tIntermediate data structure stored in " + getTimeFormatted(end-built));
-            System.out.println("\tTotal time: " + getTimeFormatted(end-start));
+            System.out.println("\tIntermediate data structure built in " + FormatUtils.getTimeFormatted(built-start));
+            System.out.println("\tIntermediate data structure stored in " + FormatUtils.getTimeFormatted(end-built));
+            System.out.println("\tTotal time: " + FormatUtils.getTimeFormatted(end-start));
         }
     }
 
@@ -134,7 +134,7 @@ public class Main {
                 for (Long pathwayId : pathwayReactions.keySet()) {
                     Set<AnalysisReaction> reactions = pathwayReactions.getElements(pathwayId);
                     Set<PathwayNode> pNodes = pathwayLocation.getElements(pathwayId);
-                    for (PathwayNode pNode : pNodes) {  //TODO: Why is there a NullPointerException?
+                    for (PathwayNode pNode : pNodes) {
                         pNode.processInteractor(identifier, mainIdentifier, reactions);
                     }
                 }
@@ -144,9 +144,5 @@ public class Main {
         hierarchyBuilder.prepareToSerialise();
     }
 
-    private static String getTimeFormatted(Long millis){
-        return String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(millis),
-                TimeUnit.MILLISECONDS.toMinutes(millis) % TimeUnit.HOURS.toMinutes(1),
-                TimeUnit.MILLISECONDS.toSeconds(millis) % TimeUnit.MINUTES.toSeconds(1));
-    }
+
 }

@@ -33,7 +33,6 @@ public class InteractorsBuilder {
 
     private static Logger logger = LoggerFactory.getLogger(InteractorsBuilder.class.getName());
 
-
     private static final String splitter = ":";
 
     private static final String STATIC = "static";
@@ -78,7 +77,8 @@ public class InteractorsBuilder {
 
             query = "MATCH (:Species{taxId:{taxId}})<-[:species]-(p:Pathway)-[:hasEvent]->(rle:ReactionLikeEvent), " +
                     "      (rle)-[:input|output|catalystActivity|entityFunctionalStatus|physicalEntity|regulatedBy|regulator*]->(pe:PhysicalEntity)-[:referenceEntity]->(re:ReferenceEntity) " +
-                    //"WHERE NOT (pe)-[:hasModifiedResidue]->(:TranslationalModification) " +
+                    "WHERE (p:TopLevelPathway) OR (:TopLevelPathway)-[:hasEvent*]->(p) " +
+                    //"     AND NOT (pe)-[:hasModifiedResidue]->(:TranslationalModification) " +
                     "WITH DISTINCT p, re, COLLECT(DISTINCT rle.dbId + {splitter} + rle.stId) AS rles " +
                     "RETURN DISTINCT re.databaseName AS databaseName, " +
                     "                CASE WHEN re.variantIdentifier IS NOT NULL THEN re.variantIdentifier ELSE re.identifier END AS identifier, " +
@@ -92,22 +92,31 @@ public class InteractorsBuilder {
                 throw new RuntimeException(e);
             }
 
-            int i = 0, tot = its.size();
-            for (InteractorsTargetQueryResult target : its) {
-                if (Main.VERBOSE) System.out.print("\rRetrieving interactors for targets in " + speciesPrefix + " >> " + i + "/" + tot);
+            if (Main.VERBOSE) System.out.print("\rInteractors retrieved for " + speciesPrefix + " >> aggregating results by entity identifier...");
+            MapSet<MainIdentifier, MapSet<Long, AnalysisReaction>> compressedResult = new MapSet<>();
+            for (InteractorsTargetQueryResult it : its) {
+                MainResource mr = (MainResource) ResourceFactory.getResource(it.getDatabaseName());
+                AnalysisIdentifier ai = new AnalysisIdentifier(it.getIdentifier());
 
-                MainResource mr = (MainResource) ResourceFactory.getResource(target.getDatabaseName());
-                AnalysisIdentifier ai = new AnalysisIdentifier(target.getIdentifier());
                 MainIdentifier interactsWith = new MainIdentifier(mr, ai);
-                if (entities.getNodes(interactsWith).isEmpty()) logger.error(interactsWith + " hasn't been previously created for '" + species.getName() +  "'.");
+                if (entities.getNodes(interactsWith).isEmpty()) logger.error(interactsWith + " hasn't been previously created for '" + species.getName() + "'.");
 
-                String acc = target.getIdentifier();
+                compressedResult.add(interactsWith, it.getPathwayReactions());
+            }
+
+            int i = 0, tot = compressedResult.keySet().size();
+            for (MainIdentifier target : compressedResult.keySet()) {
+                if (Main.VERBOSE)
+                    System.out.print("\rRetrieving interactors for targets in " + speciesPrefix + " >> " + (++i) + "/" + tot);
+                String acc = target.getValue().getId();
                 for (Interactor interactor : getInteractors(acc)) {
                     InteractorResource aux = resourceMap.get(interactor.getInteractorResourceId());
                     Resource resource = ResourceFactory.getResource(aux.getName());
                     InteractorNode interactorNode = getOrCreate(resource, interactor.getAcc());
-                    interactorNode.addPathwayReactions(target.getPathwayReactions());
-                    interactorNode.addInteractsWith(interactsWith);
+                    for (MapSet<Long, AnalysisReaction> prs : compressedResult.getElements(target)) {
+                        interactorNode.addPathwayReactions(prs);
+                    }
+                    interactorNode.addInteractsWith(target);
                     interactorsMap.add(interactor.getAlias(), resource, interactorNode);
                     interactorsMap.add(interactor.getAliasWithoutSpecies(false), resource, interactorNode);
                     //for (String synonym : interactor.getSynonyms().split("\\$")) interactorsMap.add(synonym, resource, interactorNode);

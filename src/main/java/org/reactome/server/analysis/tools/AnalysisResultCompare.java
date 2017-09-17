@@ -7,10 +7,7 @@ import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class AnalysisResultCompare {
 
@@ -48,15 +45,18 @@ public class AnalysisResultCompare {
 
         // Find the pathways not mapped
 
-        pw.write("The pathways in the new analysis but not in the original.");
+        pw.write("The pathways in the new analysis but not in the original.\n");
         for (Map.Entry<String, ResultPathwayEntry> entry : newAnalysis.entrySet()) {
             if (!oldAnalysis.containsKey(entry.getKey())) {
                 pw.println(entry.getKey());
                 newMappedPathways.add(entry.getKey());
+                checkIfNewHitsArePresent(entry.getValue());
+            } else {
+                printEntryComparison(oldAnalysis.get(entry.getKey()), newAnalysis.get(entry.getKey()));
             }
         }
 
-        pw.write("The pathways in the original analysis but not in the new.");
+        pw.write("The pathways in the original analysis but not in the new.\n");
         for (Map.Entry<String, ResultPathwayEntry> entry : oldAnalysis.entrySet()) {
             if (!newAnalysis.containsKey(entry.getKey())) {
                 pw.println(entry.getKey());
@@ -70,6 +70,102 @@ public class AnalysisResultCompare {
         // Get the pathway --> reaction --> protein --> interactor [corrected,missing]
 
         pw.close();
+    }
+
+    private static void checkIfNewHitsArePresent(ResultPathwayEntry newResultPathwayEntry) {
+        boolean hasSeparator = false;
+        // Check Submitted entities found
+        if (newResultPathwayEntry.getEntities_found() > 0) {
+
+            if (!hasSeparator) {
+                System.out.println("-----------------------" + newResultPathwayEntry.getPathway() + "------------------------");
+            }
+            hasSeparator = true;
+
+            System.out.println("Check if: " + newResultPathwayEntry.getMapped_entities()
+                    + "\nare at: " + newResultPathwayEntry.getFound_reaction_identifiers());
+        }
+
+        // Submitted entities hit interactor
+        if (newResultPathwayEntry.getInteractors_found() > 0) {
+
+            if (!hasSeparator) {
+                System.out.println("-----------------------" + newResultPathwayEntry.getPathway() + "------------------------");
+            }
+            hasSeparator = true;
+
+            System.out.println("Check if: " + newResultPathwayEntry.getSubmitted_entities_hit_interactor()
+                    + "\ninteract(s) with: " + newResultPathwayEntry.getInteracts_with()
+                    + "\nat: " + newResultPathwayEntry.getFound_reaction_identifiers());
+        }
+    }
+
+    private static void printEntryComparison(ResultPathwayEntry oldResultPathwayEntry, ResultPathwayEntry newResultPathwayEntry) {
+        //TODO: Check if extra entities are in original list and in reactions in the pathway browser
+
+        boolean hasSeparator = false;
+        if (oldResultPathwayEntry.getEntities_found() != newResultPathwayEntry.getEntities_found()) {
+
+            if (!hasSeparator) {
+                System.out.println("-----------------------" + newResultPathwayEntry.getPathway() + "------------------------");
+            }
+            hasSeparator = true;
+
+            System.out.println("Entities found are different: " + oldResultPathwayEntry.getEntities_found() + " --> " + newResultPathwayEntry.getEntities_found());
+
+            // Show diff submitted entities found
+            System.out.print("Extra entities found: ");
+            System.out.println(getDiff(oldResultPathwayEntry.getSubmitted_entities_found(), newResultPathwayEntry.getSubmitted_entities_found()));
+
+            // Show diff mapped entities
+            System.out.print("Extra mapped entities: ");
+            System.out.println(getDiff(oldResultPathwayEntry.getMapped_entities(), newResultPathwayEntry.getMapped_entities()));
+        }
+
+
+        // Show diff submitted entities hit interactor
+        if (oldResultPathwayEntry.getInteractors_found() != newResultPathwayEntry.getInteractors_found()) {
+
+            if (!hasSeparator) {
+                System.out.println("-----------------------" + newResultPathwayEntry.getPathway() + "------------------------");
+            }
+            hasSeparator = true;
+
+            System.out.println("Interactors found are different: " + oldResultPathwayEntry.getInteractors_found() + " --> " + newResultPathwayEntry.getInteractors_found());
+
+            // Show diff Submitted entities hit interactor
+            System.out.print("Extra entities hit by interactor: ");
+            System.out.println(getDiff(oldResultPathwayEntry.getSubmitted_entities_hit_interactor(), newResultPathwayEntry.getMapped_entities()));
+
+            // Show diff interacts with
+            System.out.print("Extra interactors: ");
+            System.out.println(getDiff(oldResultPathwayEntry.getInteracts_with(), newResultPathwayEntry.getInteracts_with()));
+        }
+
+        // Show diff in reactions hit
+        if (oldResultPathwayEntry.getReactions_found() != newResultPathwayEntry.getReactions_found()) {
+
+            if (!hasSeparator) {
+                System.out.println("-----------------------" + newResultPathwayEntry.getPathway() + "------------------------");
+            }
+
+            System.out.print("Extra reactions hit: ");
+            System.out.println(getDiff(oldResultPathwayEntry.getFound_reaction_identifiers(), newResultPathwayEntry.getFound_reaction_identifiers()));
+        }
+    }
+
+    /**
+     * Gets a list of elements in the first list that are not in the second list
+     */
+    private static Set<String> getDiff(Collection<String> list1, Collection<String> list2) {
+        Set<String> diff = new HashSet<>();
+
+        for (String str1 : list1) {
+            if (!list2.contains(str1))
+                diff.add(str1);
+        }
+
+        return diff;
     }
 
     private static Set<String> readInputList(String path) throws IOException {
@@ -140,9 +236,9 @@ public class AnalysisResultCompare {
         StringBuilder str = new StringBuilder();
         while ((i = bf.read()) != -1) {       //Skip all separator or line break characters before the actual content of the field
             if (i != '\n' && i != SEPARATOR) {
-                if((char) i == '\"'){
+                if ((char) i == '\"') {
                     hasQuotes = !hasQuotes;
-                }else{
+                } else {
                     str.append((char) i);
                 }
                 break;

@@ -20,13 +20,13 @@ public class IdentifiersMap<T> implements Serializable {
 
     public IdentifiersMap() {
         NodeFactory nodeFactory = new DefaultCharSequenceNodeFactory();
-        this.tree = new ConcurrentRadixTree<MapSet<Resource, T>>(nodeFactory);
+        this.tree = new ConcurrentRadixTree<>(nodeFactory);
     }
 
     private MapSet<Resource, T> getOrCreateResourceEntitiesMap(String identifier) {
         MapSet<Resource, T> map = this.tree.getValueForExactKey(identifier);
         if (map == null) {
-            map = new MapSet<Resource, T>();
+            map = new MapSet<>();
             this.tree.put(identifier, map);
         }
         return map;
@@ -42,7 +42,7 @@ public class IdentifiersMap<T> implements Serializable {
     public MapSet<Resource, T> get(AnalysisIdentifier identifier) {
         Set<AnalysisIdentifier> identifiers = expandIdentifierWithPolimorfism(identifier);
 
-        MapSet<Resource, T> rtn = new MapSet<Resource, T>();
+        MapSet<Resource, T> rtn = new MapSet<>();
         for (AnalysisIdentifier aux : identifiers) {
             String id = aux.getId().toUpperCase();
             MapSet<Resource, T> res = this.tree.getValueForExactKey(id);
@@ -56,7 +56,7 @@ public class IdentifiersMap<T> implements Serializable {
     public MapSet<Resource, T> get(String identifier) {
         MapSet<Resource, T> res = this.tree.getValueForExactKey(identifier.toUpperCase());
         if (res != null) return res;
-        return new MapSet<Resource, T>();
+        return new MapSet<>();
     }
 
     /**
@@ -65,7 +65,7 @@ public class IdentifiersMap<T> implements Serializable {
      * @return all the identifiers in the Map (upper Case)
      */
     public Set<String> keySet() {
-        Set<String> keySet = new HashSet<String>();
+        Set<String> keySet = new HashSet<>();
         for (CharSequence charSequence : this.tree.getKeysStartingWith("")) {
             keySet.add(String.valueOf(charSequence));
         }
@@ -85,9 +85,9 @@ public class IdentifiersMap<T> implements Serializable {
         String UNIPROT = "[OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2}";
 //        String UNIPROT_POLIMORFISM = UNIPROT + "\\-\\d+$";
 
-        Set<AnalysisIdentifier> rtn = new HashSet<AnalysisIdentifier>();
-        String id = identifier.getId().toUpperCase();
+        Set<AnalysisIdentifier> rtn = new HashSet<>();
         rtn.add(identifier);
+        String id = identifier.getId().toUpperCase();
         if (id.matches(UNIPROT) && !id.contains("-")) {
             for (CharSequence sequence : this.tree.getKeysStartingWith(id + "-")) {
 //                String aux = sequence.toString();

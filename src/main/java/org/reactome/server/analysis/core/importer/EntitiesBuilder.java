@@ -22,7 +22,6 @@ public class EntitiesBuilder {
 
     private static Logger logger = LoggerFactory.getLogger("importLogger");
 
-    public static final String splitter = ":";
     //Will contain the RADIX-TREE with the map (identifiers -> [EntityNode])
     private IdentifiersMap<EntityNode> entitiesMap;
 
@@ -43,7 +42,6 @@ public class EntitiesBuilder {
 
         String query;
         Map<String, Object> paramsMap = new HashMap<>();
-        paramsMap.put("splitter", splitter);
         int s = 0; int st = speciesNodes.size();
         for (SpeciesNode species : speciesNodes) {
             if (Main.TEST_MAIN_SPECIES && !species.getTaxID().equals(Main.MAIN_SPECIES_TAX_ID)) continue;
@@ -57,11 +55,14 @@ public class EntitiesBuilder {
                     "      (rle)-[:input|output|catalystActivity|entityFunctionalStatus|physicalEntity|regulatedBy|regulator|hasComponent|hasMember|hasCandidate|repeatedUnit|referenceEntity*]->(re:ReferenceEntity) " +
                     "WITH DISTINCT re " +
                     "OPTIONAL MATCH (re)-[:crossReference]->(dbi:DatabaseIdentifier) " +
-                    "RETURN DISTINCT re.dbId AS referenceEntity, " +
-                    "                re.secondaryIdentifier AS  secondaryIdentifiers, " +
-                    "                re.geneName AS geneNames, " +
-                    "                re.otherIdentifier AS otherIdentifiers, " +
-                    "                [re.databaseName + {splitter} + CASE WHEN re.variantIdentifier IS NOT NULL THEN re.variantIdentifier ELSE re.identifier END] + COLLECT(DISTINCT dbi.databaseName + {splitter} + dbi.identifier) AS xrefs";
+                    "WITH DISTINCT re, COLLECT(DISTINCT {databaseName: dbi.databaseName, identifier: dbi.identifier}) AS dbis, COUNT(DISTINCT dbi) AS n " +
+                    "RETURN re.dbId AS referenceEntity, " +
+                    "       re.secondaryIdentifier AS  secondaryIdentifiers, " +
+                    "       re.geneName AS geneNames, " +
+                    "       re.otherIdentifier AS otherIdentifiers, " +
+                    "       [{databaseName: re.databaseName, " +
+                    "         identifier: CASE WHEN re.variantIdentifier IS NOT NULL THEN re.variantIdentifier ELSE re.identifier END " +
+                    "         }] + CASE WHEN n = 0 THEN [] ELSE dbis END AS xrefs";
 
             Map<Long, ReferenceEntityIdentifiers> xrefMap = new HashMap<>();
             try {
@@ -76,14 +77,15 @@ public class EntitiesBuilder {
 
             query = "MATCH (:Species{taxId:{taxId}})<-[:species]-(p:Pathway)-[:hasEvent]->(rle:ReactionLikeEvent), " +
                     "      (rle)-[:input|output|catalystActivity|entityFunctionalStatus|physicalEntity|regulatedBy|regulator|hasComponent|hasMember|hasCandidate|repeatedUnit*]->(pe:PhysicalEntity)-[:referenceEntity]->(re:ReferenceEntity) " +
-                    "WITH DISTINCT p, pe, re, COLLECT(DISTINCT rle.dbId + {splitter} + rle.stId) AS rles " +
+                    "WITH DISTINCT p, pe, re, COLLECT(DISTINCT {dbId: rle.dbId, stId: rle.stId}) AS rles " +
                     "OPTIONAL MATCH (pe)-[:hasModifiedResidue]->(tm:TranslationalModification)-[:psiMod]->(mod:PsiMod) " +
-                    "RETURN DISTINCT p.dbId AS pathway, " +
-                    "                pe.dbId AS physicalEntity, " +
-                    "                pe.speciesName AS speciesName, " +
-                    "                re.dbId as referenceEntity, " +
-                    "                rles AS reactions, " +
-                    "                COLLECT(CASE WHEN tm.coordinate IS NOT NULL THEN tm.coordinate ELSE \"null\" END + {splitter} + mod.identifier) AS mods";
+                    "WITH DISTINCT p, pe, re, rles, COLLECT(DISTINCT {coordinate: tm.coordinate, mod: mod.identifier}) AS tmods, COUNT(DISTINCT mod) AS n " +
+                    "RETURN p.dbId AS pathway, " +
+                    "       pe.dbId AS physicalEntity, " +
+                    "       pe.speciesName AS speciesName, " +
+                    "       re.dbId as referenceEntity, " +
+                    "       rles AS reactions, " +
+                    "       CASE WHEN n = 0 THEN [] ELSE tmods END AS mods";
 
             Collection<EntitiesQueryResult> result;
             try {

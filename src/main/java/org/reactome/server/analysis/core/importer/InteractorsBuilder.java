@@ -31,8 +31,6 @@ public class InteractorsBuilder {
 
     private static Logger logger = LoggerFactory.getLogger("importLogger");
 
-    private static final String splitter = ":";
-
     private static final String STATIC = "static";
 
     private AdvancedDatabaseObjectService ados = ReactomeGraphCore.getService(AdvancedDatabaseObjectService.class);
@@ -62,7 +60,6 @@ public class InteractorsBuilder {
 
         String query;
         Map<String, Object> paramsMap = new HashMap<>();
-        paramsMap.put("splitter", splitter);
         int s = 0;
         int st = speciesNodes.size();
         for (SpeciesNode species : speciesNodes) {
@@ -77,7 +74,7 @@ public class InteractorsBuilder {
                     "      (rle)-[:input|output|catalystActivity|entityFunctionalStatus|physicalEntity|regulatedBy|regulator*]->(pe:PhysicalEntity)-[:referenceEntity]->(re:ReferenceEntity) " +
                     "WHERE (p:TopLevelPathway) OR (:TopLevelPathway)-[:hasEvent*]->(p) " +
                     //"     AND NOT (pe)-[:hasModifiedResidue]->(:TranslationalModification) " +
-                    "WITH DISTINCT p, re, COLLECT(DISTINCT rle.dbId + {splitter} + rle.stId) AS rles " +
+                    "WITH DISTINCT p, re, COLLECT(DISTINCT {dbId: rle.dbId, stId: rle.stId}) AS rles " +
                     "RETURN DISTINCT re.databaseName AS databaseName, " +
                     "                CASE WHEN re.variantIdentifier IS NOT NULL THEN re.variantIdentifier ELSE re.identifier END AS identifier, " +
                     "                p.dbId AS pathway, " +

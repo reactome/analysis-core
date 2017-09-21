@@ -1,8 +1,5 @@
 package org.reactome.server.analysis.core.importer.query;
 
-import org.reactome.server.analysis.core.importer.EntitiesBuilder;
-
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -15,10 +12,9 @@ public class ReferenceEntityIdentifiers {
     private List<String> secondaryIdentifiers;
     private List<String> geneNames;
     private List<String> otherIdentifiers;
-    private List<String> xrefs;
+    private List<XRef> xrefs;
 
-    public ReferenceEntityIdentifiers() {
-    }
+    public ReferenceEntityIdentifiers() { }
 
     public Long getReferenceEntity() {
         return referenceEntity;
@@ -53,15 +49,10 @@ public class ReferenceEntityIdentifiers {
     }
 
     public List<XRef> getXrefs() {
-        List<XRef> rtn = new ArrayList<>();
-        for (String xref : xrefs) {
-            String[] aux = xref.split(EntitiesBuilder.splitter);
-            rtn.add(new XRef(aux[0], aux[1]));
-        }
-        return rtn;
+        return xrefs;
     }
 
-    public void setXrefs(List<String> xrefs) {
+    public void setXrefs(List<XRef> xrefs) {
         this.xrefs = xrefs;
     }
 }

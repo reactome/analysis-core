@@ -10,8 +10,7 @@ public class OrthologyResult {
     private String inferredToDatabaseName;
     private String inferredToIdentifier;
 
-    public OrthologyResult() {
-    }
+    public OrthologyResult() { }
 
     public String getOriginDatabaseName() {
         return originDatabaseName;

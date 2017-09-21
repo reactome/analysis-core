@@ -7,6 +7,8 @@ public class AnalysisReaction {
     private Long dbId;
     private String stId;
 
+    public AnalysisReaction() { }
+
     public AnalysisReaction(Long dbId, String stId) {
         this.dbId = dbId;
         this.stId = stId;
@@ -16,8 +18,16 @@ public class AnalysisReaction {
         return dbId;
     }
 
+    public void setDbId(Long dbId) {
+        this.dbId = dbId;
+    }
+
     public String getStId() {
         return stId;
+    }
+
+    public void setStId(String stId) {
+        this.stId = stId;
     }
 
     @Override

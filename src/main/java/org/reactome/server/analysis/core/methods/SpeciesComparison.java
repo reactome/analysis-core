@@ -57,7 +57,7 @@ public class SpeciesComparison {
     public UserData getSyntheticUserData(SpeciesNode speciesFrom, SpeciesNode speciesTo){
         EntitiesContainer graph = analysisData.getPhysicalEntityContainer();
 
-        Set<AnalysisIdentifier> speciesToIdentifiers = new HashSet<AnalysisIdentifier>();
+        Set<AnalysisIdentifier> speciesToIdentifiers = new HashSet<>();
         for (EntityNode node : graph.getAllNodes()) {
             if(speciesFrom.equals(node.getSpecies())){
                 EntityNode eq = node.getProjection(speciesTo);

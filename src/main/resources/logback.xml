@@ -12,7 +12,7 @@
 
     <appender name="importFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>./logs/analysis-core-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>./logs/analysis-importer-%d{yyyy-MM-dd}.log</fileNamePattern>
             <cleanHistoryOnStart>true</cleanHistoryOnStart>
             <maxHistory>-1</maxHistory>
         </rollingPolicy>
@@ -23,6 +23,36 @@
     <logger name="importLogger" level="INFO" additivity="false">
         <appender-ref ref="importFileAppender"/>
     </logger>
+
+
+    <appender name="analysisDataFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>./logs/analysis-data-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+            <maxHistory>-1</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <logger name="analysisDataLogger" level="INFO" additivity="false">
+        <appender-ref ref="analysisDataFileAppender"/>
+    </logger>
+
+    <appender name="methodsFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>./logs/analysis-exec-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+            <maxHistory>-1</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <logger name="methodsLogger" level="INFO" additivity="false">
+        <appender-ref ref="methodsFileAppender"/>
+    </logger>
+
 
     <!-- Uncomment this configuration for Fixed logging size. More policies available.
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">

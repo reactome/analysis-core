@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
  */
 public class InputFormat {
 
-    private static Logger logger = LoggerFactory.getLogger(InputFormat.class.getName());
+    private static Logger logger = LoggerFactory.getLogger("importLogger");
 
     /**
      * This is the default header for oneline file and multiple line file

@@ -7,6 +7,7 @@
     <version>3.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
+    <description>The Reactome analysis-cre extracts data from the graph-database to create the intermediate data format to be kept in memory and used for the analysis-service</description>
     <name>analysis-core</name>
 
     <organization>
@@ -129,7 +130,6 @@
                         <!--<exclude>**/config/**</exclude>-->
                         <!--<exclude>**/importer/**</exclude>-->
                         <!--<exclude>**/Main.**</exclude>-->
-                        <!--<exclude>**/log4j.properties</exclude>-->
                         <exclude>**/logback.xml</exclude>
                     </excludes>
                 </configuration>

@@ -21,7 +21,7 @@ import java.util.List;
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
  */
 public abstract class InputUtils {
-    private static Logger logger = LoggerFactory.getLogger(InputUtils.class.getName());
+    private static Logger logger = LoggerFactory.getLogger("importLogger");
 
     @SuppressWarnings("UnusedDeclaration")
     public static UserData getUserData(String input) throws IOException, ParserException {

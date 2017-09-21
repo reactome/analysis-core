@@ -9,12 +9,9 @@ import java.util.TreeSet;
  *
  * @author Luis Francisco Hernández Sánchez
  */
-
 public class Term implements Comparable {
 
-    /**
-     * The PSIMOD id
-     */
+    // The PSIMOD id
     private String id;
     private String iri;
     private String label;

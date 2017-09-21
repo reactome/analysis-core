@@ -27,7 +27,7 @@ import java.util.Set;
 @Component
 public class EnrichmentAnalysis {
 
-    private static Logger logger = LoggerFactory.getLogger(EnrichmentAnalysis.class.getName());
+    private static Logger logger = LoggerFactory.getLogger("methodsLogger");
 
     public static final Object ANALYSIS_SEMAPHORE = new Object();
     private static long ANALYSIS_COUNT = 0L;
@@ -39,6 +39,7 @@ public class EnrichmentAnalysis {
         this.analysisData = analysisData;
     }
 
+    @SuppressWarnings("WeakerAccess")
     public HierarchiesData overRepresentation(Set<AnalysisIdentifier> identifiers, SpeciesNode speciesNode, boolean includeInteractors) {
         this.increaseCounter();
         HierarchiesData hierarchiesData = HierarchiesDataContainer.take();
@@ -56,7 +57,7 @@ public class EnrichmentAnalysis {
         IdentifiersMap<EntityNode> entitiesMap = analysisData.getEntitiesMap();
         IdentifiersMap<InteractorNode> interactorsMap = analysisData.getInteractorsMap();
 
-        logger.trace(String.format("Analysing %d identifiers%s%s...", originalSampleSize, includeInteractors ? " | including interactors " : "|" , speciesNode != null ? " projecting to " + speciesNode.getName() : ""));
+        logger.trace("Analysing: " + originalSampleSize + " identifier(s). Including interactors: " + includeInteractors + ". Project to species: " + (speciesNode == null ? false : speciesNode.getName()));
         long start = System.currentTimeMillis();
 
         Set<MainIdentifier> newSample = new HashSet<>();
@@ -94,10 +95,10 @@ public class EnrichmentAnalysis {
                     for (InteractorNode interactor : interactors.getElements(resource)) {
                         InteractorIdentifier interactorIdentifier = new InteractorIdentifier(identifier, interactor.getAccession());
                         MapSet<Long, AnalysisReaction> pathwayReactions = interactor.getPathwayReactions();
-                        for (MainIdentifier mainIdentifier : interactor.getInteractsWith()) {
-                            found = true;
-                            newSample.add(mainIdentifier);
-                            for (Long pathwayId : pathwayReactions.keySet()) {
+                        for (Long pathwayId : pathwayReactions.keySet()) {
+                            for (MainIdentifier mainIdentifier : interactor.getInteractsWith(pathwayId)) {
+                                found = true;
+                                newSample.add(mainIdentifier);
                                 Set<AnalysisReaction> reactions = pathwayReactions.getElements(pathwayId);
                                 Set<PathwayNode> pNodes = hierarchies.getPathwayLocation().getElements(pathwayId);
                                 for (PathwayNode pNode : pNodes) {
@@ -116,16 +117,16 @@ public class EnrichmentAnalysis {
         //IMPORTANT: For the statistics the sample is the projection we find (newSample) plus the not found identifiers
         //           in the original sample
         Integer finalSampleSize = newSample.size() + hierarchies.getNotFound().size();
-        Map<MainResource, Integer> sampleSizePerResource = new HashMap<MainResource, Integer>();
+        Map<MainResource, Integer> sampleSizePerResource = new HashMap<>();
         for (MainIdentifier mainIdentifier : newSample) {
             Integer aux = sampleSizePerResource.get(mainIdentifier.getResource());
             sampleSizePerResource.put(mainIdentifier.getResource(), aux == null ? 1 : aux + 1);
         }
 
-        logger.trace(String.format("Final sample size is %d identifiers", finalSampleSize));
+        logger.trace("Final sample size is " + finalSampleSize + " identifier(s)");
         hierarchies.setResultStatistics(sampleSizePerResource, hierarchies.getNotFound().size(), includeInteractors);
         long end = System.currentTimeMillis();
-        logger.trace(String.format("Analysis for %d identifiers performed in %d ms", finalSampleSize, end - start));
+        logger.info("Analysis for " + originalSampleSize + " identifier(s) (" + finalSampleSize + " when expanded) performed in " + (end - start) + " ms");
     }
 
     private void decreaseCounter() {

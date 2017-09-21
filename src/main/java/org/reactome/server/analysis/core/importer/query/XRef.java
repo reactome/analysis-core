@@ -1,5 +1,8 @@
 package org.reactome.server.analysis.core.importer.query;
 
+/**
+ * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ */
 public class XRef {
 
     private String databaseName;

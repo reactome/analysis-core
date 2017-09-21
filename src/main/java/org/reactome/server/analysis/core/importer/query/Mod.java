@@ -1,5 +1,8 @@
 package org.reactome.server.analysis.core.importer.query;
 
+/**
+ * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ */
 public class Mod {
     Long coordinate;
     String mod;

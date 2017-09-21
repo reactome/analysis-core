@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ */
 public class ReferenceEntityIdentifiers {
 
     private Long referenceEntity;

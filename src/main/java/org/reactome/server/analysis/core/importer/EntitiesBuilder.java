@@ -15,9 +15,12 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+/**
+ * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ */
 public class EntitiesBuilder {
 
-    private static Logger logger = LoggerFactory.getLogger(EntitiesBuilder.class.getName());
+    private static Logger logger = LoggerFactory.getLogger("importLogger");
 
     public static final String splitter = ":";
     //Will contain the RADIX-TREE with the map (identifiers -> [EntityNode])
@@ -28,7 +31,9 @@ public class EntitiesBuilder {
 
     private AdvancedDatabaseObjectService ados = ReactomeGraphCore.getService(AdvancedDatabaseObjectService.class);
 
-    public void build(Set<SpeciesNode> speciesNodes) {
+    public void build(Map<String, SpeciesNode> speciesMap) {
+        Collection<SpeciesNode> speciesNodes = speciesMap.values();
+
         this.entitiesMap = new IdentifiersMap<>();
         this.entitiesContainer = new EntitiesContainer();
 
@@ -75,6 +80,7 @@ public class EntitiesBuilder {
                     "OPTIONAL MATCH (pe)-[:hasModifiedResidue]->(tm:TranslationalModification)-[:psiMod]->(mod:PsiMod) " +
                     "RETURN DISTINCT p.dbId AS pathway, " +
                     "                pe.dbId AS physicalEntity, " +
+                    "                pe.speciesName AS speciesName, " +
                     "                re.dbId as referenceEntity, " +
                     "                rles AS reactions, " +
                     "                COLLECT(CASE WHEN tm.coordinate IS NOT NULL THEN tm.coordinate ELSE \"null\" END + {splitter} + mod.identifier) AS mods";
@@ -94,6 +100,7 @@ public class EntitiesBuilder {
                 List<XRef> xrefs = rei.getXrefs();
                 final String databaseName = xrefs.get(0).getDatabaseName();
                 final String identifier = xrefs.get(0).getIdentifier();
+                final SpeciesNode entitySpecies = speciesMap.get(current.getSpeciesName()); //Small molecules have no species (null is assigned)
                 Resource resource = ResourceFactory.getResource(databaseName);
                 if (resource instanceof MainResource) {
                     List<Modification> modifications = new ArrayList<>();
@@ -102,7 +109,7 @@ public class EntitiesBuilder {
                     }
                     MainResource mainResource = (MainResource) resource;
                     //IMPORTANT: Add checks for duplicates and returns the right entity node to "play with"
-                    EntityNode node = entitiesContainer.add(new EntityNode(species, mainResource, identifier, modifications));
+                    EntityNode node = entitiesContainer.add(new EntityNode(entitySpecies, mainResource, identifier, modifications));
                     node.addPathwayReactions(current.getPathwayReactions());
 
                     //Adding every possible xRef to the RadixTree
@@ -131,7 +138,7 @@ public class EntitiesBuilder {
             }
         }
 
-        if (Main.VERBOSE) System.out.println(msgPrefix + " >> Done. ");
+        if (Main.VERBOSE) System.out.println(msgPrefix + ">> Done.");
     }
 
     public void setOrthologous() {

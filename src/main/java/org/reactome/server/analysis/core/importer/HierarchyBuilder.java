@@ -66,6 +66,14 @@ public class HierarchyBuilder {
         return pathwayLocation;
     }
 
+    public Map<String, SpeciesNode> getSpeciesMap(){
+        Map<String, SpeciesNode> rtn = new HashMap<>();
+        for (SpeciesNode speciesNode : hierarchies.keySet()) {
+            rtn.put(speciesNode.getName(), speciesNode);
+        }
+        return rtn;
+    }
+
     private void fillBranch(PathwayNode node, Pathway pathway) {
         for (Event event : pathway.getHasEvent()) {
             if (event instanceof Pathway) {

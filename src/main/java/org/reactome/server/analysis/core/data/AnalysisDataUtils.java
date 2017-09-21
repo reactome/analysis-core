@@ -19,7 +19,7 @@ import java.io.OutputStream;
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
  */
 public class AnalysisDataUtils {
-    private static Logger logger = LoggerFactory.getLogger(AnalysisDataUtils.class.getName());
+    private static Logger logger = LoggerFactory.getLogger("analysisDataLogger");
 
     public static DataContainer getDataContainer(InputStream file) {
         logger.info(String.format("Loading %s file...", DataContainer.class.getSimpleName()));
@@ -27,7 +27,7 @@ public class AnalysisDataUtils {
         DataContainer container = (DataContainer) AnalysisDataUtils.read(file);
         container.initialize();
         long end = System.currentTimeMillis();
-        logger.info(String.format("Time to load %s file >> %s", DataContainer.class.getSimpleName(), FormatUtils.getTimeFormatted(end - start)));
+        logger.info(String.format("Loading %s file >> Done (%s)", DataContainer.class.getSimpleName(), FormatUtils.getTimeFormatted(end - start)));
         return container;
     }
 
@@ -54,8 +54,7 @@ public class AnalysisDataUtils {
             container.initialize(); //At the end the data structure remains the same
             if (Main.VERBOSE) System.out.println(msgPrefix + " >> Done.");
         } catch (FileNotFoundException e) {
-            if (Main.VERBOSE) System.out.println(msgPrefix + " >> An error has occurred: " + e.getMessage());
-            logger.error(e.getMessage(), e);
+            if (Main.VERBOSE) System.err.println(msgPrefix + " >> An error has occurred: " + e.getMessage());
             e.printStackTrace();
         }
     }

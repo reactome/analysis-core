@@ -31,7 +31,7 @@ import java.util.Map;
 @Component
 @Scope("singleton")
 public class AnalysisData {
-    private static Logger logger = LoggerFactory.getLogger(AnalysisData.class.getName());
+    private static Logger logger = LoggerFactory.getLogger("analysisDataLogger");
 
     private static DataContainer container = null;
 

@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class HierarchiesDataContainer {
 
-    private static Logger logger = LoggerFactory.getLogger(HierarchiesDataContainer.class.getName());
+    private static Logger logger = LoggerFactory.getLogger("analysisDataLogger");
 
     private static final Object READER_SEMAPHORE = new Object();
 

@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HierarchiesDataProducer {
 
-    private static Logger logger = LoggerFactory.getLogger(HierarchiesDataProducer.class.getName());
+    private static Logger logger = LoggerFactory.getLogger("analysisDataLogger");
 
     private static HierarchiesDataProducer producer;
     private static Thread backgroundProducer;
@@ -22,13 +22,14 @@ public class HierarchiesDataProducer {
     private HierarchiesDataProducer(DataContainer data) {
         this.data = data;
         if (HierarchiesDataContainer.POOL_SIZE > 1) {
-            logger.info("Initialising the background producer.");
+            logger.trace("Initialising the background producer...");
             backgroundProducer = new Thread(new BackgroundProducer());
             backgroundProducer.setName("background_producer");
             producing = true;
             backgroundProducer.start();
+            logger.info("Hierarchy content background producer initialised");
         } else {
-            logger.info("No background producer initialised");
+            logger.error("No background producer initialised");
         }
     }
 

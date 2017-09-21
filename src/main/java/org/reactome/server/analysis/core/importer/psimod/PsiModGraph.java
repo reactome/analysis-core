@@ -7,7 +7,6 @@ import java.util.HashMap;
 /**
  * @author Luis Francisco Hernández Sánchez
  */
-
 @SuppressWarnings("unused")
 public class PsiModGraph {
     /**
@@ -20,14 +19,6 @@ public class PsiModGraph {
      * object which contains the connections to the parent and children nodes.
      */
     private HashMap<String, Term> terms;
-
-    public Term getRoot() {
-        return root;
-    }
-
-    public void setRoot(Term root) {
-        this.root = root;
-    }
 
     /**
      * Initializes the graph with only one term, which is the root node "00000"
@@ -56,6 +47,10 @@ public class PsiModGraph {
                 }
             }
         }
+    }
+
+    public Term getRoot() {
+        return root;
     }
 
     public Term getTerm(String id) {

@@ -17,19 +17,18 @@ package org.reactome.server.analysis.core.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.org.apache.xml.internal.utils.URI;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.reactome.server.analysis.core.model.Term;
 
-import java.io.BufferedReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -46,8 +45,8 @@ public class OnthologyHttpClient {
 
     public static void main(String[] args) {
         try {
-            CloseableHttpClient httpClient = HttpClients.createDefault();
-            HttpGet getRequest = new HttpGet(createUri("mod", "00125", "hierarchicalAncestors"));
+            CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+            HttpGet getRequest = new HttpGet(createUriString("mod", "00125", "hierarchicalAncestors"));
             getRequest.addHeader("accept", "application/json");
 
             HttpResponse response = httpClient.execute(getRequest);
@@ -101,7 +100,7 @@ public class OnthologyHttpClient {
 
     private static BufferedReader getContentBufferedReader(String uri) {
         try {
-            HttpClient httpClient = HttpClientBuilder.create().build();
+            CloseableHttpClient httpClient = HttpClientBuilder.create().build();
             HttpGet getRequest = new HttpGet(uri);
             getRequest.addHeader("accept", "application/json");
 
@@ -114,7 +113,7 @@ public class OnthologyHttpClient {
 
             BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));
 
-            httpClient.getConnectionManager().shutdown();
+            httpClient.close();
 
             return br;
 
@@ -138,7 +137,7 @@ public class OnthologyHttpClient {
         StringBuilder json = new StringBuilder();
         try {
             CloseableHttpClient httpClient = HttpClients.createDefault();
-            HttpGet getRequest = new HttpGet(createUri("mod", id, relation));
+            HttpGet getRequest = new HttpGet(createUriString("mod", id, relation));
             getRequest.addHeader("accept", "application/json");
 
             HttpResponse response = httpClient.execute(getRequest);
@@ -198,8 +197,13 @@ public class OnthologyHttpClient {
         return result;
     }
 
-    private static String createUri(String onthologyName, String term, String relation) {
-        String result = "http://www.ebi.ac.uk/ols/api/ontologies/" + onthologyName + "/terms/http%253A%252F%252Fpurl.obolibrary.org%252Fobo%252FMOD_" + term + "/" + relation + "?size=" + onthologySize;
+    private static String createUriString(String onthologyName, String term, String relation) {
+        String result = "";
+        try {
+            result = "http://www.ebi.ac.uk/ols/api/ontologies/" + onthologyName + "/terms/" + URLEncoder.encode(URLEncoder.encode("htp://purl.obolibrary.org/obot/MOD_" + term, "ISO-8859-1"), "ISO-8859-1") + "/" + relation + "?size=" + onthologySize;
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
         return result;
     }
 

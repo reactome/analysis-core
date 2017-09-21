@@ -1,16 +1,14 @@
 package org.reactome.server.analysis.tools;
 
 import com.martiansoftware.jsap.*;
-import org.reactome.server.graph.domain.model.PhysicalEntity;
 import org.reactome.server.graph.domain.model.Species;
 import org.reactome.server.graph.service.DatabaseObjectService;
 import org.reactome.server.graph.service.GeneralService;
-import org.reactome.server.graph.service.PhysicalEntityService;
 import org.reactome.server.graph.utils.ReactomeGraphCore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
+import java.util.HashMap;
 
 public class serviceTest {
 
@@ -39,11 +37,18 @@ public class serviceTest {
                 ReactomeNeo4jConfig.class);
 
         GeneralService genericService = ReactomeGraphCore.getService(GeneralService.class);
-        System.out.println("Database name: " + genericService.getDBName());
-        System.out.println("Database version: " + genericService.getDBVersion());
 
-        DatabaseObjectService databaseObjectService = ReactomeGraphCore.getService(DatabaseObjectService.class);
-        Species homoSapiens = (Species) databaseObjectService.findByIdNoRelations(48887L);
-        System.out.println(homoSapiens);
+        String query = "MATCH (re:ReferenceEntity)<-[:referenceEntity]-(ewas:EntityWithAccessionedSequence)\n" +
+                "WITH re, ewas\n" +
+//                "OPTIONAL MATCH (ewas)-[:hasModifiedResidue]->(tm:TranslationalModification)-[:psiMod]->(mod:PsiMod)\n" +
+                "RETURN re, ewas";
+
+        System.out.println(genericService.query(query, new HashMap<>()));
+//        System.out.println("Database name: " + genericService.getDBName());
+//        System.out.println("Database version: " + genericService.getDBVersion());
+
+//        DatabaseObjectService databaseObjectService = ReactomeGraphCore.getService(DatabaseObjectService.class);
+//        Species homoSapiens = (Species) databaseObjectService.findByIdNoRelations(48887L);
+//        System.out.println(homoSapiens);
     }
 }

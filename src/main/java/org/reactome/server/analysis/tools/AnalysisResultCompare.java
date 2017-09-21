@@ -1,6 +1,7 @@
 package org.reactome.server.analysis.tools;
 
 import org.reactome.server.analysis.core.util.Pair;
+import org.reactome.server.analysis.tools.util.InconsistencyException;
 import org.reactome.server.analysis.tools.util.ResultPathwayEntry;
 
 import java.io.BufferedInputStream;
@@ -115,11 +116,21 @@ public class AnalysisResultCompare {
 
             // Show diff submitted entities found
             System.out.print("Extra entities found: ");
-            System.out.println(getDiff(oldResultPathwayEntry.getSubmitted_entities_found(), newResultPathwayEntry.getSubmitted_entities_found()));
+            Set<String> diff = getDiff(newResultPathwayEntry.getSubmitted_entities_found(), oldResultPathwayEntry.getSubmitted_entities_found());
+            System.out.println(diff);
+            for (String id : diff) {
+                if (!inputList.contains(id)) {
+                    try {
+                        throw new InconsistencyException("Extra entity " + id + " is not in inputList.");
+                    } catch (InconsistencyException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
 
             // Show diff mapped entities
             System.out.print("Extra mapped entities: ");
-            System.out.println(getDiff(oldResultPathwayEntry.getMapped_entities(), newResultPathwayEntry.getMapped_entities()));
+            System.out.println(getDiff(newResultPathwayEntry.getMapped_entities(), oldResultPathwayEntry.getMapped_entities()));
         }
 
 
@@ -135,11 +146,21 @@ public class AnalysisResultCompare {
 
             // Show diff Submitted entities hit interactor
             System.out.print("Extra entities hit by interactor: ");
-            System.out.println(getDiff(oldResultPathwayEntry.getSubmitted_entities_hit_interactor(), newResultPathwayEntry.getMapped_entities()));
+            Set<String> diff = getDiff(newResultPathwayEntry.getSubmitted_entities_hit_interactor(), oldResultPathwayEntry.getMapped_entities());
+            System.out.println(diff);
+            for (String id : diff) {
+                if (!inputList.contains(id)) {
+                    try {
+                        throw new InconsistencyException("Extra entity hit by interactor " + id + " is not in inputList.");
+                    } catch (InconsistencyException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
 
             // Show diff interacts with
             System.out.print("Extra interactors: ");
-            System.out.println(getDiff(oldResultPathwayEntry.getInteracts_with(), newResultPathwayEntry.getInteracts_with()));
+            System.out.println(getDiff(newResultPathwayEntry.getInteracts_with(), oldResultPathwayEntry.getInteracts_with()));
         }
 
         // Show diff in reactions hit
@@ -149,8 +170,9 @@ public class AnalysisResultCompare {
                 System.out.println("-----------------------" + newResultPathwayEntry.getPathway() + "------------------------");
             }
 
+            System.out.println(oldResultPathwayEntry.getReactions_found() + " --> " + newResultPathwayEntry.getReactions_found());
             System.out.print("Extra reactions hit: ");
-            System.out.println(getDiff(oldResultPathwayEntry.getFound_reaction_identifiers(), newResultPathwayEntry.getFound_reaction_identifiers()));
+            System.out.println(getDiff(newResultPathwayEntry.getFound_reaction_identifiers(), oldResultPathwayEntry.getFound_reaction_identifiers()));
         }
     }
 
@@ -202,7 +224,7 @@ public class AnalysisResultCompare {
         }
 
         field = readNextField(bf);
-        while (field.getFst().length() > 0) {   //Read they file while there are fields
+        while (!field.getFst().equals("-")) {   //Read they file while there are fields
             if (col == 0) {
                 entry = new ResultPathwayEntry();
             }
@@ -234,22 +256,25 @@ public class AnalysisResultCompare {
         boolean isLastField = false;
         boolean hasQuotes = false;
         StringBuilder str = new StringBuilder();
+        str.append('-');
         while ((i = bf.read()) != -1) {       //Skip all separator or line break characters before the actual content of the field
             if (i != '\n' && i != SEPARATOR) {
+                str = new StringBuilder();
                 if ((char) i == '\"') {
                     hasQuotes = !hasQuotes;
                 } else {
                     str.append((char) i);
                 }
                 break;
+            } else if (i == SEPARATOR) {
+                return new Pair<String, Boolean>("", false);
             }
         }
         while ((i = bf.read()) != -1) {       // Read the content of the field
             char c = (char) i;
             if (c == '\"') {
                 hasQuotes = !hasQuotes;
-            }
-            if (c == '\n') {
+            } else if (c == '\n') {
                 isLastField = true;
                 break;
             } else if (i == SEPARATOR) {

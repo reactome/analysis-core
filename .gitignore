@@ -13,4 +13,6 @@
 *.tar.gz
 *.rar
 
-docs/
+*.pdf
+*.tsv
+*.csv

@@ -20,7 +20,6 @@ import org.reactome.server.interactors.service.InteractionService;
 import org.reactome.server.interactors.service.InteractorResourceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -28,10 +27,9 @@ import java.util.*;
 /**
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
  */
-@Component
 public class InteractorsBuilder {
 
-    private static Logger logger = LoggerFactory.getLogger(InteractorsBuilder.class.getName());
+    private static Logger logger = LoggerFactory.getLogger("importLogger");
 
     private static final String splitter = ":";
 
@@ -72,7 +70,7 @@ public class InteractorsBuilder {
 
             paramsMap.put("taxId", species.getTaxID());
 
-            String speciesPrefix = "'" + species.getName() + "' (" + (s++) + "/" + st + ")";
+            String speciesPrefix = "'" + species.getName() + "' (" + (++s) + "/" + st + ")";
             if (Main.VERBOSE) System.out.print("\rCreating the interactors container for " + speciesPrefix + " >> retrieving targets for interactors...");
 
             query = "MATCH (:Species{taxId:{taxId}})<-[:species]-(p:Pathway)-[:hasEvent]->(rle:ReactionLikeEvent), " +
@@ -114,9 +112,11 @@ public class InteractorsBuilder {
                     Resource resource = ResourceFactory.getResource(aux.getName());
                     InteractorNode interactorNode = getOrCreate(resource, interactor.getAcc());
                     for (MapSet<Long, AnalysisReaction> prs : compressedResult.getElements(target)) {
-                        interactorNode.addPathwayReactions(prs);
+                        for (Long pathwayId : prs.keySet()) {
+                            interactorNode.addInteractsWith(pathwayId, target);
+                            interactorNode.addPathwayReactions(prs);
+                        }
                     }
-                    interactorNode.addInteractsWith(target);
                     interactorsMap.add(interactor.getAlias(), resource, interactorNode);
                     interactorsMap.add(interactor.getAliasWithoutSpecies(false), resource, interactorNode);
                     //for (String synonym : interactor.getSynonyms().split("\\$")) interactorsMap.add(synonym, resource, interactorNode);

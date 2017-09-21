@@ -3,7 +3,6 @@ package org.reactome.server.analysis.core.model;
 import org.reactome.server.analysis.core.model.identifier.MainIdentifier;
 import org.reactome.server.analysis.core.util.MapSet;
 
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -16,7 +15,7 @@ public class InteractorNode {
 
     private String accession;
 
-    private Set<MainIdentifier> interactsWith;
+    private MapSet<Long, MainIdentifier> interactsWith;
 
     //We DO NOT use PathwayNode here because at some point cloning the hierarchies
     //structure will be needed and keeping this separate will help to maintain the
@@ -24,20 +23,20 @@ public class InteractorNode {
     private MapSet<Long, AnalysisReaction> pathwayReactions = null;
 
     public InteractorNode(String accession) {
-        this.interactsWith = new HashSet<>();
+        this.interactsWith = new MapSet<>();
         this.accession = accession;
     }
 
-    public void addInteractsWith(MainIdentifier interactsWith) {
-        this.interactsWith.add(interactsWith);
+    public void addInteractsWith(Long pathway, MainIdentifier interactsWith) {
+        this.interactsWith.add(pathway, interactsWith);
     }
 
     public String getAccession() {
         return accession;
     }
 
-    public Set<MainIdentifier> getInteractsWith() {
-        return interactsWith;
+    public Set<MainIdentifier> getInteractsWith(Long pathway) {
+        return interactsWith.getElements(pathway);
     }
 
     public MapSet<Long, AnalysisReaction> getPathwayReactions() {

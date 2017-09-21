@@ -19,6 +19,9 @@ import java.io.File;
 import java.sql.SQLException;
 import java.util.Set;
 
+/**
+ * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ */
 public class Main {
 
     public static boolean TEST_MAIN_SPECIES;
@@ -79,7 +82,7 @@ public class Main {
         hierarchyBuilder.build();
 
         EntitiesBuilder entitiesBuilder = new EntitiesBuilder();
-        entitiesBuilder.build(hierarchyBuilder.getHierarchies().keySet());
+        entitiesBuilder.build(hierarchyBuilder.getSpeciesMap());
         entitiesBuilder.setOrthologous();
 
         InteractorsBuilder interactorsBuilder = new InteractorsBuilder();
@@ -130,8 +133,8 @@ public class Main {
         for (InteractorNode interactorNode : interactorsMap.values()) {
             InteractorIdentifier identifier = new InteractorIdentifier(interactorNode.getAccession());
             MapSet<Long, AnalysisReaction> pathwayReactions = interactorNode.getPathwayReactions();
-            for (MainIdentifier mainIdentifier : interactorNode.getInteractsWith()) {
-                for (Long pathwayId : pathwayReactions.keySet()) {
+            for (Long pathwayId : pathwayReactions.keySet()) {
+                for (MainIdentifier mainIdentifier : interactorNode.getInteractsWith(pathwayId)) {
                     Set<AnalysisReaction> reactions = pathwayReactions.getElements(pathwayId);
                     Set<PathwayNode> pNodes = pathwayLocation.getElements(pathwayId);
                     for (PathwayNode pNode : pNodes) {

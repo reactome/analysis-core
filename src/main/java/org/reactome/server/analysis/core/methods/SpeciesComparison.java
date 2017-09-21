@@ -1,9 +1,10 @@
 package org.reactome.server.analysis.core.methods;
 
-
 import org.reactome.server.analysis.core.data.AnalysisData;
 import org.reactome.server.analysis.core.exception.SpeciesNotFoundException;
 import org.reactome.server.analysis.core.model.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,8 +15,11 @@ import java.util.Set;
 /**
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
  */
+@SuppressWarnings({"unused", "WeakerAccess"})
 @Component
 public class SpeciesComparison {
+
+    private static Logger logger = LoggerFactory.getLogger("methodsLogger");
 
     private final AnalysisData analysisData;
     private final EnrichmentAnalysis enrichmentAnalysis;

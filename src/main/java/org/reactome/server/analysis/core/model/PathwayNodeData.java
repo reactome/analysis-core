@@ -145,7 +145,7 @@ public class PathwayNodeData {
                 if (evss.size() > i) {
                     evs = evss.get(i);
                 } else {
-                    evs = new LinkedList<Double>();
+                    evs = new LinkedList<>();
                     evss.add(i, evs);
                 }
                 evs.add(ev);
@@ -360,7 +360,7 @@ public class PathwayNodeData {
     public Set<AnalysisReaction> getReactions(MainResource resource) {
         Set<AnalysisReaction> rtn = reactions.getElements(resource);
         if(rtn==null){
-            rtn = new HashSet<AnalysisReaction>();
+            rtn = new HashSet<>();
         }
         return rtn;
     }
@@ -437,7 +437,7 @@ public class PathwayNodeData {
         }
         combinedResult.totalReactions += totalReactions.size(); totalReactions.clear();
         combinedResult.reactionsRatio =  combinedResult.totalReactions /speciesData.getReactionsCount().doubleValue();
-        reactions = new MapSet<MainResource, AnalysisReaction>();
+        reactions = new MapSet<>();
 
         MapSet<MainResource, AnalysisIdentifier> aux = new MapSet<>();
         for (Identifier identifier : entities.keySet()) {

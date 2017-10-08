@@ -96,8 +96,8 @@ public class InputFormat {
         logger.debug("Elapsed Time Parsing the data: " + (end - start) + ".ms");
 
         if (hasError()) {
-            logger.error("Error analysing your data");
-            throw new ParserException("Error analysing your data", errorResponses);
+            logger.warn("Errors found while parsing analysis submitted data");
+            throw new ParserException("Error while parsing your data", errorResponses);
         }
 
     }

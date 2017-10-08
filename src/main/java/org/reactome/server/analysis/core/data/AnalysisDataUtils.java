@@ -21,10 +21,11 @@ import java.io.OutputStream;
 public class AnalysisDataUtils {
     private static Logger logger = LoggerFactory.getLogger("analysisDataLogger");
 
-    public static DataContainer getDataContainer(InputStream file) {
+    static DataContainer getDataContainer(InputStream file) {
         logger.info(String.format("Loading %s file...", DataContainer.class.getSimpleName()));
         long start = System.currentTimeMillis();
         DataContainer container = (DataContainer) AnalysisDataUtils.read(file);
+        assert container != null;
         container.initialize();
         long end = System.currentTimeMillis();
         logger.info(String.format("Loading %s file >> Done (%s)", DataContainer.class.getSimpleName(), FormatUtils.getTimeFormatted(end - start)));
@@ -60,11 +61,17 @@ public class AnalysisDataUtils {
     }
 
     private static Object read(InputStream file) {
-        Kryo kryo = new Kryo();
-        kryo.setInstantiatorStrategy(new StdInstantiatorStrategy());
-        Input input = new Input(file);
-        Object obj = kryo.readClassAndObject(input);
-        input.close();
-        return obj;
+        try {
+            System.gc();
+            Kryo kryo = new Kryo();
+            kryo.setInstantiatorStrategy(new StdInstantiatorStrategy());
+            Input input = new Input(file);
+            Object obj = kryo.readClassAndObject(input);
+            input.close();
+            return obj;
+        } catch (RuntimeException ex){
+            logger.error(String.format("There was a problem loading the intermediate data file. %s", ex.getMessage()));
+        }
+        return null;
     }
 }

@@ -33,22 +33,17 @@ import java.util.Map;
 public class AnalysisData {
     private static Logger logger = LoggerFactory.getLogger("analysisDataLogger");
 
+    static final Object LOADER_SEMAPHORE = new Object();
+
     private static DataContainer container = null;
-
-    public AnalysisData() {
-    }
-
-    public AnalysisData(DataContainer container) {
-        AnalysisData.container = container;
-    }
-
 
     private DataContainer getContainer() {
         if (container == null) {
-            String msg = "DataContainer has not been initialized.";
-            logger.error(msg, new NullPointerException(msg));
-            System.err.println(getClass().getName() + " [ERROR] : " + msg);
-            System.exit(1);
+            synchronized (LOADER_SEMAPHORE){
+                if (container == null) {
+                    logger.error(getClass().getName() + " [ERROR] : DataContainer has not been initialized.");
+                }
+            }
         }
         return container;
     }
@@ -89,20 +84,26 @@ public class AnalysisData {
      *
      * @param fileName the binary file containing the data structures for the analysis
      */
+    @SuppressWarnings("unused")
     public void setFileName(String fileName) {
-        if (container != null) {
+        if (container == null) {
+            new Thread(() -> {
+                synchronized (LOADER_SEMAPHORE) {
+                    try {
+                        InputStream file = new FileInputStream(fileName);
+                        container = AnalysisDataUtils.getDataContainer(file);
+                        //Note: HierarchiesDataProducer.getHierarchiesData is also sync with LOADER_SEMAPHORE
+                        HierarchiesDataProducer.initializeProducer(container);
+                    } catch (FileNotFoundException e) {
+                        String msg = String.format("%s has not been found. Please check the settings", fileName);
+                        logger.error(msg, e);
+                    } finally {
+                        LOADER_SEMAPHORE.notifyAll();
+                    }
+                }
+            }).start();
+        } else {
             logger.warn("Attempt to load the content file when previously loaded");
-            return;
-        }
-        try {
-            InputStream file = new FileInputStream(fileName);
-            container = AnalysisDataUtils.getDataContainer(file);
-            HierarchiesDataProducer.initializeProducer(container);
-        } catch (FileNotFoundException e) {
-            String msg = String.format("%s has not been found. Please check the settings", fileName);
-            logger.error(msg, e);
-            System.err.println(msg);
-            System.exit(1);
         }
     }
 }

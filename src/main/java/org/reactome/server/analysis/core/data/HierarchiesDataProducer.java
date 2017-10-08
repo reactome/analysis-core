@@ -33,7 +33,7 @@ public class HierarchiesDataProducer {
         }
     }
 
-    public static void initializeProducer(DataContainer data) {
+    static void initializeProducer(DataContainer data) {
         if (producer == null) {
             producer = new HierarchiesDataProducer(data);
         } else {
@@ -41,6 +41,7 @@ public class HierarchiesDataProducer {
         }
     }
 
+    @SuppressWarnings("unused")
     public static void interruptProducer() {
         if (backgroundProducer != null) {
             producing = false;
@@ -51,12 +52,14 @@ public class HierarchiesDataProducer {
         }
     }
 
-    public static HierarchiesData getHierarchiesData() {
-        if (producer != null) {
-            return producer.data.getHierarchiesData();
-        } else {
-            logger.error("This class needs to be initialised with the data structure to perform the analysis with");
-            return null;
+    static HierarchiesData getHierarchiesData() {
+        synchronized (AnalysisData.LOADER_SEMAPHORE) {
+            if (producer != null) {
+                return producer.data.getHierarchiesData();
+            } else {
+                logger.error("This class needs to be initialised with the data structure to perform the analysis with");
+                return null;
+            }
         }
     }
 

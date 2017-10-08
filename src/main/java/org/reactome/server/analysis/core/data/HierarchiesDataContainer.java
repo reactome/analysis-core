@@ -13,15 +13,15 @@ public abstract class HierarchiesDataContainer {
 
     private static final Object READER_SEMAPHORE = new Object();
 
-    public static int POOL_SIZE = 5;
+    static int POOL_SIZE = 5;
     private static HierarchiesData[] pool = new HierarchiesData[POOL_SIZE];
 
     private static int read_pos = 0;
     private static int write_pos = 0;
 
-    public static boolean put(HierarchiesData data){
-        synchronized (READER_SEMAPHORE){
-            if(!isFull()){
+    public static boolean put(HierarchiesData data) {
+        synchronized (READER_SEMAPHORE) {
+            if (!isFull()) {
                 pool[write_pos] = data;
                 write_pos = next(write_pos);
             }
@@ -31,8 +31,8 @@ public abstract class HierarchiesDataContainer {
         return true;
     }
 
-    public static HierarchiesData take(){
-        if(isEmpty()){
+    public static HierarchiesData take() {
+        if (isEmpty()) {
             return HierarchiesDataProducer.getHierarchiesData();
         }
 
@@ -47,30 +47,30 @@ public abstract class HierarchiesDataContainer {
         return data;
     }
 
-    public static synchronized boolean isEmpty(){
-        return size()==0;
+    public static synchronized boolean isEmpty() {
+        return size() == 0;
     }
 
-    public static synchronized boolean isFull(){
-        return size()==POOL_SIZE;
+    static synchronized boolean isFull() {
+        return size() == POOL_SIZE;
     }
 
-    private static int next(int pos){
+    private static int next(int pos) {
         return (pos + 1) % POOL_SIZE;
     }
 
-    private static int prev(int pos){
-        return pos == 0? POOL_SIZE-1 : pos-1;
+    private static int prev(int pos) {
+        return pos == 0 ? POOL_SIZE - 1 : pos - 1;
     }
 
-    private static synchronized int size(){
-        if(read_pos==write_pos){
-            if(pool[prev(write_pos)]==null){
+    private static synchronized int size() {
+        if (read_pos == write_pos) {
+            if (pool[prev(write_pos)] == null) {
                 return 0;
             }
             return POOL_SIZE;
         }
-        if(read_pos<write_pos){
+        if (read_pos < write_pos) {
             return write_pos - read_pos;
         }
         return POOL_SIZE - (read_pos - write_pos);

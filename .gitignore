@@ -16,3 +16,13 @@
 *.pdf
 *.tsv
 *.csv
+
+docs/FormatSpecifications/
+docs/UniProtSimpleLists.xlsx
+docs/plots/
+resources/.RData
+resources/.Rhistory
+resources/DensityHitPathways.png
+resources/DensityHitPathways4.svg
+resources/uniprot-all.fasta.gz
+resources/uniprot-all.fasta/

@@ -43,7 +43,7 @@ public class serviceTest {
 //                "OPTIONAL MATCH (ewas)-[:hasModifiedResidue]->(tm:TranslationalModification)-[:psiMod]->(mod:PsiMod)\n" +
                 "RETURN re, ewas";
 
-        System.out.println(genericService.query(query, new HashMap<>()));
+        System.out.println(genericService.query(query, new HashMap<String, Object>()));
 //        System.out.println("Database name: " + genericService.getDBName());
 //        System.out.println("Database version: " + genericService.getDBVersion());
 

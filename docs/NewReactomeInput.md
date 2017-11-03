@@ -1,6 +1,25 @@
-## Proteoform Matching in Reactome
+# Reactome Analysis tool v2
 
-### Definitions
+# Improvements
+
+* Use Google Guava Stopwatch class to measure input preprocessing performance.
+    
+    It is based on the System.nanoTime(), instead of System.currentTimeMillis(), 
+    which measures the elapsed wall-clock time. In contrast, System.nanoTime() returns the current value of the most 
+    precise available system timer, which is specifically developed to measure elapsed time.
+    
+ * Faster reading of expression input.
+  
+  Traverse the input fewer times. Currently, it is traversing all input at least 3 times using:
+ split, replaceAll, and StringTokenizer. 
+ 
+ * Added possibility to specify proteoforms.
+    * Add support for PEFF format.
+    * Added support for Protein Ontology (PRO) format.
+    * Added support for a simple custom proteoform format.
+    
+
+## Definitions
 
 A __proteoform__ is a protein with a set of post translational modifications.
 
@@ -42,9 +61,37 @@ An input proteoform is not matched (not considered found) when at least one of t
     - At least one input PTM is more specific than the stored PTMs. In other words, the input PTM type is a child of the stored PTM type in the ontology hierarchy tree.
     - At least one input PTM with the same coordinate was not found in the stored proteoform.
 
-### Proteoform Formats
+## Input Formats
 
-#### Simple
+### Identifiers list
+
+#### Gene name list
+#### UniProt accession list
+#### Gene NCBI / Entrez list
+#### Small molecules (ChEBI)
+#### Small molecules (KEGG)
+#### Simple Proteoforms list
+
+### Expression values
+* Files can be in one line or multiple lines.
+* File contains multiple columns. The first column in each row contains the identifier. All the other columns must contain
+expression values as floating point numbers.
+
+
+* Identifiers can be repeated in multiple lines?
+
+#### Microarray data
+#### Metabolomics data
+#### Cancer Gene Census
+#### Simple proteoforms list with expression values
+
+### Other formats
+#### PEFF
+#### Protein Ontology
+#### GPMDB
+
+
+#### Simple proteoform list
 
 Each line of the file corresponds to a single proteoform.
 A line consists of two fields separated by ';'. First a Uniprot Accession and second a set of PTMs.
@@ -91,8 +138,6 @@ A0A022YWF9;246:00916,467:00916,632:00916
 
 #### GPMDB (TODO)
 
-#### PIR Identifiers (TODO)
-
 ### Implementation (TODO)
 
 The input type is decided using the first 5 lines of the file, without counting headers.
@@ -111,7 +156,15 @@ Then find the
 
 An unknown PTM coordinate is stored as null, to avoid counting the 0 in the range of near coordinates.
 
-### Analysis (TODO)
+### Analysis
+
+#### Input reader
+
+#### Input matching
+
+#### Intermediate data structure
+
+#### Results analysis
 
 # References
 \[1\] [UniProt: the universal protein knowledgebase. Nucleic Acids Res. 45: D158-D169 (2017)](http://dx.doi.org/doi:10.1093/nar/gkw1099) <br>

@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
  *
  * @author Guilherme Viteri <gviteri@ebi.ac.uk>
  */
-public class InputFormat {
+public class InputFormat extends InputProcessor {
 
     private static Logger logger = Logger.getLogger(InputFormat.class.getName());
 

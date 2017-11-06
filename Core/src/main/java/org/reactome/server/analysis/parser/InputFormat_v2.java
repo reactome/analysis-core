@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
  * Supported input formats: Accession lists, Expression matrices, simple proteoform lists, Protein Ontology (PRO) proteoform lists
  *
  */
-public class InputFormat_v2 {
+public class InputFormat_v2 extends InputProcessor{
 
     private static Logger logger = Logger.getLogger(InputFormat_v2.class.getName());
 

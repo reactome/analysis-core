@@ -97,10 +97,10 @@ public class InputPatterns {
     }
 
     public static boolean isProteoformWithExpression(String str) {
-        if (str.matches(PROTEOFORM_CUSTOM + EXPRESSION_VALUES)
-                || str.matches(PROTEOFORM_PRO + EXPRESSION_VALUES)
-                || str.matches(PROTEOFORM_GPMDB + EXPRESSION_VALUES)
-                || str.matches(PROTEOFORM_PIR + EXPRESSION_VALUES)) {
+        if (matches_Proteoform_Custom_With_Expression_Values(str)
+                || matches_Proteoform_Pro_With_Expression_Values(str)
+                || matches_Proteoform_Gpmdb_With_Expression_Values(str)
+                || matches_Proteoform_Pir_With_Expression_Values(str)) {
             return true;
         }
         return false;

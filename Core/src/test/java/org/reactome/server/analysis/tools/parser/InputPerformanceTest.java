@@ -3,6 +3,7 @@ package org.reactome.server.analysis.tools.parser;
 import com.google.common.base.Stopwatch;
 import org.reactome.server.analysis.parser.InputFormat;
 import org.reactome.server.analysis.parser.InputFormat_v2;
+import org.reactome.server.analysis.parser.InputFormat_v3;
 import org.reactome.server.analysis.parser.InputProcessor;
 import org.reactome.server.analysis.parser.exception.ParserException;
 import org.reactome.server.analysis.parser.util.ConstantHolder.*;
@@ -28,10 +29,11 @@ public class InputPerformanceTest {
         FileWriter timesFile = new FileWriter(PATH_STATS + "Times.csv");
         Stopwatch stopwatch = Stopwatch.createUnstarted();
 
-        typesToTest.add(InputTypeEnum.uniprotList);
+        typesToTest.add(InputTypeEnum.uniprotListAndModSites);
 
-        processorVersions.add(new InputFormat());
+//        processorVersions.add(new InputFormat());
         processorVersions.add(new InputFormat_v2());
+        processorVersions.add(new InputFormat_v3());
 
         timesFile.write("Version,Test,Size,ms,Repetition\n");
 

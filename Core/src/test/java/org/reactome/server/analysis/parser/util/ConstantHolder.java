@@ -6,7 +6,7 @@ import java.time.Duration;
 import java.util.TreeMap;
 
 public class ConstantHolder {
-    public static final int REPETITIONS = 200;
+    public static final int REPETITIONS = 500;
     public static int WARMUP_OFFSET = 1;
 
     public static int sizes[] = {1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000};

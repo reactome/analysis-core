@@ -41,7 +41,7 @@ public class InputPerformanceTest {
                     for (int r = 0; r < REPETITIONS; r++) {
                         stopwatch.start();
 
-                        String input = getString_BufferedReader(PATH + t + "_" + String.format("%05d", s) + ".txt");
+                        String input = getString_readAllBytes(PATH + t + "_" + String.format("%05d", s) + ".txt");
                         p.parseData(input);
 
                         stopwatch.stop();

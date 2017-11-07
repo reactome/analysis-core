@@ -531,28 +531,28 @@ public class InputFormat_v3 extends InputProcessor{
         Pair<String, MapList<String, Long>> proteoform = null;
         switch (format) {
             case CUSTOM:
-                if (matches_Proteoform_Custom_With_Expression_Values(line)) {
+                if (!matches_Proteoform_Custom_With_Expression_Values(line)) {
                     warningResponses.add(Response.getMessage(Response.INLINE_PROBLEM, i + 1, 1));
                 } else {
                     proteoform = getProteoformCustom(line, i + 1);
                 }
                 break;
             case PROTEIN_ONTOLOGY:
-                if (matches_Proteoform_Pro_With_Expression_Values(line)) {
+                if (!matches_Proteoform_Pro_With_Expression_Values(line)) {
                     warningResponses.add(Response.getMessage(Response.INLINE_PROBLEM, i + 1, 1));
                 } else {
                     proteoform = getProteoformProteinOntology(line, i + 1);
                 }
                 break;
             case PIR_ID:
-                if (matches_Proteoform_Pir_With_Expression_Values(line)) {
+                if (!matches_Proteoform_Pir_With_Expression_Values(line)) {
                     warningResponses.add(Response.getMessage(Response.INLINE_PROBLEM, i + 1, 1));
                 } else {
                     proteoform = getProteoformPIR(line, i + 1);
                 }
                 break;
             case GPMDB:
-                if (matches_Proteoform_Gpmdb_With_Expression_Values(line)) {
+                if (!matches_Proteoform_Gpmdb_With_Expression_Values(line)) {
                     warningResponses.add(Response.getMessage(Response.INLINE_PROBLEM, i + 1, 1));
                 } else {
                     proteoform = getProteoformGPMDB(line, i + 1);

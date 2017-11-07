@@ -16,9 +16,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.reactome.server.analysis.parser.util.ConstantHolder.*;
-import static org.reactome.server.analysis.parser.util.FileUtils.getString_BufferedReader;
 import static org.reactome.server.analysis.parser.util.FileUtils.getString_channel;
-import static org.reactome.server.analysis.parser.util.FileUtils.getString_readAllBytes;
 
 public class InputPerformanceTest {
 
@@ -29,28 +27,36 @@ public class InputPerformanceTest {
         FileWriter timesFile = new FileWriter(PATH_STATS + "Times.csv");
         Stopwatch stopwatch = Stopwatch.createUnstarted();
 
+//        typesToTest.add(InputTypeEnum.uniprotList);
         typesToTest.add(InputTypeEnum.uniprotListAndModSites);
 
-//        processorVersions.add(new InputFormat());
-        processorVersions.add(new InputFormat_v2());
         processorVersions.add(new InputFormat_v3());
+        processorVersions.add(new InputFormat_v2());
+//        processorVersions.add(new InputFormat());
 
         timesFile.write("Version,Test,Size,ms,Repetition\n");
 
         for (InputProcessor p : processorVersions) {
             for (InputTypeEnum t : typesToTest) {
                 for (int s : sizes) {
+                    for (int w = 0; w < WARMUP_OFFSET; w++) {
+                        String input = getString_channel(PATH + t + "_" + String.format("%05d", s) + ".txt");
+                        p.parseData(input);
+                    }
+                }
+                for (int s : sizes) {
                     for (int r = 0; r < REPETITIONS; r++) {
+                        String input = getString_channel(PATH + t + "_" + String.format("%05d", s) + ".txt");
                         stopwatch.start();
 
-                        String input = getString_readAllBytes(PATH + t + "_" + String.format("%05d", s) + ".txt");
                         p.parseData(input);
 
                         stopwatch.stop();
                         Duration duration = stopwatch.elapsed();
                         // Write: Version, input type, size, time
                         timesFile.write(p.getClass().getSimpleName() + "," + t + "," + s + "," + new DecimalFormat("#0.000").format(duration.toNanos() / 1000000.0) + "," + r + "\n");
-                        System.out.println(p.getClass().getSimpleName() + "," + t + "," + s + "," + new DecimalFormat("#0.000").format(duration.toNanos() / 1000000.0) + "," + r);
+                        timesFile.flush();
+//                        System.out.println(p.getClass().getSimpleName() + "," + t + "," + s + "," + new DecimalFormat("#0.000").format(duration.toNanos() / 1000000.0) + "," + r);
                         stopwatch.reset();
                     }
                 }

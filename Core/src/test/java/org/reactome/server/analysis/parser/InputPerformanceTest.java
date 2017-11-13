@@ -1,4 +1,4 @@
-package org.reactome.server.analysis.tools.parser;
+package org.reactome.server.analysis.parser;
 
 import com.google.common.base.Stopwatch;
 import org.reactome.server.analysis.parser.InputFormat;

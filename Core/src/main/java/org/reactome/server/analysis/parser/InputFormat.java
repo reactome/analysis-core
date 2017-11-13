@@ -164,7 +164,7 @@ public class InputFormat extends InputProcessor {
         /** Note that using String.replaceAll() will compile the regular expression each time you call it. **/
         line = p.matcher(line).replaceAll(" ");
 
-        /** StringTokenizer has more performance to offer than String.slit. **/
+        /** StringTokenizer has better performance than String.split(). **/
         StringTokenizer st = new StringTokenizer(line); //space is default delimiter.
 
         int tokens = st.countTokens();

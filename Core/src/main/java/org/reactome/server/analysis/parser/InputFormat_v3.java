@@ -21,11 +21,10 @@ import static org.reactome.server.analysis.parser.tools.InputPatterns.*;
 
 /**
  * Parser for AnalysisData tool v2
- *
+ * <p>
  * Supported input formats: Accession lists, Expression matrices, simple proteoform lists, Protein Ontology (PRO) proteoform lists
- *
  */
-public class InputFormat_v3 extends InputProcessor{
+public class InputFormat_v3 extends InputProcessor {
 
     private static Logger logger = Logger.getLogger(InputFormat_v3.class.getName());
 
@@ -108,23 +107,21 @@ public class InputFormat_v3 extends InputProcessor{
      * @param input file already converted into a String.
      * @throws IOException, ParserException
      */
-    public void parseData(String input) throws IOException, ParserException {
+    public void parseData(String input) throws ParserException {
 
-        String clean = input.trim();
-        if (clean.equalsIgnoreCase("")) {       // no data to be analysed
+        String cleanInput = input.trim();
+        if (cleanInput.equalsIgnoreCase("")) {        // no data to be analysed
             errorResponses.add(Response.getMessage(Response.EMPTY_FILE));
         } else {        // If there is content in the input
-            // Split lines
-            String[] lines = input.split("[\r\n]"); // Do not add + here. It will remove empty lines
+            String[] lines = cleanInput.split("[\r\n]");   // Split lines. Do not add + here. It will remove empty lines
 
-            // check whether one line file is present and parse
-            boolean isOneLine = isOneLineFile(lines);
-            if (!isOneLine) {
-                // Prepare header
-                analyseHeaderColumns(lines);
-
-                // Prepare content
-                analyseContent(lines);
+            int firstLineNumber = isOneLineFile(lines);
+            if (firstLineNumber >= 0) {
+                hasHeader = false;
+                analyseOneLineFile(lines[firstLineNumber]);
+            } else {
+                analyseHeaderColumns(lines);                    // Prepare header
+                analyseContent(lines);                          // Prepare content
             }
         }
 
@@ -143,35 +140,30 @@ public class InputFormat_v3 extends InputProcessor{
      * analyse content method.
      * This method ignores blank lines,spaces, tabs and so on.
      *
-     * @param input the file
-     * @return true if file has one line, false otherwise.
+     * @param input the file already trimmed.
+     * @return If the file has one valid line returns the number of line. Otherwise returns a negative number.
      */
-    private boolean isOneLineFile(String[] input) {
+    private int isOneLineFile(String[] input) {
 
+        int lineNumber = -1;
         int countNonEmptyLines = 0;
-        String validLine = "";
+        for (int N = 0; N < input.length; N++) {
 
-        for (int i = 0; i < input.length; i++) {
             // Cleaning the line in other to eliminate blank or spaces spread in the file
-            String cleanLine = input[i].trim();
+            String cleanLine = input[N].trim();
+
             if (StringUtils.isNotEmpty(cleanLine) || StringUtils.isNotBlank(cleanLine)) {
                 countNonEmptyLines++;
-
-                // Line without parsing - otherwise we can't eliminate blank space and tabs spread in the file.
-                validLine = input[i];
+                lineNumber = N;
 
                 // We don't need to keep counting...
                 if (countNonEmptyLines > 1) {
-                    return false;
+                    lineNumber = -1;
+                    break;
                 }
             }
         }
-
-        hasHeader = false;
-
-        analyseOneLineFile(validLine);
-
-        return true;
+        return lineNumber;
     }
 
     /**
@@ -189,7 +181,7 @@ public class InputFormat_v3 extends InputProcessor{
     private void analyseOneLineFile(String line) {
         //Check if the line belongs to a Proteoform
         String regexp = ONE_LINE_CONTENT_SPLIT_REGEX;
-        boolean containsProteoform = isProteoformWithExpression(line);
+        boolean containsProteoform = matches_oneLine_Custom_Proteoforms(line);
         if (containsProteoform) {
             regexp = ONE_LINE_CONTENT_SPLIT_REGEX_ONLY_SPACES;
         }
@@ -218,7 +210,7 @@ public class InputFormat_v3 extends InputProcessor{
                     String[] content = new String[1];
                     content[0] = st.nextToken().trim();
                     ProteoformFormat proteoformFormat = checkForProteoforms(content, 0);
-                    analyseContentLineProteoform(content[0], proteoformFormat, 1);
+                    analyseContentLineProteoform(content[0], ProteoformFormat.CUSTOM, 1);
                 } else {
                     AnalysisIdentifier rtn = new AnalysisIdentifier(st.nextToken().trim());
                     analysisIdentifierSet.add(rtn);
@@ -277,7 +269,7 @@ public class InputFormat_v3 extends InputProcessor{
         if (proteoformType != ProteoformFormat.NONE && proteoformType != ProteoformFormat.UNKNOWN) {
 
             if (proteoformType.equals(ProteoformFormat.CUSTOM)) {
-                firstLine = firstLine.replaceAll( PROTEOFORM_CUSTOM, "proteoform");
+                firstLine = firstLine.replaceAll(PROTEOFORM_CUSTOM, "proteoform");
             } else if (proteoformType.equals(ProteoformFormat.PROTEIN_ONTOLOGY)) {
                 firstLine = firstLine.replaceAll(PROTEOFORM_PROTEIN_ONTOLOGY, "proteoform");
             } else if (proteoformType.equals(ProteoformFormat.PIR_ID)) {

@@ -20,28 +20,6 @@ public class AnalysisIdentifier implements Comparable<AnalysisIdentifier> {
     private List<Double> exp;
 
     /**
-     * The data structure to store the ptm set for a proteoform. Keys are psi mod identifiers (five digits).
-     * Values are lists of numbers for the coordinates of the ptms.
-     * Map implemented as TreeMap to be sorted.
-     */
-    private MapList<String, Long> ptms;
-
-    public MapList<String, Long> getPtms() {
-        return ptms;
-    }
-
-    public void setPtms(MapList<String, Long> ptms) {
-        this.ptms = ptms;
-    }
-
-    public AnalysisIdentifier(AnalysisIdentifier aux) {
-        this(aux.getId());
-        for (Double ev : aux.getExp()) {
-            this.add(ev);
-        }
-    }
-
-    /**
      * Notice that this constructor initializes also the ptm set as empty. Then when comparing to AnalysisIdentifiers
      * it will also check that the sets contain the same elements.
      *
@@ -59,6 +37,13 @@ public class AnalysisIdentifier implements Comparable<AnalysisIdentifier> {
         this.ptms = new MapList<>();
     }
 
+    public AnalysisIdentifier(AnalysisIdentifier aux) {
+        this(aux.getId());
+        for (Double ev : aux.getExp()) {
+            this.add(ev);
+        }
+    }
+
     public boolean add(Double value) {
         return this.exp.add(value);
     }
@@ -69,6 +54,30 @@ public class AnalysisIdentifier implements Comparable<AnalysisIdentifier> {
 
     public List<Double> getExp() {
         return exp;
+    }
+
+    /**
+     * The data structure to store the ptm set for a proteoform. Keys are psi mod identifiers (five digits).
+     * Values are lists of numbers for the coordinates of the ptms.
+     * Map implemented as TreeMap to be sorted.
+     */
+    private MapList<String, Long> ptms;
+
+    public MapList<String, Long> getPtms() {
+        return ptms;
+    }
+
+    public void setPtms(MapList<String, Long> ptms) {
+        this.ptms = ptms;
+    }
+
+    /**
+     * Add a post-translational modification to the current identifier.
+     * @param psiModId
+     * @param coordinate
+     */
+    public void addPtm(String psiModId, Long coordinate){
+        ptms.add(psiModId, coordinate);
     }
 
     @Override

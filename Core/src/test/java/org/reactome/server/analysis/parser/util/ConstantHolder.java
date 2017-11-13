@@ -1,5 +1,6 @@
 package org.reactome.server.analysis.parser.util;
 
+import org.reactome.server.analysis.parser.InputProcessor;
 import org.springframework.util.StopWatch;
 
 import java.time.Duration;
@@ -18,9 +19,7 @@ public class ConstantHolder {
     public static TreeMap<String, Duration[]> times = new TreeMap<>();
     public static TreeMap<String, Integer> repetitions = new TreeMap<>();
 
-
-
-    public static final String PATH = "C:\\Users\\Francisco\\Documents\\phd\\Projects\\PathwayMatcher\\target\\test-classes\\input\\";
+    public static final String PATH = "analysis/input/"; // Path relative to the project
     public static final String PATH_STATS = "C:\\Users\\Francisco\\Documents\\phd\\Projects\\Golden\\docs\\plots\\";
 
 

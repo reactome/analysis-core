@@ -10,11 +10,13 @@ public class InputPatterns {
 
     public static final String PROTEIN_UNIPROT = "([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})([-]\\d{1,2})?";
     public static final String PROTEIN_ENSEMBL = "ENSP\\d{11}";
-    public static final String PROTEOFORM_CUSTOM = "^([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})([-]\\d{1,2})?;(\\d{5}:(\\d{1,11}|[Nn][Uu][Ll][Ll]))?(,\\d{5}:(\\d{1,11}|[Nn][Uu][Ll][Ll]))*";
+    public static final String PROTEOFORM_CUSTOM = "([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})([-]\\d{1,2})?;(\\d{5}:(\\d{1,11}|[Nn][Uu][Ll][Ll]))?(,\\d{5}:(\\d{1,11}|[Nn][Uu][Ll][Ll]))*";
     private static final String PROTEOFORM_PRO = "^UniProtKB:([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})[-]?\\d?(,(\\d+-\\d+)?(,([A-Z][a-z]{2}-\\d+(\\/[A-Z][a-z]{2}-\\d+)*,MOD:\\d{5}(\\|[A-Z][a-z]{2}-\\d+(\\/[A-Z][a-z]{2}-\\d+)*,MOD:\\d{5})*)?)?)?\\s*";
     private static final String PROTEOFORM_PIR = "^PR:\\d{9}\\d*\\s*";
     private static final String PROTEOFORM_GPMDB = "(?i)^((([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})([-]\\d+)?)|(ENSP\\d{11})):pm.([A-Z]\\d+[+=](([A-Z][a-z]+)|(MOD:\\d{5}))(\\/(([A-Z][a-z]+)|(MOD:\\d{5})))*;)+\\s*";    // GPMDB (http://wiki.thegpm.org/wiki/Nomenclature_for_the_description_of_protein_sequence_modifications)
     private static final String PROTEOFORM_PEFF = ""; //TODO
+
+    private static final String ONELINE_MULTIPLE_PROTEOFORM_CUSTOM = "^\\s*" + PROTEOFORM_CUSTOM + "(\\s+" + PROTEOFORM_CUSTOM + ")*\\s*$";
 
     private static final Pattern PATTERN_PROTEIN_UNIPROT = Pattern.compile(PROTEIN_UNIPROT);
     private static final Pattern PATTERN_PROTEIN_ENSEMBL = Pattern.compile(PROTEIN_ENSEMBL);
@@ -30,6 +32,8 @@ public class InputPatterns {
     private static final Pattern PATTERN_PROTEOFORM_PRO_WITH_EXPRESSION_VALUES = Pattern.compile(PROTEOFORM_PRO + EXPRESSION_VALUES);
     private static final Pattern PATTERN_PROTEOFORM_PIR_WITH_EXPRESSION_VALUES = Pattern.compile(PROTEOFORM_PIR + EXPRESSION_VALUES);
     private static final Pattern PATTERN_PROTEOFORM_GPMDB_WITH_EXPRESSION_VALUES = Pattern.compile(PROTEOFORM_GPMDB + EXPRESSION_VALUES);
+
+    private static final Pattern PATTERN_ONELINE_PROTEOFORM_CUSTOM = Pattern.compile(ONELINE_MULTIPLE_PROTEOFORM_CUSTOM);
 
     public static boolean matches_Protein_Uniprot(String str) {
         Matcher m = PATTERN_PROTEIN_UNIPROT.matcher(str);
@@ -93,6 +97,11 @@ public class InputPatterns {
 
     public static boolean matches_Proteoform_Gpmdb_With_Expression_Values(String str) {
         Matcher m = PATTERN_PROTEOFORM_GPMDB_WITH_EXPRESSION_VALUES.matcher(str);
+        return m.matches();
+    }
+
+    public static boolean matches_oneLine_Custom_Proteoforms(String str){
+        Matcher m = PATTERN_ONELINE_PROTEOFORM_CUSTOM.matcher(str);
         return m.matches();
     }
 

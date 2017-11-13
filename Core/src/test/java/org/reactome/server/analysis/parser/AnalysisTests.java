@@ -1,16 +1,18 @@
-package org.reactome.server.analysis.tools.parser;
+package org.reactome.server.analysis.parser;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.reactome.server.analysis.core.model.AnalysisIdentifier;
 import org.reactome.server.analysis.core.util.MapList;
-import org.reactome.server.analysis.parser.InputFormat_v2;
+import org.reactome.server.analysis.parser.InputFormat_v3;
 import org.reactome.server.analysis.parser.exception.ParserException;
 import org.springframework.context.annotation.Description;
 
 import java.io.*;
 import java.net.URL;
+
+import static org.reactome.server.analysis.parser.util.FileUtils.getString;
 
 /**
  * Tester class for the Analysis parser
@@ -18,7 +20,7 @@ import java.net.URL;
  * @author Guilherme Viteri <gviteri@ebi.ac.uk>
  */
 
-public class AnalysisTests_v2 {
+public class AnalysisTests {
 
     private static final String PATH = "analysis/input/";
 
@@ -77,7 +79,7 @@ public class AnalysisTests_v2 {
     /**
      * Analysis Portal Samples
      */
-    private static final String SAMPLE = PATH.concat("samples/");
+    private static final String SAMPLE = PATH.concat("Samples/");
     private static final String GENE_NAME_LIST = SAMPLE.concat("gene_name_list.txt");
     private static final String GENE_NCBI = SAMPLE.concat("gene_ncbi.txt");
     private static final String METABOLOMICS_DATA = SAMPLE.concat("metabolomics_data.txt");
@@ -90,7 +92,7 @@ public class AnalysisTests_v2 {
     public void testEmptyLines() {
         File file = getFileFromResources(EMPTY_LINES);
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -106,7 +108,7 @@ public class AnalysisTests_v2 {
     @Test
     public void testEmptyLinesWithSpaces() {
         File file = getFileFromResources(EMPTY_LINES_WITH_SPACES);
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -115,7 +117,7 @@ public class AnalysisTests_v2 {
 
         Assert.assertEquals(6, format.getHeaderColumnNames().size());
         Assert.assertEquals(14, format.getAnalysisIdentifierSet().size());
-        //Assert.assertEquals(7, format.getWarningResponses().size());
+        Assert.assertEquals(7, format.getWarningResponses().size());
 
     }
 
@@ -123,7 +125,7 @@ public class AnalysisTests_v2 {
     public void testInlineProblems() {
         File file = getFileFromResources(INLINE_PROBLEMS);
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -167,7 +169,7 @@ public class AnalysisTests_v2 {
     public void testMissingHeader() {
         File file = getFileFromResources(MISSING_HEADER);
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -185,7 +187,7 @@ public class AnalysisTests_v2 {
     public void testPotentialHeader() {
         File file = getFileFromResources(POTENTIAL_HEADER);
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -203,7 +205,7 @@ public class AnalysisTests_v2 {
     public void testSpacesOnHeader() {
         File file = getFileFromResources(SPACES_ON_HEADER);
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -221,7 +223,7 @@ public class AnalysisTests_v2 {
     public void testCorrectFile() {
         File file = getFileFromResources(CORRECT_FILE);
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -265,7 +267,7 @@ public class AnalysisTests_v2 {
     public void testCarriageReturn() {
         File file = getFileFromResources(CARRIAGE_RETURN);
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -282,7 +284,7 @@ public class AnalysisTests_v2 {
     public void testMultipleWarnings() {
         File file = getFileFromResources(MULTIPLE_WARNINGS);
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -320,7 +322,7 @@ public class AnalysisTests_v2 {
     @Test
     public void testCarriageReturnWarnings() {
         File file = getFileFromResources(CARRIAGE_RETURN_WARNING);
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -351,7 +353,7 @@ public class AnalysisTests_v2 {
     public void testMaxFileSize() {
         File file = writeHugeFile();
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
 
         try {
             format = parser(file);
@@ -363,14 +365,14 @@ public class AnalysisTests_v2 {
 
         Assert.assertEquals(4, format.getHeaderColumnNames().size());
         Assert.assertEquals(310000, format.getAnalysisIdentifierSet().size());
-        Assert.assertEquals(0, format.getWarningResponses().size());
+        Assert.assertEquals(310000, format.getWarningResponses().size());   //Set to 310000 because the line endings were CRLF
 
     }
 
     @Test
     public void testOnlyIdentifiers() {
         File file = getFileFromResources(ONLY_IDENTIFIERS);
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -391,7 +393,7 @@ public class AnalysisTests_v2 {
     @Test
     public void testOneLineStartingWithNumber() {
         File file = getFileFromResources(ONELINE_START_WITH_NUMBER);
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -420,7 +422,7 @@ public class AnalysisTests_v2 {
     public void testOneLineIdentifiers() { //success
         File file = getFileFromResources(ONELINE_IDENTIFIERS);
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -441,7 +443,7 @@ public class AnalysisTests_v2 {
     public void testOneLineIdAndExpressions() { //success
         File file = getFileFromResources(ONELINE_ID_EXPRESSIONS);
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -458,7 +460,7 @@ public class AnalysisTests_v2 {
     public void testOneLineIdAndExpressionsMixed() {
         File file = getFileFromResources(ONELINE_ID_EXPRESSIONS_MIXED);
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
 
@@ -476,7 +478,7 @@ public class AnalysisTests_v2 {
     public void testOneLineCsv() {
         File file = getFileFromResources(ONELINE_CSV);
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -493,7 +495,7 @@ public class AnalysisTests_v2 {
     public void testOneLineOthersSeparator() {
         File file = getFileFromResources(ONELINE_OTHERSSEPARATOR);
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -510,7 +512,7 @@ public class AnalysisTests_v2 {
     public void testOneLineStartWithSpaces() {
         File file = getFileFromResources(ONELINE_START_WITH_SPACES);
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -527,7 +529,7 @@ public class AnalysisTests_v2 {
     public void testOneLineButNotInFirstLine() {
         File file = getFileFromResources(ONELINE_BUT_NOT_IN_FIRST_LINE);
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -544,7 +546,7 @@ public class AnalysisTests_v2 {
     public void testOneLineRandomCharacters() {
         File file = getFileFromResources(ONELINE_RANDOM_CHARACTERS);
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -561,7 +563,7 @@ public class AnalysisTests_v2 {
     public void testOnelineHuge() {
         File file = writeOneLineHugeFile();
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
 
         try {
             format = parser(file);
@@ -584,7 +586,7 @@ public class AnalysisTests_v2 {
          */
         File file = getFileFromResources(ONELINE_WITH_HEADER);
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -601,7 +603,7 @@ public class AnalysisTests_v2 {
     public void testOneLineOneIdentifier() {
         File file = getFileFromResources(ONELINE_ONE_IDENTIFIER);
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -622,7 +624,7 @@ public class AnalysisTests_v2 {
     public void testMetabolomicsData() {
         File file = getFileFromResources(METABOLOMICS_DATA);
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -641,7 +643,7 @@ public class AnalysisTests_v2 {
     public void testGeneNameList() {
         File file = getFileFromResources(GENE_NAME_LIST);
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -659,7 +661,7 @@ public class AnalysisTests_v2 {
     public void testGeneNcbi() {
         File file = getFileFromResources(GENE_NCBI);
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -678,7 +680,7 @@ public class AnalysisTests_v2 {
     public void testMicroarrayData() {
         File file = getFileFromResources(MICROARRAY_DATA);
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -697,7 +699,7 @@ public class AnalysisTests_v2 {
     public void testSmallMoleculesChebi() {
         File file = getFileFromResources(SMALL_MOLECULES_CHEBI);
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -716,7 +718,7 @@ public class AnalysisTests_v2 {
     public void testSmallMoleculesKegg() {
         File file = getFileFromResources(SMALL_MOLECULES_KEGG);
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -735,7 +737,7 @@ public class AnalysisTests_v2 {
     public void testUniprotAccessionList() {
         File file = getFileFromResources(UNIPROT_ACCESSION_LIST);
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -750,8 +752,8 @@ public class AnalysisTests_v2 {
 
     }
 
-    private InputFormat_v2 parser(File file) throws ParserException {
-        InputFormat_v2 format = new InputFormat_v2();
+    private InputFormat_v3 parser(File file) throws ParserException {
+        InputFormat_v3 format = new InputFormat_v3();
 
         try {
             InputStream fis = new FileInputStream(file);
@@ -887,7 +889,7 @@ public class AnalysisTests_v2 {
     public void testPrideSample() {
         File file = getFileFromResources(PRIDE_SAMPLE);
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -906,7 +908,7 @@ public class AnalysisTests_v2 {
     public void testSampleWithSpacesWithoutHeader() {
         File file = getFileFromResources(SAMPLE_WITH_SPACES_WITHOUT_HEADER);
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -923,7 +925,7 @@ public class AnalysisTests_v2 {
     public void testSampleWithTabWithoutHeader() {
         File file = getFileFromResources(SAMPLE_WITH_TAB_WITHOUT_HEADER);
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -940,7 +942,7 @@ public class AnalysisTests_v2 {
     public void testSampleWithColonWithoutHeader() {
         File file = getFileFromResources(SAMPLE_WITH_COLON_WITHOUT_HEADER);
 
-        InputFormat_v2 format = null;
+        InputFormat_v3 format = null;
         try {
             format = parser(file);
         } catch (ParserException e) {
@@ -950,148 +952,6 @@ public class AnalysisTests_v2 {
         Assert.assertEquals(1, format.getHeaderColumnNames().size());
         Assert.assertEquals(2, format.getAnalysisIdentifierSet().size());
         Assert.assertEquals(1, format.getWarningResponses().size());
-
-    }
-
-    @Test
-    public void testProteoformsCustom() {
-        File file = getFileFromResources(PROTEOFORM_CUSTOM);
-
-        InputFormat_v2 format = null;
-        try {
-            format = parser(file);
-        } catch (ParserException e) {
-            Assert.fail(PROTEOFORM_CUSTOM + " has failed.");
-        }
-
-        Assert.assertEquals(1, format.getHeaderColumnNames().size());
-        Assert.assertEquals(11, format.getAnalysisIdentifierSet().size());
-
-        AnalysisIdentifier ai = new AnalysisIdentifier("P10412");
-        Assert.assertTrue("Looking for P10412", format.getAnalysisIdentifierSet().contains(ai));    //When asking for contains, it checks that the id and the ptms are equal.
-
-        ai = new AnalysisIdentifier("P10412-1");
-        Assert.assertTrue("Looking for P10412-1", format.getAnalysisIdentifierSet().contains(ai));
-
-        ai = new AnalysisIdentifier("P56524");
-        MapList<String, Long> ptms = new MapList<>();
-        ptms.add("00916", (long) 559);
-        ai.setPtms(ptms);
-        Assert.assertTrue("Looking for P56524;559:00916", format.getAnalysisIdentifierSet().contains(ai));
-
-        ai = new AnalysisIdentifier("P04637");
-        ptms.clear();
-        ptms.add("00084", (long) 370);
-        ptms.add("00084", (long)382);
-        ai.setPtms(ptms);
-        Assert.assertTrue("Looking for P04637;370:00084,382:00084", format.getAnalysisIdentifierSet().contains(ai));
-
-        ai = new AnalysisIdentifier("P56524");
-        ptms.clear();
-        ptms.add("00916", (long) 246);
-        ptms.add("00916", (long) 467);
-        ptms.add("00916", (long) 632);
-        ai.setPtms(ptms);
-        Assert.assertTrue("Looking for P56524;246:00916,467:00916,632:00916", format.getAnalysisIdentifierSet().contains(ai));
-
-        ai = new AnalysisIdentifier("P12345-2");
-        ptms.clear();
-        ptms.add("00916", (long) 246);
-        ptms.add("00916", (long) 467);
-        ptms.add("00916", (long) 632);
-        ai.setPtms(ptms);
-        Assert.assertTrue("Looking for P12345-2;246:00916,467:00916,632:00916", format.getAnalysisIdentifierSet().contains(ai));
-
-        ai = new AnalysisIdentifier("Q1AAA9");
-        Assert.assertTrue("Looking for Q1AAA9", format.getAnalysisIdentifierSet().contains(ai));
-
-        ai = new AnalysisIdentifier("O456A1");
-        Assert.assertTrue("Looking for O456A1", format.getAnalysisIdentifierSet().contains(ai));
-
-        ai = new AnalysisIdentifier("P4A123");
-        Assert.assertTrue("Looking for P4A123", format.getAnalysisIdentifierSet().contains(ai));
-
-        ai = new AnalysisIdentifier("A0A022YWF9");
-        Assert.assertTrue("Looking for A0A022YWF9", format.getAnalysisIdentifierSet().contains(ai));
-
-        ai = new AnalysisIdentifier("A0A022YWF9");
-        ptms.clear();
-        ptms.add("00916", (long) 632);
-        ptms.add("00916", (long) 246);
-        ptms.add("00916", (long) 467);
-        ai.setPtms(ptms);
-        Assert.assertTrue("Looking for A0A022YWF9;246:00916,467:00916,632:00916", format.getAnalysisIdentifierSet().contains(ai));
-
-        Assert.assertEquals(1, format.getWarningResponses().size());    // Expected: Missing header. Using a default one.
-        // If the file ending is CFLF then 12 are expected, because of empty extra lines.
-    }
-
-    @Test
-    public void testProteoformsCustomOneProtein() {
-        File file = getFileFromResources(PROTEOFORM_CUSTOM_ONE_PROTEIN);
-
-        InputFormat_v2 format = null;
-        try {
-            format = parser(file);
-        } catch (ParserException e) {
-            Assert.fail(PROTEOFORM_CUSTOM_ONE_PROTEIN + " has failed.");
-        }
-
-        Assert.assertEquals(1, format.getHeaderColumnNames().size());
-        Assert.assertEquals(1, format.getAnalysisIdentifierSet().size());
-        AnalysisIdentifier ai = new AnalysisIdentifier("P56524");
-        MapList<String, Long> ptms = new MapList<>();
-        ptms.add("00916", (long)246);
-        ptms.add("00916", (long)467);
-        ptms.add("00916", (long)632);
-        ai.setPtms(ptms);
-        Assert.assertTrue("Looking for P56524;246:00916,467:00916,632:00916", format.getAnalysisIdentifierSet().contains(ai));
-        Assert.assertEquals(0, format.getWarningResponses().size());
-    }
-
-    @Test
-    public void testProteoformsCustomOneProteinWithNullCoordinate() {
-        // TODO
-        File file = getFileFromResources(PROTEOFORM_CUSTOM_ONE_PROTEIN);
-
-        InputFormat_v2 format = null;
-        try {
-            format = parser(file);
-        } catch (ParserException e) {
-            Assert.fail(PROTEOFORM_CUSTOM_ONE_PROTEIN + " has failed.");
-        }
-
-        Assert.assertEquals(1, format.getHeaderColumnNames().size());
-        Assert.assertEquals(1, format.getAnalysisIdentifierSet().size());
-        AnalysisIdentifier ai = new AnalysisIdentifier("P56524");
-        MapList<String, Long> ptms = new MapList<>();
-        ptms.add("00916", (long)246);
-        ptms.add("00916", (long)467);
-        ptms.add("00916", (long)632);
-        ai.setPtms(ptms);
-        Assert.assertTrue("Looking for P56524;246:00916,467:00916,632:00916", format.getAnalysisIdentifierSet().contains(ai));
-        Assert.assertEquals(0, format.getWarningResponses().size());
-    }
-
-    @Test
-    public void testMultipleEquivalentProteoformsMergedToOne(){
-
-    }
-
-    @Test
-    public void testProteoformsWithNullCoordinates(){
-
-    }
-
-    @Test
-    public void testIsoforms(){
-
-    }
-
-    @Test
-    @Description("Proteoforms with isoforms with 1 and 2 digits.")
-    public void testProteoformsWithIsoforms(){
-
     }
 }
 

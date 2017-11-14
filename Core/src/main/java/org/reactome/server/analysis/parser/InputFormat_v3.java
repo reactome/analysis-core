@@ -721,10 +721,41 @@ public class InputFormat_v3 extends InputProcessor {
     }
 
     private static Pair<String, MapList<String, Long>> getProteoformProteinOntology(String line, int i) {
-        throw new NotImplementedException("Missing implementation for getProteoformProteinOntology");
+        StringBuilder protein = new StringBuilder();
+        StringBuilder coordinate = null;
+        StringBuilder mod = null;
+        MapList<String, Long> ptms = new MapList<>();
+
+        int pos = 0;
+        char c = line.charAt(pos);
+        while (c != ':') {        // Read the database name section
+            pos++;
+            c = line.charAt(pos);
+        }
+        pos++;
+        line.charAt(pos);
+        while (c != ',') {        // Read the accession section
+            protein.append(c);
+            pos++;
+            c = line.charAt(pos);
+        }           // The proteoform should come at least until here
+        pos++;
+        if (pos < line.length()) {
+            line.charAt(pos);
+            while (c != ',') {        //Read the subsequence range section
+                pos++;
+                line.charAt(pos);
+            }
+            pos++;
+
+            line.charAt(pos);
+        }
+
+        return new Pair<String, MapList<String, Long>>(protein.toString(), ptms);
     }
 
-    private static Pair<String, MapList<String, Long>> getProteoformPIR(String line, int i) {
+
+    private static Pair<String, MapList<String, Long>> getProteoformPIR(String line, int i) { // TODO
         throw new NotImplementedException("Missing implementation for getProteoformPIR");
     }
 

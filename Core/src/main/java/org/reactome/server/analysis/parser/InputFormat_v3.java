@@ -280,11 +280,11 @@ public class InputFormat_v3 extends InputProcessor {
          * Why? Tab is a delimiter for header, but space isn't. Colon is a delimiter for the content
          * but not for the header.
          **/
-        if(proteoformType.equals(ProteoformFormat.NONE)){
+        if (proteoformType.equals(ProteoformFormat.NONE)) {
             chunks = firstLine.split(NO_HEADER_DEFAULT_REGEX);
         }
         // If it contains proteoforms then \s+
-        else{
+        else {
             chunks = firstLine.split(ONE_LINE_CONTENT_SPLIT_REGEX_ONLY_SPACES);
         }
 
@@ -318,8 +318,8 @@ public class InputFormat_v3 extends InputProcessor {
 
     /**
      * The default header will be built based on the first line.
-     *  Example: For colsLength 5 the result would be:
-     *  ["", "col1", "col2", "col3", "col4"]
+     * Example: For colsLength 5 the result would be:
+     * ["", "col1", "col2", "col3", "col4"]
      *
      * @param colsLength
      */
@@ -675,7 +675,7 @@ public class InputFormat_v3 extends InputProcessor {
         while (c != ';') {
             protein.append(c);
             pos++;
-             if (pos == line.length())
+            if (pos == line.length())
                 break;
             c = line.charAt(pos);
         }
@@ -689,11 +689,14 @@ public class InputFormat_v3 extends InputProcessor {
         //While there are characters
 
         while (pos < line.length()) {
+            c = line.charAt(pos);
+            if (!Character.isDigit(c)) {
+                break;
+            }
             coordinate = new StringBuilder();
             mod = new StringBuilder();
             //Read a ptm
-            c = line.charAt(pos);
-            while (c != ':' && Character.isDigit(c)) {
+            while (c != ':') {
                 mod.append(c);
                 pos++;
                 c = line.charAt(pos);

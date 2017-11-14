@@ -5,7 +5,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
 import org.reactome.server.analysis.core.model.AnalysisIdentifier;
 import org.reactome.server.analysis.core.model.UserData;
-import org.reactome.server.analysis.parser.InputFormat_v2;
+import org.reactome.server.analysis.parser.InputFormat;
 import org.reactome.server.analysis.parser.exception.ParserException;
 import org.springframework.util.DigestUtils;
 
@@ -99,7 +99,7 @@ public abstract class InputUtils {
     */
 
     private static UserData processData(String data, String md5) throws IOException, ParserException {
-        InputFormat_v2 parser = new InputFormat_v2();
+        InputFormat parser = new InputFormat();
         parser.parseData(data);
 
         return new UserData(parser.getHeaderColumnNames(), parser.getAnalysisIdentifierSet(), md5, parser.getWarningResponses());

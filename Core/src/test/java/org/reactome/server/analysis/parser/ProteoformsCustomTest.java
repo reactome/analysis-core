@@ -52,7 +52,11 @@ class ProteoformsCustomTest {
     private static final String PATH_INVALID = "target/test-classes/analysis/input/ProteoformsCustom/Invalid/";
 
     static List<AnalysisIdentifier> aiSet;
+    static List<AnalysisIdentifier> aiSet2;
     static List<AnalysisIdentifier> aiSetWithNull;
+    static List<AnalysisIdentifier> aiSetWithNull2;
+    static List<AnalysisIdentifier> aiSetWithMultiplePTMs;
+    static List<AnalysisIdentifier> aiSetWithIsoforms;
 
     private static AnalysisIdentifier ai_P12345_2 = new AnalysisIdentifier("P12345-2");
 
@@ -285,62 +289,119 @@ class ProteoformsCustomTest {
 
     @Test
     @Tag("Valid")
-    void multipleLineTest() {
+    void multipleLinesWithExpressionValuesTest(TestInfo testInfo) {
+        String data = getString(PATH_VALID + "multipleLinesWithExpressionValues.txt");
+        InputFormat_v3 p = new InputFormat_v3();
+        try {
+            p.parseData(data);
+        } catch (ParserException e) {
+            Assert.fail(testInfo.getDisplayName() + " has failed");
+        }
 
+        Assert.assertEquals(6, p.getHeaderColumnNames().size());
+        Assert.assertEquals(9, p.getAnalysisIdentifierSet().size());
+        Assert.assertEquals(0, p.getWarningResponses().size());
+
+        for (AnalysisIdentifier ai : aiSet2) {
+            Assert.assertTrue("Looking for " + ai.toString(), p.getAnalysisIdentifierSet().contains(ai));
+        }
+    }
+
+    @Test
+    @Tag("Valid")
+    void multipleLinesOnlyUniprotAccessionsTest(TestInfo testInfo) {
+        String data = getString(PATH_VALID + "multipleLinesOnlyUniprotAccessions.txt");
+        InputFormat_v3 p = new InputFormat_v3();
+        try {
+            p.parseData(data);
+        } catch (ParserException e) {
+            Assert.fail(testInfo.getDisplayName() + " has failed");
+        }
+
+        Assert.assertEquals(1, p.getHeaderColumnNames().size());
+        Assert.assertEquals(18, p.getAnalysisIdentifierSet().size());
+        Assert.assertEquals(1, p.getWarningResponses().size());
 
     }
 
     @Test
     @Tag("Valid")
-    void multipleLinesWithExpressionValuesTest() {
+    void multipleLinesWithMultiplePTMsTest(TestInfo testInfo) {
+        String data = getString(PATH_VALID + "multipleLinesWithMultiplePTMs.txt");
+        InputFormat_v3 p = new InputFormat_v3();
+        try {
+            p.parseData(data);
+        } catch (ParserException e) {
+            Assert.fail(testInfo.getDisplayName() + " has failed");
+        }
 
+        Assert.assertEquals(1, p.getHeaderColumnNames().size());
+        Assert.assertEquals(11, p.getAnalysisIdentifierSet().size());
+        Assert.assertEquals(1, p.getWarningResponses().size());
+
+        for (AnalysisIdentifier ai : aiSetWithMultiplePTMs) {
+            Assert.assertTrue("Looking for " + ai.toString(), p.getAnalysisIdentifierSet().contains(ai));
+        }
     }
 
     @Test
     @Tag("Valid")
-    void multipleLinesOnlyUniprotAccessionsTest() {
+    void multipleLinesNullCoordinateTest(TestInfo testInfo) {
+        String data = getString(PATH_VALID + "multipleLinesNullCoordinate.txt");
+        InputFormat_v3 p = new InputFormat_v3();
+        try {
+            p.parseData(data);
+        } catch (ParserException e) {
+            Assert.fail(testInfo.getDisplayName() + " has failed");
+        }
 
-    }
+        Assert.assertEquals(1, p.getHeaderColumnNames().size());
+        Assert.assertEquals(11, p.getAnalysisIdentifierSet().size());
+        Assert.assertEquals(0, p.getWarningResponses().size());
 
-    @Test
-    @Tag("Valid")
-    void multipleLinesProteinWithMultiplePTMsTest() {
-
-    }
-
-    @Test
-    @Tag("Valid")
-    void multipleLinesNullCoordinateTest() {
-
-    }
-
-    @Test
-    @Tag("Valid")
-    void unkownPTMTypeTest() {
-
-    }
-
-    @Test
-    @Tag("Valid")
-    void multipleLinesWithHeaders() {
-
-    }
-
-    @Test
-    @Tag("Valid")
-    void multipleLinesHasIsoformTest() {
-
-    }
-
-    @Test
-    @Tag("Valid")
-    void multipleLinesHasIsoformAndPTMsTest() {
-
+        for (AnalysisIdentifier ai : aiSetWithNull2) {
+            Assert.assertTrue("Looking for " + ai.toString(), p.getAnalysisIdentifierSet().contains(ai));
+        }
     }
 
     @Test
     @Tag("Invalid")
-    void multipleLinesBrokenFileTest(TestInfo testInfo){
+    // Proteoforms will not follow the format specified in the regex, therefore it is taken
+    // as a regular id, but then the number of columns will not match
+    void multipleLinesWithInvalidPTMTypeTest(TestInfo testInfo) {
+        String data = getString(PATH_INVALID + "multipleLinesWithInvalidPTMType.txt");
+        InputFormat_v3 p = new InputFormat_v3();
+        try {
+            p.parseData(data);
+            Assert.fail(testInfo.getDisplayName() + " has failed.");
+        } catch (ParserException e) {
+            Assert.assertTrue("Expecting start with comment", e.getErrorMessages().contains("Line 2 does not have 6 column(s). 7 Column(s) found."));
+        }
+    }
+
+    @Test
+    @Tag("Valid")
+    void multipleLinesWithIsoformsTest(TestInfo testInfo) {
+        String data = getString(PATH_VALID + "multipleLinesWithIsoforms.txt");
+        InputFormat_v3 p = new InputFormat_v3();
+        try {
+            p.parseData(data);
+        } catch (ParserException e) {
+            Assert.fail(testInfo.getDisplayName() + " has failed");
+        }
+
+        Assert.assertEquals(1, p.getHeaderColumnNames().size());
+        Assert.assertEquals(13, p.getAnalysisIdentifierSet().size());
+        Assert.assertEquals(1, p.getWarningResponses().size());
+
+        for (AnalysisIdentifier ai : aiSetWithIsoforms) {
+            Assert.assertTrue("Looking for " + ai.toString(), p.getAnalysisIdentifierSet().contains(ai));
+        }
+    }
+
+    @Test
+    @Tag("Invalid")
+    void multipleLinesBrokenFileTest(TestInfo testInfo) {
         String data = getString(PATH_INVALID + "multipleLinesBrokenFile.txt");
         InputFormat_v3 p = new InputFormat_v3();
         try {
@@ -351,100 +412,6 @@ class ProteoformsCustomTest {
             Assert.assertTrue("Should have more columns than the first line.", e.getErrorMessages().contains("Line 3 does not have 5 column(s). 8 Column(s) found."));
             Assert.assertTrue("Should have more columns than the first line.", e.getErrorMessages().contains("Line 7 does not have 5 column(s). 9 Column(s) found."));
         }
-    }
-
-    @org.junit.Test
-    public void testProteoformsCustom() {
-        String data = getString(PROTEOFORM_CUSTOM);
-        InputFormat_v3 p = new InputFormat_v3();
-        try {
-            p.parseData(data);
-        } catch (ParserException e) {
-            Assert.fail(PROTEOFORM_CUSTOM + " has failed.");
-        }
-
-        Assert.assertEquals(1, p.getHeaderColumnNames().size());
-        Assert.assertEquals(11, p.getAnalysisIdentifierSet().size());
-
-        AnalysisIdentifier ai = new AnalysisIdentifier("P10412");
-        Assert.assertTrue("Looking for P10412", p.getAnalysisIdentifierSet().contains(ai));    //When asking for contains, it checks that the id and the ptms are equal.
-
-        ai = new AnalysisIdentifier("P10412-1");
-        Assert.assertTrue("Looking for P10412-1", p.getAnalysisIdentifierSet().contains(ai));
-
-        ai = new AnalysisIdentifier("P56524");
-        MapList<String, Long> ptms = new MapList<>();
-        ptms.add("00916", (long) 559);
-        ai.setPtms(ptms);
-        Assert.assertTrue("Looking for P56524;559:00916", p.getAnalysisIdentifierSet().contains(ai));
-
-        ai = new AnalysisIdentifier("P04637");
-        ptms.clear();
-        ptms.add("00084", (long) 370);
-        ptms.add("00084", (long) 382);
-        ai.setPtms(ptms);
-        Assert.assertTrue("Looking for P04637;370:00084,382:00084", p.getAnalysisIdentifierSet().contains(ai));
-
-        ai = new AnalysisIdentifier("P56524");
-        ptms.clear();
-        ptms.add("00916", (long) 246);
-        ptms.add("00916", (long) 467);
-        ptms.add("00916", (long) 632);
-        ai.setPtms(ptms);
-        Assert.assertTrue("Looking for P56524;246:00916,467:00916,632:00916", p.getAnalysisIdentifierSet().contains(ai));
-
-        ai = new AnalysisIdentifier("P12345-2");
-        ptms.clear();
-        ptms.add("00916", (long) 246);
-        ptms.add("00916", (long) 467);
-        ptms.add("00916", (long) 632);
-        ai.setPtms(ptms);
-        Assert.assertTrue("Looking for P12345-2;246:00916,467:00916,632:00916", p.getAnalysisIdentifierSet().contains(ai));
-
-        ai = new AnalysisIdentifier("Q1AAA9");
-        Assert.assertTrue("Looking for Q1AAA9", p.getAnalysisIdentifierSet().contains(ai));
-
-        ai = new AnalysisIdentifier("O456A1");
-        Assert.assertTrue("Looking for O456A1", p.getAnalysisIdentifierSet().contains(ai));
-
-        ai = new AnalysisIdentifier("P4A123");
-        Assert.assertTrue("Looking for P4A123", p.getAnalysisIdentifierSet().contains(ai));
-
-        ai = new AnalysisIdentifier("A0A022YWF9");
-        Assert.assertTrue("Looking for A0A022YWF9", p.getAnalysisIdentifierSet().contains(ai));
-
-        ai = new AnalysisIdentifier("A0A022YWF9");
-        ptms.clear();
-        ptms.add("00916", (long) 632);
-        ptms.add("00916", (long) 246);
-        ptms.add("00916", (long) 467);
-        ai.setPtms(ptms);
-        Assert.assertTrue("Looking for A0A022YWF9;246:00916,467:00916,632:00916", p.getAnalysisIdentifierSet().contains(ai));
-
-        Assert.assertEquals(1, p.getWarningResponses().size());    // Expected: Missing header. Using a default one.
-        // If the file ending is CFLF then 12 are expected, because of empty extra lines.
-    }
-
-    @org.junit.Test
-    public void testProteoformsCustomOneProtein() {
-        String data = getString(PROTEOFORM_CUSTOM_ONE_PROTEIN);
-        InputFormat_v3 p = new InputFormat_v3();
-        try {
-            p.parseData(data);
-        } catch (ParserException e) {
-            Assert.fail(PROTEOFORM_CUSTOM_ONE_PROTEIN + " has failed.");
-        }
-
-        Assert.assertEquals(1, p.getHeaderColumnNames().size());
-        Assert.assertEquals(1, p.getAnalysisIdentifierSet().size());
-        AnalysisIdentifier ai = new AnalysisIdentifier("P56524");
-        MapList<String, Long> ptms = new MapList<>();
-        ptms.add("00916", (long) 246);
-        ptms.add("00916", (long) 467);
-        ptms.add("00916", (long) 632);
-        ai.setPtms(ptms);
-        Assert.assertTrue("Looking for P56524;246:00916,467:00916,632:00916", p.getAnalysisIdentifierSet().contains(ai));
-        Assert.assertEquals(0, p.getWarningResponses().size());
     }
 
     @BeforeAll
@@ -496,5 +463,141 @@ class ProteoformsCustomTest {
         aiSetWithNull.add(ai);
 
         ai_P12345_2 = ai;
+
+        /****************/
+
+        aiSet2 = new ArrayList<>();
+
+        ai = new AnalysisIdentifier("O14641");
+        ai.addPtm("01148", null);
+        aiSet2.add(ai);
+
+        ai = new AnalysisIdentifier("O14678");
+        ai.addPtm("01649", 319L);
+        ai.addPtm("00014", 319L);
+        aiSet2.add(ai);
+
+        ai = new AnalysisIdentifier("O14775-1");
+        aiSet2.add(ai);
+
+        ai = new AnalysisIdentifier("P08581");
+        ai.addPtm("00048", 1349L);
+        ai.addPtm("00048", 1356L);
+        aiSet2.add(ai);
+
+        ai = new AnalysisIdentifier("O14841");
+        ai.addPtm("00011", 323L);
+        ai.addPtm("01646", 323L);
+        aiSet2.add(ai);
+
+        ai = new AnalysisIdentifier("O14841");
+        ai.addPtm("00019", 1089L);
+        ai.addPtm("01650", 1089L);
+        aiSet2.add(ai);
+
+        aiSetWithNull2 = new ArrayList<>();
+
+        ai = new AnalysisIdentifier("P08151");
+        ai.addPtm("00046", null);
+        ai.addPtm("01148", null);
+        aiSetWithNull2.add(ai);
+
+        ai = new AnalysisIdentifier("P08151");
+        ai.addPtm("00696", null);
+        aiSetWithNull2.add(ai);
+
+        ai = new AnalysisIdentifier("P08151");
+        ai.addPtm("00046", null);
+        aiSetWithNull2.add(ai);
+
+        ai = new AnalysisIdentifier("P08151");
+        ai.addPtm("01148", null);
+        aiSetWithNull2.add(ai);
+
+        ai = new AnalysisIdentifier("P08123");
+        ai.addPtm("00130", 84L);
+        ai.addPtm("00162", null);
+        aiSetWithNull2.add(ai);
+
+        ai = new AnalysisIdentifier("P08123");
+        ai.addPtm("00130", 84L);
+        ai.addPtm("00162", null);
+        ai.addPtm("00039", null);
+        aiSetWithNull2.add(ai);
+
+        ai = new AnalysisIdentifier("P08123");
+        ai.addPtm("00130", 84L);
+        ai.addPtm("00039", null);
+        ai.addPtm("00037", null);
+        ai.addPtm("00038", null);
+        aiSetWithNull2.add(ai);
+
+        ai = new AnalysisIdentifier("P08123");
+        ai.addPtm("01914", null);
+        ai.addPtm("00130", null);
+        ai.addPtm("00039", null);
+        aiSetWithNull2.add(ai);
+
+        ai = new AnalysisIdentifier("P08123");
+        ai.addPtm("01914", null);
+        ai.addPtm("00130", 84L);
+        ai.addPtm("00039", null);
+        aiSetWithNull2.add(ai);
+
+        ai = new AnalysisIdentifier("P08123");
+        ai.addPtm("00130", 84L);
+        ai.addPtm("00039", null);
+        aiSetWithNull2.add(ai);
+
+        ai = new AnalysisIdentifier("P08123");
+        ai.addPtm("00130", 84L);
+        ai.addPtm("00039", null);
+        ai.addPtm("00037", null);
+        aiSetWithNull2.add(ai);
+
+        aiSetWithMultiplePTMs = new ArrayList<>();
+        ai = new AnalysisIdentifier("O14678");
+        ai.addPtm("01649", 319L);
+        ai.addPtm("00014", 319L);
+        aiSetWithMultiplePTMs.add(ai);
+
+        ai = new AnalysisIdentifier("P08581");
+        ai.addPtm("00048", 1003L);
+        ai.addPtm("00048", 1234L);
+        ai.addPtm("00048", 1235L);
+        ai.addPtm("00048", 1349L);
+        ai.addPtm("00048", 1356L);
+        ai.addPtm("00048", null);
+        aiSetWithMultiplePTMs.add(ai);
+
+        aiSetWithMultiplePTMs = new ArrayList<>();
+        ai = new AnalysisIdentifier("P08581");
+        ai.addPtm("00048", 1234L);
+        ai.addPtm("00048", 1235L);
+        ai.addPtm("00048", 1349L);
+        ai.addPtm("00048", 1356L);
+        aiSetWithMultiplePTMs.add(ai);
+
+        aiSetWithIsoforms = new ArrayList<>();
+        ai = new AnalysisIdentifier("P08235-2");
+        aiSetWithIsoforms.add(ai);
+
+        ai = new AnalysisIdentifier("P08235-4");
+        aiSetWithIsoforms.add(ai);
+
+        ai = new AnalysisIdentifier("P02545-1");
+        ai.addPtm("00046", 22L);
+        ai.addPtm("00046", 392L);
+        aiSetWithIsoforms.add(ai);
+
+        ai = new AnalysisIdentifier("P02545-1");
+        ai.addPtm("00046", 22L);
+        ai.addPtm("00046", 395L);
+        aiSetWithIsoforms.add(ai);
+
+        ai = new AnalysisIdentifier("P02545-2");
+        ai.addPtm("00046", 22L);
+        ai.addPtm("00046", 395L);
+        aiSetWithIsoforms.add(ai);
     }
 }

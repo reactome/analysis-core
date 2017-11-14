@@ -82,6 +82,7 @@ public class AnalysisIdentifier implements Comparable<AnalysisIdentifier> {
 
     @Override
     public boolean equals(Object o) {
+//        System.out.println("equals: " + this + " and " + o.toString());
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
@@ -95,7 +96,9 @@ public class AnalysisIdentifier implements Comparable<AnalysisIdentifier> {
 
         // Verify the ptms are all equal
         for (Map.Entry<String, List<Long>> mod : ptms.entrySetInternal()) {
+
             if (!that.getPtms().containsKey(mod.getKey())) return false;
+            if( mod.getValue().size() != that.getPtms().getElements(mod.getKey()).size()) return false;
             if (!mod.getValue().containsAll(that.getPtms().getElements(mod.getKey()))) return false;
         }
 
@@ -104,12 +107,18 @@ public class AnalysisIdentifier implements Comparable<AnalysisIdentifier> {
 
     @Override
     public int hashCode() {
+//        System.out.println("hashCode: " + id);
+
         return id != null ? id.hashCode() : 0;
+
+//        int hash = id != null ? id.hashCode() : 0;
+//        hash += (this.ptms != null ? this.ptms.hashCode() : 0);
+//        return hash;
     }
 
     @Override
     public String toString() {
-        return this.id;
+        return this.id + "[" + this.ptms.toString() + "]";
     }
 
     @Override

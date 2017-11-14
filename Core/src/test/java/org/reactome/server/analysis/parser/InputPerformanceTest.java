@@ -1,10 +1,6 @@
 package org.reactome.server.analysis.parser;
 
 import com.google.common.base.Stopwatch;
-import org.reactome.server.analysis.parser.InputFormat;
-import org.reactome.server.analysis.parser.InputFormat_v2;
-import org.reactome.server.analysis.parser.InputFormat_v3;
-import org.reactome.server.analysis.parser.InputProcessor;
 import org.reactome.server.analysis.parser.exception.ParserException;
 import org.reactome.server.analysis.parser.util.ConstantHolder.*;
 
@@ -31,7 +27,6 @@ public class InputPerformanceTest {
         typesToTest.add(InputTypeEnum.uniprotListAndModSites);
 
         processorVersions.add(new InputFormat_v3());
-        processorVersions.add(new InputFormat_v2());
 //        processorVersions.add(new InputFormat());
 
         timesFile.write("Version,Test,Size,ms,Repetition\n");

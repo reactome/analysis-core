@@ -1,5 +1,6 @@
 package org.reactome.server.analysis.parser;
 
+import com.google.common.base.CharMatcher;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
@@ -9,7 +10,6 @@ import org.reactome.server.analysis.core.util.MapList;
 import org.reactome.server.analysis.core.util.Pair;
 import org.reactome.server.analysis.parser.exception.ParserException;
 import org.reactome.server.analysis.parser.response.Response;
-import org.reactome.server.analysis.parser.tools.InputPatterns;
 
 import java.io.IOException;
 import java.util.*;
@@ -60,6 +60,7 @@ public class InputFormat_v3 extends InputProcessor {
 
     /**
      * Regex used to split the content of a multiple line file
+     * Note also that using + instead of * avoids replacing empty strings and therefore might also speed up the process.
      **/
     private static final String MULTI_LINE_CONTENT_SPLIT_REGEX = "[\\s,;]+";
 
@@ -206,15 +207,18 @@ public class InputFormat_v3 extends InputProcessor {
         if (tokens > 0) {
             headerColumnNames.add(DEFAULT_IDENTIFIER_HEADER);
             while (st.hasMoreTokens()) {
-                if (containsProteoform) {
+                AnalysisIdentifier rtn = null;
+                if (!containsProteoform) {
+                    rtn = new AnalysisIdentifier(st.nextToken().trim());
+                } else {
                     String[] content = new String[1];
                     content[0] = st.nextToken().trim();
                     ProteoformFormat proteoformFormat = checkForProteoforms(content, 0);
-                    analyseContentLineProteoform(content[0], ProteoformFormat.CUSTOM, 1);
-                } else {
-                    AnalysisIdentifier rtn = new AnalysisIdentifier(st.nextToken().trim());
-                    analysisIdentifierSet.add(rtn);
+                    Pair<String, MapList<String, Long>> proteoform = getProteoform(content[0], ProteoformFormat.CUSTOM, 1);
+                    rtn = new AnalysisIdentifier(proteoform.getFst());
+                    rtn.setPtms(proteoform.getSnd());
                 }
+                analysisIdentifierSet.add(rtn);
             }
         }
     }
@@ -334,10 +338,18 @@ public class InputFormat_v3 extends InputProcessor {
         }
 
         // Check for input type Normal/Proteoform using the first lines
-        proteoformFormat = checkForProteoforms(content, startOnLine);
+        if (headerColumnNames.size() == 1) {
+            proteoformFormat = checkForProteoforms(content, startOnLine);
+        } else {
+            proteoformFormat = checkForProteoformsWithExpressionValues(content, startOnLine);
+        }
 
         // Process all lines
         if (proteoformFormat == ProteoformFormat.NONE) {      // Continue with the normal content processing from Reactome V2
+
+            // Set the regular expression to separate each expression value in a single row
+            String regexp = MULTI_LINE_CONTENT_SPLIT_REGEX;
+            Pattern p = Pattern.compile(regexp);
 
             for (int i = startOnLine; i < content.length; ++i) {
                 String line = content[i].trim();
@@ -346,10 +358,6 @@ public class InputFormat_v3 extends InputProcessor {
                     continue;
                 }
 //                analyseContentLineNormal(line, i);
-                /** Note also that using + instead of * avoids replacing empty strings and therefore might also speed up the process. **/
-                String regexp = MULTI_LINE_CONTENT_SPLIT_REGEX;
-
-                Pattern p = Pattern.compile(regexp);
 
                 /** Note that using String.replaceAll() will compile the regular expression each time you call it. **/
                 line = p.matcher(line).replaceAll(" "); // slow slow slow
@@ -384,17 +392,27 @@ public class InputFormat_v3 extends InputProcessor {
                     }
                 }
             }
-        } else {                                                // Process the content as proteoform lines
+        } else {
+            // Process the content as proteoform lines
+
+            // Set the regular expression to separate each expression value in a single row
+            String regexp = ONE_LINE_CONTENT_SPLIT_REGEX_ONLY_SPACES;
+            Pattern p = Pattern.compile(regexp);
+
             for (int i = startOnLine; i < content.length; ++i) {
                 String line = content[i].trim();
                 if (line.isEmpty()) {
                     warningResponses.add(Response.getMessage(Response.EMPTY_LINE, i + 1));
                     continue;
                 }
+
+                line = p.matcher(line).replaceAll(" ");
+
                 analyseContentLineProteoform(line, proteoformFormat, i);
             }
         }
     }
+
 
     /**
      * Verifies if a set of content lines follows a proteoform format.
@@ -438,6 +456,54 @@ public class InputFormat_v3 extends InputProcessor {
                     return ProteoformFormat.NONE;
                 }
             } else if (matches_Proteoform_Gpmdb(line)) {
+                if (resultFormat == ProteoformFormat.UNKNOWN) {
+                    resultFormat = ProteoformFormat.GPMDB;
+                } else if (resultFormat != ProteoformFormat.GPMDB) {
+                    return ProteoformFormat.NONE;
+                }
+            } else {
+                if (resultFormat == ProteoformFormat.UNKNOWN) {
+                    resultFormat = ProteoformFormat.NONE;
+                } else if (resultFormat != ProteoformFormat.NONE) {
+                    return ProteoformFormat.NONE;
+                }
+            }
+            linesChecked++;
+        }
+
+        return resultFormat;
+    }
+
+    private ProteoformFormat checkForProteoformsWithExpressionValues(String[] content, int startOnLine) {
+        ProteoformFormat resultFormat = ProteoformFormat.UNKNOWN;
+
+        int linesChecked = 0;
+        for (int i = startOnLine; i < content.length && linesChecked < 5; ++i) {
+            String line = content[i].trim();
+            if (line.isEmpty()) {
+                //warningResponses.add(Response.getMessage(Response.EMPTY_LINE, i + 1));
+                continue;
+            }
+            if (matches_Proteoform_Custom_With_Expression_Values(line)) {
+                if (resultFormat == ProteoformFormat.UNKNOWN) {
+                    resultFormat = ProteoformFormat.CUSTOM;
+                } else if (resultFormat != ProteoformFormat.CUSTOM) {
+                    //errorResponses.add(Response.getMessage(Response.PROTEOFORM_MISMATCH, i + 1));
+                    return ProteoformFormat.NONE;
+                }
+            } else if (matches_Proteoform_Pro_With_Expression_Values(line)) {
+                if (resultFormat == ProteoformFormat.UNKNOWN) {
+                    resultFormat = ProteoformFormat.PROTEIN_ONTOLOGY;
+                } else if (resultFormat != ProteoformFormat.PROTEIN_ONTOLOGY) {
+                    return ProteoformFormat.NONE;
+                }
+            } else if (matches_Proteoform_Pir_With_Expression_Values(line)) {
+                if (resultFormat == ProteoformFormat.UNKNOWN) {
+                    resultFormat = ProteoformFormat.PIR_ID;
+                } else if (resultFormat != ProteoformFormat.PIR_ID) {
+                    return ProteoformFormat.NONE;
+                }
+            } else if (matches_Proteoform_Gpmdb_With_Expression_Values(line)) {
                 if (resultFormat == ProteoformFormat.UNKNOWN) {
                     resultFormat = ProteoformFormat.GPMDB;
                 } else if (resultFormat != ProteoformFormat.GPMDB) {
@@ -513,13 +579,45 @@ public class InputFormat_v3 extends InputProcessor {
     }
 
     /**
-     * Analyse a content line as a proteoform
+     * Analyse a content line with one proteoform and possibly expression values.
      *
      * @param line   The content line itself
      * @param format The type of proteoform format that to parse the lines
      * @param i      Line number in the content of the input file
      */
     private void analyseContentLineProteoform(String line, ProteoformFormat format, int i) {
+
+        Pair<String, MapList<String, Long>> proteoform = getProteoform(line, format, i);
+
+        // StringTokenizer has better performance than String.split().
+        StringTokenizer st = new StringTokenizer(line); //space is default delimiter.
+
+        int tokens = st.countTokens();
+        if (tokens > 0) {
+            // analyse if each line has the same amount of columns as the threshold based on first line
+            if (thresholdColumn == tokens) {
+                String first = st.nextToken();
+                AnalysisIdentifier rtn = new AnalysisIdentifier(proteoform.getFst());
+                rtn.setPtms(proteoform.getSnd());
+
+                int j = 1;
+                while (st.hasMoreTokens()) {
+                    String token = st.nextToken().trim();
+                    if (isNumeric(token)) {
+                        rtn.add(Double.valueOf(token));
+                    } else {
+                        warningResponses.add(Response.getMessage(Response.INLINE_PROBLEM, i + 1, j + 1));
+                    }
+                    j++;
+                }
+                analysisIdentifierSet.add(rtn);
+            } else {
+                errorResponses.add(Response.getMessage(Response.COLUMN_MISMATCH, i + 1, thresholdColumn, tokens));
+            }
+        }
+    }
+
+    private Pair<String, MapList<String, Long>> getProteoform(String line, ProteoformFormat format, int i) {
         Pair<String, MapList<String, Long>> proteoform = null;
         switch (format) {
             case CUSTOM:
@@ -553,11 +651,7 @@ public class InputFormat_v3 extends InputProcessor {
             case NONE:
                 throw new RuntimeException("The line " + i + " should marked as a proteoform.");
         }
-
-//        System.out.println(proteoform);
-        AnalysisIdentifier rtn = new AnalysisIdentifier(proteoform.getFst());
-        rtn.setPtms(proteoform.getSnd());
-        analysisIdentifierSet.add(rtn);
+        return proteoform;
     }
 
     private Pair<String, MapList<String, Long>> getProteoformCustom(String line, int i) {
@@ -599,7 +693,7 @@ public class InputFormat_v3 extends InputProcessor {
             }
             pos++;
             c = line.charAt(pos);
-            while (c != ',') {
+            while (Character.isDigit(c) || CharMatcher.anyOf("nulNUL").matches(c)) {
                 coordinate.append(c);
                 pos++;
                 if (pos == line.length())
@@ -607,6 +701,9 @@ public class InputFormat_v3 extends InputProcessor {
                 c = line.charAt(pos);
             }
             ptms.add(mod.toString(), (coordinate.toString().toLowerCase().equals("null") ? null : Long.valueOf(coordinate.toString())));
+            if (c != ',') {
+                break;
+            }
             pos++;
         }
 

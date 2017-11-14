@@ -54,7 +54,7 @@ class ProteoformsCustomTest {
     static List<AnalysisIdentifier> aiSet;
     static List<AnalysisIdentifier> aiSetWithNull;
 
-
+    private static AnalysisIdentifier ai_P12345_2 = new AnalysisIdentifier("P12345-2");
 
     @Test
     @Tag("Valid")
@@ -120,7 +120,7 @@ class ProteoformsCustomTest {
 
     @Test
     @Tag("Valid")
-    // Whether it has the semi-colon or not, the single uniprot accession should be accepted.
+        // Whether it has the semi-colon or not, the single uniprot accession should be accepted.
     void oneLineOnlyUniprotAccessionsTest(TestInfo testInfo) {
         String data = getString(PATH_VALID + "oneLineWithOneUniprot.txt");
         InputFormat_v3 p = new InputFormat_v3();
@@ -238,8 +238,21 @@ class ProteoformsCustomTest {
 
     @Test
     @Tag("Invalid")
-    void oneLineWithHeadersTest() {
-        String input = getString(PATH + "");
+    void oneLineWithHeadersTest(TestInfo testInfo) {
+
+        String data = getString(PATH_VALID + "oneLineWithHeaders.txt");
+        InputFormat_v3 p = new InputFormat_v3();
+        try {
+            p.parseData(data);
+        } catch (ParserException e) {
+            Assert.fail(testInfo.getDisplayName() + " has failed");
+        }
+
+        Assert.assertEquals(6, p.getHeaderColumnNames().size());
+        Assert.assertEquals(1, p.getAnalysisIdentifierSet().size());
+        Assert.assertEquals(0, p.getWarningResponses().size());
+        Assert.assertTrue("Looking for " + ai_P12345_2.toString(), p.getAnalysisIdentifierSet().contains(ai_P12345_2));
+
     }
 
     @Test
@@ -265,8 +278,7 @@ class ProteoformsCustomTest {
     @Tag("Valid")
     void multipleLineTest() {
 
-        String input = getString(PATH + "ProteoformsCustom/Valid/proteoforms_custom.txt");
-        System.out.println(input);
+
     }
 
     @Test
@@ -458,5 +470,7 @@ class ProteoformsCustomTest {
         ai.addPtm("00916", (long) 467);
         ai.addPtm("00916", (long) 632);
         aiSetWithNull.add(ai);
+
+        ai_P12345_2 = ai;
     }
 }

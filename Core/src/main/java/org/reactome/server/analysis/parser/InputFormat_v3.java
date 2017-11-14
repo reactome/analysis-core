@@ -15,8 +15,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static org.reactome.server.analysis.parser.InputFormat_v2.PROTEOFORM_PIR_ID;
-import static org.reactome.server.analysis.parser.InputFormat_v2.PROTEOFORM_PROTEIN_ONTOLOGY;
 import static org.reactome.server.analysis.parser.tools.InputPatterns.*;
 
 /**
@@ -192,7 +190,7 @@ public class InputFormat_v3 extends InputProcessor {
         Pattern p = Pattern.compile(regexp);
 
         // Line cannot start with # or //
-        if (hasHeaderLine(line)) {
+        if (startsWithHeaderSign(line)) {
             errorResponses.add(Response.getMessage(Response.START_WITH_HASH));
             return;
         }
@@ -226,6 +224,7 @@ public class InputFormat_v3 extends InputProcessor {
     /**
      * Analyse header based on the first line.
      * Headers must start with # or //
+     * Note that the lines already come trimmed. Therefore the method  startsWithHeaderSign(headerLine) works.
      *
      * @param data is the file lines
      */
@@ -235,61 +234,64 @@ public class InputFormat_v3 extends InputProcessor {
          * StartOnLine will be important in the content analysis. Having this attribute we don't to iterate and ignore
          * blank lines in the beginning.
          */
-        String headerLine = "";
-        for (int i = 0; i < data.length; i++) {
-            if (StringUtils.isNotEmpty(data[i])) {
-                headerLine = data[i];
-                startOnLine = i;
+        String firstLine = "";
+        for (int R = 0; R < data.length; R++) {
+            if (StringUtils.isNotEmpty(data[R])) {
+                firstLine = data[R];
+                startOnLine = R;
                 break;
             }
         }
 
-        if (hasHeaderLine(headerLine)) {
-            // parse header line
-            getHeaderLabel(headerLine);
-            hasHeader = true;
+        hasHeader = startsWithHeaderSign(firstLine);
+        if (hasHeader) {    //
+            headerColumnNames = getHeaderLabels(firstLine);
+            thresholdColumn = headerColumnNames.size();
         } else {
             //warningResponses.add(Response.getMessage(Response.MALFORMED_HEADER));
-            predictFirstLineAsHeader(headerLine);
+            predictFirstLineAsHeader(firstLine);
         }
     }
 
     /**
      * There're files which may have a header line but malformed.
      * This method analyse the first line and if the columns are not numeric
-     * a potential header is present and the user will be notified
+     * a potential header is present and the user will be notified.
+     * At this point it was already checked if the header contained #|// at the beginning, so we are unsure if it is a header.
      *
      * @param firstLine potential header
      */
     private void predictFirstLineAsHeader(String firstLine) {
-        int errorInARow = 0;
 
+        int errorInARow = 0;
         List<String> columnNames = new LinkedList<>();
 
         firstLine = firstLine.replaceAll("^(#|//)", "");
 
+        // Check if it is a regular line or a proteoform line
         String[] content = {firstLine};
-        ProteoformFormat proteoformType = checkForProteoforms(content, 0);
-        if (proteoformType != ProteoformFormat.NONE && proteoformType != ProteoformFormat.UNKNOWN) {
+        ProteoformFormat proteoformType = checkForProteoformsWithExpressionValues(content, 0);
 
-            if (proteoformType.equals(ProteoformFormat.CUSTOM)) {
-                firstLine = firstLine.replaceAll(PROTEOFORM_CUSTOM, "proteoform");
-            } else if (proteoformType.equals(ProteoformFormat.PROTEIN_ONTOLOGY)) {
-                firstLine = firstLine.replaceAll(PROTEOFORM_PROTEIN_ONTOLOGY, "proteoform");
-            } else if (proteoformType.equals(ProteoformFormat.PIR_ID)) {
-                firstLine = firstLine.replaceAll(PROTEOFORM_PIR_ID, "proteoform");
-            }
-        }
-
+        // Split the line in chunks of characters
+        String[] chunks;
+        // If it is a regular line split with [\s,;]+
         /**
          * We cannot use the HEADER REGEX for parsing the header and prepare the default
          * Why? Tab is a delimiter for header, but space isn't. Colon is a delimiter for the content
          * but not for the header.
          **/
-        String[] data = firstLine.split(NO_HEADER_DEFAULT_REGEX);
+        if(proteoformType.equals(ProteoformFormat.NONE)){
+            chunks = firstLine.split(NO_HEADER_DEFAULT_REGEX);
+        }
+        // If it contains proteoforms then \s+
+        else{
+            chunks = firstLine.split(ONE_LINE_CONTENT_SPLIT_REGEX_ONLY_SPACES);
+        }
 
-        if (data.length > 0) {
-            for (String col : data) {
+        // Count the number of chunks without only digits
+        // Add each chunk to the list of column names.
+        if (chunks.length > 0) {
+            for (String col : chunks) {
                 columnNames.add(col.trim());
                 if (!isNumeric(col.trim())) {
                     errorInARow++;
@@ -297,23 +299,27 @@ public class InputFormat_v3 extends InputProcessor {
             }
         }
 
-        thresholdColumn = data.length;
+        thresholdColumn = chunks.length;
 
-        if (errorInARow >= 3) {
+        // If 2 or more chunks of the row contain at least one letter, send warning that this may be a header
+        // and use the first row as header.
+        if (errorInARow >= 2) {
             hasHeader = true;
             warningResponses.add(Response.getMessage(Response.POTENTIAL_HEADER));
-
             headerColumnNames = columnNames;
         } else {
             // just skip the predictable header and use the default one
+            hasHeader = false;
             warningResponses.add(Response.getMessage(Response.NO_HEADER));
 
-            buildDefaultHeader(data.length);
+            buildDefaultHeader(chunks.length);
         }
     }
 
     /**
      * The default header will be built based on the first line.
+     *  Example: For colsLength 5 the result would be:
+     *  ["", "col1", "col2", "col3", "col4"]
      *
      * @param colsLength
      */
@@ -536,7 +542,7 @@ public class InputFormat_v3 extends InputProcessor {
         Pattern p = Pattern.compile(regexp);
 
         // Line cannot start with # or //
-//        if (hasHeaderLine(line)) {
+//        if (startsWithHeaderSign(line)) {
 //            errorResponses.add(Response.getMessage(Response.START_WITH_HASH));
 //            return;
 //        }
@@ -580,6 +586,7 @@ public class InputFormat_v3 extends InputProcessor {
 
     /**
      * Analyse a content line with one proteoform and possibly expression values.
+     * Assumes that the line comes trimmed and the sets of consecutive spaces have been replaced for a single space.
      *
      * @param line   The content line itself
      * @param format The type of proteoform format that to parse the lines
@@ -668,7 +675,7 @@ public class InputFormat_v3 extends InputProcessor {
         while (c != ';') {
             protein.append(c);
             pos++;
-            if (pos == line.length())
+             if (pos == line.length())
                 break;
             c = line.charAt(pos);
         }
@@ -686,7 +693,7 @@ public class InputFormat_v3 extends InputProcessor {
             mod = new StringBuilder();
             //Read a ptm
             c = line.charAt(pos);
-            while (c != ':') {
+            while (c != ':' && Character.isDigit(c)) {
                 mod.append(c);
                 pos++;
                 c = line.charAt(pos);
@@ -722,7 +729,7 @@ public class InputFormat_v3 extends InputProcessor {
         throw new NotImplementedException("Missing implementation for getProteoformGPMDB");
     }
 
-    private static boolean hasHeaderLine(String line) {
+    private static boolean startsWithHeaderSign(String line) {
         return line.startsWith("#") || line.startsWith("//");
     }
 
@@ -731,18 +738,20 @@ public class InputFormat_v3 extends InputProcessor {
      *
      * @param line The line to be analysed as a header
      */
-    private void getHeaderLabel(String line) {
+    private List<String> getHeaderLabels(String line) {
+
+        List<String> headerLabelsList = new ArrayList<>();
+
         // remove chars which categorizes a comment.
         line = line.replaceAll("^(#|//)", "");
 
         // Split header line by our known delimiters
         String[] cols = line.split(HEADER_SPLIT_REGEX);
 
-        thresholdColumn = cols.length;
-
         for (String columnName : cols) {
-            headerColumnNames.add(StringEscapeUtils.escapeJava(columnName.trim()));
+            headerLabelsList.add(StringEscapeUtils.escapeJava(columnName.trim()));
         }
+        return headerLabelsList;
     }
 
     public List<String> getHeaderColumnNames() {

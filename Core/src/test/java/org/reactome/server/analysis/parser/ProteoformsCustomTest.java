@@ -237,7 +237,8 @@ class ProteoformsCustomTest {
     }
 
     @Test
-    @Tag("Invalid")
+    @Tag("Valid")
+        // Is valid as it becomes a multiline file: 1 header and 1 for content
     void oneLineWithHeadersTest(TestInfo testInfo) {
 
         String data = getString(PATH_VALID + "oneLineWithHeaders.txt");
@@ -257,22 +258,30 @@ class ProteoformsCustomTest {
 
     @Test
     @Tag("Invalid")
-    void oneLineStartsWithSharpSignTest() {
+    void oneLineStartsWithHashTest(TestInfo testInfo) {
 
+        String data = getString(PATH_INVALID + "oneLineStartsWithHash.txt");
+        InputFormat_v3 p = new InputFormat_v3();
+        try {
+            p.parseData(data);
+            Assert.fail(testInfo.getDisplayName() + " has failed.");
+        } catch (ParserException e) {
+            Assert.assertTrue("Expecting start with comment", e.getErrorMessages().contains("A single line input cannot start with hash or comment."));
+        }
     }
 
     @Test
     @Tag("Invalid")
-    void oneLineStartsWithComment() {
-
+    void oneLineStartsWithComment(TestInfo testInfo) {
+        String data = getString(PATH_INVALID + "oneLineStartsWithComment.txt");
+        InputFormat_v3 p = new InputFormat_v3();
+        try {
+            p.parseData(data);
+            Assert.fail(testInfo.getDisplayName() + " has failed.");
+        } catch (ParserException e) {
+            Assert.assertTrue("Expecting start with comment", e.getErrorMessages().contains("A single line input cannot start with hash or comment."));
+        }
     }
-
-    @Test
-    @Tag("Invalid")
-    void oneLineHasComment() {
-
-    }
-
 
     @Test
     @Tag("Valid")
@@ -327,6 +336,21 @@ class ProteoformsCustomTest {
     @Tag("Valid")
     void multipleLinesHasIsoformAndPTMsTest() {
 
+    }
+
+    @Test
+    @Tag("Invalid")
+    void multipleLinesBrokenFileTest(TestInfo testInfo){
+        String data = getString(PATH_INVALID + "multipleLinesBrokenFile.txt");
+        InputFormat_v3 p = new InputFormat_v3();
+        try {
+            p.parseData(data);
+            Assert.fail(testInfo.getDisplayName() + " has failed.");
+        } catch (ParserException e) {
+            Assert.assertTrue("Should have less columns than first line.", e.getErrorMessages().contains("Line 2 does not have 5 column(s). 1 Column(s) found."));
+            Assert.assertTrue("Should have more columns than the first line.", e.getErrorMessages().contains("Line 3 does not have 5 column(s). 8 Column(s) found."));
+            Assert.assertTrue("Should have more columns than the first line.", e.getErrorMessages().contains("Line 7 does not have 5 column(s). 9 Column(s) found."));
+        }
     }
 
     @org.junit.Test

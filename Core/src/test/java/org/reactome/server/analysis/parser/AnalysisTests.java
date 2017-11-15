@@ -808,7 +808,8 @@ public class AnalysisTests {
             bw.write("Column 1\t");
             bw.write("Column 2\t");
             bw.write("Column 3");
-            bw.newLine();
+            //bw.newLine();
+            bw.write("\n");
 
             for (int i = 0; i < 310000; i++) {
                 bw.write(i + "_abcd\t");
@@ -816,7 +817,7 @@ public class AnalysisTests {
                 bw.write("5.1234\t");
                 bw.write("4.1234\t");
                 bw.write("3.1234");
-                bw.newLine();
+                bw.write("\n");
 
                 if (i % 10000 == 0) {
                     bw.flush();

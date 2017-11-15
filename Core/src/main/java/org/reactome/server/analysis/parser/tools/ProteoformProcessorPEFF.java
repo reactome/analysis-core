@@ -10,7 +10,7 @@ import java.io.File;
  * @author Luis Francisco Hernández Sánchez <luis.sanchez@uib.no>
  */
 
-public class PEFFParser {
+public class ProteoformProcessorPEFF {
 
     /**
      * Validates if the provided file follows the PEFF format.

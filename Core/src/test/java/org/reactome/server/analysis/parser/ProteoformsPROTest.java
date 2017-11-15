@@ -19,27 +19,22 @@ class ProteoformsPROTest {
     /**
      * Format rules:
      * - One proteoform per line
-     * - There is semi-colon (';') after each protein accession.
-     * - PTMs are expressed using two elements: psi mod id (five digits) and an integer coordinate.
-     * - The coordinate can have a value between 0 and 99,999,999,999 or "null".
-     * - PTMs match this regex: "\d{5}:(\d{1,11}|[Nn][Uu][Ll][Ll])"
-     * - PTMS are separated using (',').
-     * - A proteoform matches this pattern: ID;PTM,PTM...PTM
-     * where ID stands for the Uniprot Accession including the optional isoform specification.
-     * <p>
-     * For single line files the rules are:
-     * - No headers
-     * - No expressions values
-     * - Cannot start with # or comments
-     * - Must match this "regular expression" (\delim)*ID((\delimID)* | (\delimNUMBER)* ),
-     * where \delim can be a whitespace character (\s), and ID stands for an Identifier of any type.
-     * - Does not accept comma or semi-colon as separators like the original input for proteins.
-     * <p>
-     * For multiple line files the rules are:
-     * - Can contain headers in the first line.
-     * - Headers must start with # or //.
-     * - Headers follow this regex "(#|//).*([\t,;]+(#|//).*)*", where .* stands for the header text itself.
-     * - Can contain expression values
+     * - Consists of a sequence block and optional modification blocks
+     * - The only mandatory part is the accession number.
+     * - There are one or more optional modification blocks
+     * - Sequence blocks consist of a UniProtKB accession with an optional isoform indicated by a dash, followed
+     * by a comma. And an optional subsequence range separated with a comma.
+     * - Each modification block is presented in order from the N-terminal-most amino acid specified.
+     * - Within a modification block there are one or more amino acids listed by type and position.
+     * - Multiple amino-acids within a block are separated by forward slashes.
+     * - Positions of modification are relative to the full length of the isoform.
+     * - Missing a subsequence section indicates that the class encompasses either multiple species or isoforms.
+     * - Missing modification blocks with a subsequence indicates that the class is defined by subsequence only.
+     * - NOTE: In our casse we will only use the accession numbers and set of post translational modifications
+     * to identify a particular proteoform, to make our analysis consistent with the rest of the formats.
+     *  - We allow the position to be null, so that it is also consistent with the rest.
+     *
+     * The draft of the format is at: doi: 10.1093/nar/gkw1075
      */
 
     private static final String PATH_VALID = "target/test-classes/analysis/input/ProteoformsPRO/Valid/";

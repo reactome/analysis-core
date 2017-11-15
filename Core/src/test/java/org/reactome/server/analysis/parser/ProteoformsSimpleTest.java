@@ -17,7 +17,7 @@ import java.util.List;
 import static org.reactome.server.analysis.parser.util.ConstantHolder.PATH;
 import static org.reactome.server.analysis.parser.util.FileUtils.getString;
 
-class ProteoformsCustomTest {
+class ProteoformsSimpleTest {
 
     /**
      * Format rules:
@@ -48,8 +48,8 @@ class ProteoformsCustomTest {
     private static final String PROTEOFORM_CUSTOM = PATH.concat("proteoforms_custom.txt");
     private static final String PROTEOFORM_CUSTOM_ONE_PROTEIN = PATH.concat("proteoforms_custom_one_protein.txt");
 
-    private static final String PATH_VALID = "target/test-classes/analysis/input/ProteoformsCustom/Valid/";
-    private static final String PATH_INVALID = "target/test-classes/analysis/input/ProteoformsCustom/Invalid/";
+    private static final String PATH_VALID = "target/test-classes/analysis/input/ProteoformsSimple/Valid/";
+    private static final String PATH_INVALID = "target/test-classes/analysis/input/ProteoformsSimple/Invalid/";
 
     static List<AnalysisIdentifier> aiSet;
     static List<AnalysisIdentifier> aiSet2;
@@ -91,15 +91,11 @@ class ProteoformsCustomTest {
         InputFormat_v3 p = new InputFormat_v3();
         try {
             p.parseData(data);
+            Assert.fail(testInfo.getDisplayName() + " should fail");
         } catch (ParserException e) {
-            Assert.fail(testInfo.getDisplayName() + " has failed");
+            Assert.assertEquals(1, e.getErrorMessages().size());
+            Assert.assertTrue("There should be an inline error.", e.getErrorMessages().contains("A single line input is invalid. Found proteins and values together."));
         }
-
-        Assert.assertEquals(1, p.getHeaderColumnNames().size());
-        Assert.assertEquals(10, p.getAnalysisIdentifierSet().size());
-        Assert.assertEquals(0, p.getWarningResponses().size());
-        Assert.assertTrue("Looking for 00084:382", p.getAnalysisIdentifierSet().contains(new AnalysisIdentifier("00084:382")));
-
     }
 
     @Test

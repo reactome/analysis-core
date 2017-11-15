@@ -10,13 +10,12 @@ import org.reactome.server.analysis.core.util.MapList;
 import org.reactome.server.analysis.core.util.Pair;
 import org.reactome.server.analysis.parser.exception.ParserException;
 import org.reactome.server.analysis.parser.response.Response;
-import org.reactome.server.analysis.parser.tools.*;
+import org.reactome.server.analysis.parser.tools.ProteoformsProcessor;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static org.reactome.server.analysis.parser.tools.InputPatterns.*;
 import static org.reactome.server.analysis.parser.tools.ProteoformsProcessor.checkForProteoforms;
 import static org.reactome.server.analysis.parser.tools.ProteoformsProcessor.checkForProteoformsWithExpressionValues;
 
@@ -78,7 +77,7 @@ public class InputFormat_v3 extends InputProcessor {
     public static enum ProteoformFormat {
         NONE,
         UNKNOWN,
-        CUSTOM,
+        SIMPLE,
         PRO,
         PIR_ID,
         GPMDB
@@ -183,8 +182,8 @@ public class InputFormat_v3 extends InputProcessor {
     private void analyseOneLineFile(String line) {
         //Check if the line belongs to a Proteoform
         String regexp = ONE_LINE_CONTENT_SPLIT_REGEX;
-        boolean containsProteoform = matches_oneLine_Custom_Proteoforms(line);
-        if (containsProteoform) {
+        ProteoformFormat format = checkForProteoforms(line);
+        if (format != ProteoformFormat.UNKNOWN && format != ProteoformFormat.NONE) {
             regexp = ONE_LINE_CONTENT_SPLIT_REGEX_ONLY_SPACES;
         }
 
@@ -209,15 +208,19 @@ public class InputFormat_v3 extends InputProcessor {
             headerColumnNames.add(DEFAULT_IDENTIFIER_HEADER);
             while (st.hasMoreTokens()) {
                 AnalysisIdentifier rtn = null;
-                if (!containsProteoform) {
+                if (format == ProteoformFormat.UNKNOWN || format == ProteoformFormat.NONE) {
                     rtn = new AnalysisIdentifier(st.nextToken().trim());
                 } else {
-                    String[] content = new String[1];
-                    content[0] = st.nextToken().trim();
-                    ProteoformFormat proteoformFormat = checkForProteoforms(content, 0);
-                    Proteoform proteoform = ProteoformsProcessor.getProteoform(content[0], ProteoformFormat.CUSTOM, 1, warningResponses);
-                    rtn = new AnalysisIdentifier(proteoform.getUniProtAcc());
-                    rtn.setPtms(proteoform.getPTMs());
+                    String[] content = {st.nextToken().trim()};
+                    Proteoform proteoform = ProteoformsProcessor.getProteoform(content[0], format, 1, warningResponses);
+                    if(proteoform != null){
+                        rtn = new AnalysisIdentifier(proteoform.getUniProtAcc());
+                        rtn.setPtms(proteoform.getPTMs());
+                    }
+                    else{
+                        errorResponses.add(Response.getMessage(Response.INVALID_SINGLE_LINE, 1, thresholdColumn, tokens));
+                        continue;
+                    }
                 }
                 analysisIdentifierSet.add(rtn);
             }

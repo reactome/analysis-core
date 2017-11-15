@@ -4,9 +4,6 @@ import org.reactome.server.analysis.core.util.MapList;
 import org.reactome.server.analysis.parser.InputFormat_v3;
 import org.reactome.server.analysis.parser.tools.ProteoformProcessorPRO;
 import org.reactome.server.analysis.parser.tools.ProteoformProcessorSimple;
-import org.reactome.server.analysis.parser.tools.ProteoformsProcessor;
-
-import java.util.Collections;
 
 public class Proteoform {
     private String UniProtAcc;
@@ -42,7 +39,7 @@ public class Proteoform {
         StringBuilder str = new StringBuilder();
         String[] mods;
         switch (format) {
-            case CUSTOM:
+            case SIMPLE:
                 return ProteoformProcessorSimple.getString(this);
             case GPMDB:
                 //TODO

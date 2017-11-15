@@ -365,7 +365,7 @@ public class AnalysisTests {
 
         Assert.assertEquals(4, format.getHeaderColumnNames().size());
         Assert.assertEquals(310000, format.getAnalysisIdentifierSet().size());
-        Assert.assertEquals(310000, format.getWarningResponses().size());   //Set to 310000 because the line endings were CRLF
+        Assert.assertEquals(0, format.getWarningResponses().size());   //Set to 310000 because the line endings were CRLF
 
     }
 

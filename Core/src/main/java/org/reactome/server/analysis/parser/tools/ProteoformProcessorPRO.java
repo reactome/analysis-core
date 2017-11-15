@@ -5,6 +5,10 @@ import org.reactome.server.analysis.core.util.MapList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static org.reactome.server.analysis.parser.tools.InputPatterns.EXPRESSION_VALUES;
 
 public class ProteoformProcessorPRO {
 
@@ -29,6 +33,25 @@ public class ProteoformProcessorPRO {
      * The draft of the format is at: doi: 10.1093/nar/gkw1075
      */
 
+    private static final String PROTEOFORM_PRO = "UniProtKB:([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})([-]\\d{1,2})?(,\\d+-\\d+)?(,\\p{Alpha}{3}-(\\d{1,11}|[Nn][Uu][Ll][Ll])(\\/\\p{Alpha}{3}-(\\d{1,11}|[Nn][Uu][Ll][Ll]))*,MOD:\\d{5}(\\|\\p{Alpha}{3}-(\\d{1,11}|[Nn][Uu][Ll][Ll])(\\/\\p{Alpha}{3}-(\\d{1,11}|[Nn][Uu][Ll][Ll]))*,MOD:\\d{5})*)?";
+    private static final Pattern PATTERN_PROTEOFORM_PRO = Pattern.compile(PROTEOFORM_PRO);
+    private static final Pattern PATTERN_PROTEOFORM_PRO_WITH_EXPRESSION_VALUES = Pattern.compile(PROTEOFORM_PRO + EXPRESSION_VALUES);
+
+    public static boolean matches_Proteoform_Pro(String str) {
+        Matcher m = PATTERN_PROTEOFORM_PRO.matcher(str);
+        return m.matches();
+    }
+
+    public static boolean matches_Proteoform_Pro_With_Expression_Values(String str) {
+        Matcher m = PATTERN_PROTEOFORM_PRO_WITH_EXPRESSION_VALUES.matcher(str);
+        return m.matches();
+    }
+
+    public static boolean contains_Proteoform_Pro(String str) {
+        Matcher m = PATTERN_PROTEOFORM_PRO.matcher(str);
+        return m.find();
+    }
+
     public static void processFile(String input) {
         //TODO
     }
@@ -43,7 +66,7 @@ public class ProteoformProcessorPRO {
     public static Proteoform getProteoform(String line, int i) {
         StringBuilder protein = new StringBuilder();
         StringBuilder coordinate = null;
-        List<Long> coordinateList;
+        List<Long> coordinateList = new ArrayList<>();
         StringBuilder mod = null;
         MapList<String, Long> ptms = new MapList<>();
 
@@ -60,46 +83,58 @@ public class ProteoformProcessorPRO {
                 break;
             }
             c = line.charAt(pos);
-            if (c != ',') {
+            if (c == ',' || c == ' ' || c == '\t') {
                 break;
             }
         }           // The proteoform should come at least until here
-        pos++;      // Advance after the comma of te accession or out of the string
-        if(pos < line.length()){        // If there are still characters
-            c = line.charAt(pos);
-            if (Character.isDigit(c)) {   // If there is a subsequence, skip it
-                while (c != ',') {
-                    c = line.charAt(++pos);
-                }
-            }
-        }
-
-        coordinateList = new ArrayList<>();
-        while (pos < line.length()) {       //Read the post-translational modifications section
-            c = line.charAt(pos);           //While there are characters to read expect: \w{3}-\d+/PTM/PTM,MOD:#####
-
-            if (c == '|') {
-                c = line.charAt(++pos);
-            }
-            while (c != ',') {
-                while (c != '-') {
-                    c = line.charAt(++pos);
-                }
-                coordinate = new StringBuilder();
-                while (c != ',' && c != '/') {
-                    coordinate.append(c);
-                }
-                coordinateList.add(Long.valueOf(coordinate.toString()));
-                c = line.charAt(++pos);
-            }
-            while (c != ':') {    // Skip the "MOD:"
-                c = line.charAt(++pos);
-            }
-            mod = new StringBuilder();
-            for (int I = 0; I < 5; I++) {
-                mod.append(line.charAt(++pos));
-            }
+        if (c == ',') {
             pos++;
+            if (pos < line.length()) {        // If there are still characters
+                pos++;      // Advance after the comma of the accession or out of the string
+                c = line.charAt(pos);
+
+                while (Character.isDigit(c) || c == '-') {   // If there is a subsequence, skip it
+                    pos++;
+                    if (pos >= line.length()) {
+                        break;
+                    }
+                    c = line.charAt(pos);
+                }
+                while (pos < line.length()) {       //Read the post-translational modifications section
+                    c = line.charAt(pos);           //While there are characters to read expect: \w{3}-\d+/PTM/PTM,MOD:#####
+
+                    if (c == '|') {
+                        c = line.charAt(++pos);
+                        coordinateList = new ArrayList<>();
+                    }
+                    if (c == ' ' || c == '\t') {
+                        break;
+                    }
+                    while (c != ',') {
+                        while (c != '-') {
+                            c = line.charAt(++pos);
+                        }
+                        c = line.charAt(++pos);
+                        coordinate = new StringBuilder();
+                        while (c != ',' && c != '/') {
+                            coordinate.append(c);
+                            c = line.charAt(++pos);
+                        }
+                        coordinateList.add(coordinate.toString().toLowerCase().equals("null") ? null : Long.valueOf(coordinate.toString()));
+                    }
+                    while (c != ':') {    // Skip the "MOD:"
+                        c = line.charAt(++pos);
+                    }
+                    mod = new StringBuilder();
+                    for (int I = 0; I < 5; I++) {
+                        mod.append(line.charAt(++pos));
+                    }
+                    for (Long site : coordinateList) {
+                        ptms.add(mod.toString(), site);
+                    }
+                    pos++;
+                }
+            }
         }
 
         return new Proteoform(protein.toString(), ptms);

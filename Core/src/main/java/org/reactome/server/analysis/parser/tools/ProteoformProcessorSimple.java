@@ -7,8 +7,38 @@ import org.reactome.server.analysis.parser.response.Response;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static org.reactome.server.analysis.parser.tools.InputPatterns.EXPRESSION_VALUES;
 
 public class ProteoformProcessorSimple {
+
+    public static final String PROTEOFORM_SIMPLE = "([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})([-]\\d{1,2})?;(\\d{5}:(\\d{1,11}|[Nn][Uu][Ll][Ll]))?(,\\d{5}:(\\d{1,11}|[Nn][Uu][Ll][Ll]))*";
+    private static final String ONELINE_MULTIPLE_PROTEOFORM_SIMPLE = "^\\s*" + PROTEOFORM_SIMPLE + "(\\s+" + PROTEOFORM_SIMPLE + ")*\\s*$";
+    private static final Pattern PATTERN_PROTEOFORM_SIMPLE = Pattern.compile(PROTEOFORM_SIMPLE);
+    private static final Pattern PATTERN_PROTEOFORM_SIMPLE_WITH_EXPRESSION_VALUES = Pattern.compile(PROTEOFORM_SIMPLE + EXPRESSION_VALUES);
+    private static final Pattern PATTERN_ONELINE_PROTEOFORM_SIMPLE = Pattern.compile(ONELINE_MULTIPLE_PROTEOFORM_SIMPLE);
+
+    public static boolean matches_Proteoform_Simple(String str) {
+        Matcher m = PATTERN_PROTEOFORM_SIMPLE.matcher(str);
+        return m.matches();
+    }
+
+    public static boolean matches_Proteoform_Simple_With_Expression_Values(String str) {
+        Matcher m = PATTERN_PROTEOFORM_SIMPLE_WITH_EXPRESSION_VALUES.matcher(str);
+        return m.matches();
+    }
+
+    public static boolean matches_oneLine_Simple_Proteoforms(String str){
+        Matcher m = PATTERN_ONELINE_PROTEOFORM_SIMPLE.matcher(str);
+        return m.matches();
+    }
+
+    public static boolean contains_Proteoform_Simple(String str) {
+        Matcher m = PATTERN_PROTEOFORM_SIMPLE.matcher(str);
+        return m.find();
+    }
 
     public static Proteoform getProteoform(String line) {
         return getProteoform(line, 0, new ArrayList<>());

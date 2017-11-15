@@ -7,6 +7,10 @@ import org.reactome.server.analysis.parser.response.Response;
 import java.util.List;
 
 import static org.reactome.server.analysis.parser.tools.InputPatterns.*;
+import static org.reactome.server.analysis.parser.tools.ProteoformProcessorPRO.matches_Proteoform_Pro;
+import static org.reactome.server.analysis.parser.tools.ProteoformProcessorPRO.matches_Proteoform_Pro_With_Expression_Values;
+import static org.reactome.server.analysis.parser.tools.ProteoformProcessorSimple.matches_Proteoform_Simple;
+import static org.reactome.server.analysis.parser.tools.ProteoformProcessorSimple.matches_Proteoform_Simple_With_Expression_Values;
 
 public class ProteoformsProcessor {
 
@@ -14,7 +18,7 @@ public class ProteoformsProcessor {
         ProteoformFormat format = checkForProteoforms(line);
         Proteoform proteoform = null;
         switch (format) {
-            case CUSTOM:
+            case SIMPLE:
                     proteoform = ProteoformProcessorSimple.getProteoform(line);
                 break;
             case PRO:
@@ -33,8 +37,8 @@ public class ProteoformsProcessor {
     public static Proteoform getProteoform(String line, ProteoformFormat format, int i, List<String> warnings) {
         Proteoform proteoform = null;
         switch (format) {
-            case CUSTOM:
-                if (!matches_Proteoform_Custom_With_Expression_Values(line)) {
+            case SIMPLE:
+                if (!matches_Proteoform_Simple_With_Expression_Values(line)) {
                     warnings.add(Response.getMessage(Response.INLINE_PROBLEM, i + 1, 1));
                 } else {
                     proteoform = ProteoformProcessorSimple.getProteoform(line, i + 1, warnings);
@@ -89,10 +93,10 @@ public class ProteoformsProcessor {
                 //warningResponses.add(Response.getMessage(Response.EMPTY_LINE, i + 1));
                 continue;
             }
-            if (matches_Proteoform_Custom(line)) {
+            if (matches_Proteoform_Simple(line)) {
                 if (resultFormat == ProteoformFormat.UNKNOWN) {
-                    resultFormat = ProteoformFormat.CUSTOM;
-                } else if (resultFormat != ProteoformFormat.CUSTOM) {
+                    resultFormat = ProteoformFormat.SIMPLE;
+                } else if (resultFormat != ProteoformFormat.SIMPLE) {
                     //errorResponses.add(Response.getMessage(Response.PROTEOFORM_MISMATCH, i + 1));
                     return ProteoformFormat.NONE;
                 }
@@ -127,9 +131,18 @@ public class ProteoformsProcessor {
         return resultFormat;
     }
 
+    /**
+     * Check if the line has at least one proteoform.
+     * @param line
+     * @return
+     */
     public static ProteoformFormat checkForProteoforms(String line){
-        String content[] = {line};
-        return checkForProteoforms(content, 0);
+        if(ProteoformProcessorPRO.contains_Proteoform_Pro(line)){
+            return ProteoformFormat.PRO;
+        } else if(ProteoformProcessorSimple.contains_Proteoform_Simple(line)){
+            return ProteoformFormat.SIMPLE;
+        }
+        return ProteoformFormat.NONE;
     }
 
     public static ProteoformFormat checkForProteoformsWithExpressionValues(String[] content, int startOnLine) {
@@ -142,10 +155,10 @@ public class ProteoformsProcessor {
                 //warningResponses.add(Response.getMessage(Response.EMPTY_LINE, i + 1));
                 continue;
             }
-            if (matches_Proteoform_Custom_With_Expression_Values(line)) {
+            if (matches_Proteoform_Simple_With_Expression_Values(line)) {
                 if (resultFormat == ProteoformFormat.UNKNOWN) {
-                    resultFormat = ProteoformFormat.CUSTOM;
-                } else if (resultFormat != ProteoformFormat.CUSTOM) {
+                    resultFormat = ProteoformFormat.SIMPLE;
+                } else if (resultFormat != ProteoformFormat.SIMPLE) {
                     //errorResponses.add(Response.getMessage(Response.PROTEOFORM_MISMATCH, i + 1));
                     return ProteoformFormat.NONE;
                 }

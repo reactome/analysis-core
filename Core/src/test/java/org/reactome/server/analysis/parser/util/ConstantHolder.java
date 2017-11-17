@@ -1,8 +1,5 @@
 package org.reactome.server.analysis.parser.util;
 
-import org.reactome.server.analysis.parser.InputProcessor;
-import org.springframework.util.StopWatch;
-
 import java.time.Duration;
 import java.util.TreeMap;
 

@@ -1,19 +1,14 @@
 package org.reactome.server.analysis.parser;
 
-import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.jupiter.api.Tag;
 import org.reactome.server.analysis.core.model.AnalysisIdentifier;
-import org.reactome.server.analysis.core.util.MapList;
-import org.reactome.server.analysis.parser.InputFormat_v3;
 import org.reactome.server.analysis.parser.exception.ParserException;
-import org.springframework.context.annotation.Description;
 
 import java.io.*;
-import java.net.URL;
 
-import static org.reactome.server.analysis.parser.util.ConstantHolder.PATH;
+import static org.reactome.server.analysis.parser.tools.ParserFactory.createParser;
 import static org.reactome.server.analysis.parser.util.FileUtils.getString;
 
 /**
@@ -87,8 +82,9 @@ public class AnalysisTests_v3 {
     @Tag("Valid")
     public void testEmptyLines() {
         String data = getString(EMPTY_LINES);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(EMPTY_FILE + " has failed.");
@@ -103,8 +99,9 @@ public class AnalysisTests_v3 {
     @Tag("Valid")
     public void testEmptyLinesWithSpaces() {
         String data = getString(EMPTY_LINES_WITH_SPACES);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(EMPTY_LINES_WITH_SPACES + " has failed.");
@@ -119,8 +116,9 @@ public class AnalysisTests_v3 {
     @Tag("Invalid")
     public void testInlineProblems() {
         String data = getString(INLINE_PROBLEMS);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(INLINE_PROBLEMS + " has failed.");
@@ -134,8 +132,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testEmptyFile() {
         String data = getString(EMPTY_FILE);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
 
             Assert.fail(EMPTY_FILE + " should fail");
@@ -148,8 +147,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testEmptyFileWithSpaces() {
         String data = getString(EMPTY_FILE_SPACES);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
             Assert.fail(EMPTY_FILE_SPACES + " should fail.");
         } catch (ParserException e) {
@@ -160,8 +160,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testMissingHeader() {
         String data = getString(MISSING_HEADER);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(MISSING_HEADER + " has failed.");
@@ -177,8 +178,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testPotentialHeader() {
         String data = getString(POTENTIAL_HEADER);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(POTENTIAL_HEADER + " has failed.");
@@ -194,8 +196,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testSpacesOnHeader() {
         String data = getString(SPACES_ON_HEADER);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(SPACES_ON_HEADER + " has failed.");
@@ -211,8 +214,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testCorrectFile() {
         String data = getString(CORRECT_FILE);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(CORRECT_FILE + " has failed.");
@@ -227,8 +231,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testColumnMismatchHeader() {
         String data = getString(COLUMN_MISMATCH_HEADER);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
 
             Assert.fail(COLUMN_MISMATCH_HEADER + " should fail");
@@ -241,8 +246,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testColumnMismatchContent() {
         String data = getString(COLUMN_MISMATCH_CONTENT);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
             Assert.fail(COLUMN_MISMATCH_HEADER + " should fail");
 
@@ -254,8 +260,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testCarriageReturn() {
         String data = getString(CARRIAGE_RETURN);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(CARRIAGE_RETURN + " has failed.");
@@ -270,8 +277,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testMultipleWarnings() {
         String data = getString(MULTIPLE_WARNINGS);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(MULTIPLE_WARNINGS + " has failed.");
@@ -295,8 +303,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testCarriageReturnErrors() {
         String data = getString(CARRIAGE_RETURN_ERROR);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
             Assert.fail(CARRIAGE_RETURN_ERROR + " should fail.");
         } catch (ParserException e) {
@@ -308,8 +317,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testCarriageReturnWarnings() {
         String data = getString(CARRIAGE_RETURN_WARNING);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(CARRIAGE_RETURN_WARNING + " has failed.");
@@ -324,8 +334,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testBrokenFile() {
         String data = getString(BROKEN_FILE);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
 
             Assert.fail(BROKEN_FILE + " should fail.");
@@ -340,8 +351,9 @@ public class AnalysisTests_v3 {
         File file = writeHugeFile();
 
         String data = getString(PATH + "max_file_size.txt");
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail("10MB file has failed.");
@@ -358,8 +370,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testOnlyIdentifiers() {
         String data = getString(ONLY_IDENTIFIERS);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(ONLY_IDENTIFIERS + " has failed.");
@@ -379,8 +392,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testOneLineStartingWithNumber() {
         String data = getString(ONELINE_START_WITH_NUMBER);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(ONELINE_START_WITH_NUMBER + " has failed.");
@@ -394,8 +408,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testOneLineStartingWithHash() {
         String data = getString(ONELINE_START_WITH_HASH);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
 
             Assert.fail(ONELINE_START_WITH_HASH + " has failed.");
@@ -407,8 +422,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testOneLineIdentifiers() { //success
         String data = getString(ONELINE_IDENTIFIERS);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(ONELINE_IDENTIFIERS + " has failed.");
@@ -427,8 +443,9 @@ public class AnalysisTests_v3 {
      */
     public void testOneLineIdAndExpressions() { //success
         String data = getString(ONELINE_ID_EXPRESSIONS);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(ONELINE_ID_EXPRESSIONS + " has failed.");
@@ -443,8 +460,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testOneLineIdAndExpressionsMixed() {
         String data = getString(ONELINE_ID_EXPRESSIONS_MIXED);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
 
         } catch (ParserException e) {
@@ -460,8 +478,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testOneLineCsv() {
         String data = getString(ONELINE_CSV);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(ONELINE_CSV + " has failed.");
@@ -476,8 +495,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testOneLineOthersSeparator() {
         String data = getString(ONELINE_OTHERSSEPARATOR);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(ONELINE_OTHERSSEPARATOR + " has failed.");
@@ -492,8 +512,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testOneLineStartWithSpaces() {
         String data = getString(ONELINE_START_WITH_SPACES);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(ONELINE_START_WITH_SPACES + " has failed.");
@@ -508,8 +529,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testOneLineButNotInFirstLine() {
         String data = getString(ONELINE_BUT_NOT_IN_FIRST_LINE);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(ONELINE_BUT_NOT_IN_FIRST_LINE + " has failed.");
@@ -524,8 +546,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testOneLineRandomCharacters() {
         String data = getString(ONELINE_RANDOM_CHARACTERS);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(ONELINE_RANDOM_CHARACTERS + " has failed.");
@@ -542,8 +565,9 @@ public class AnalysisTests_v3 {
         File file = writeOneLineHugeFile();
 
         String data = getString(PATH + "one_line_max_file_size.txt");
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail("10MB one line file has failed.");
@@ -563,8 +587,9 @@ public class AnalysisTests_v3 {
          * A ONE LINE file cannot have EXPRESSION VALUES
          */
         String data = getString(ONELINE_WITH_HEADER);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(ONELINE_WITH_HEADER + " has failed.");
@@ -579,8 +604,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testOneLineOneIdentifier() {
         String data = getString(ONELINE_ONE_IDENTIFIER);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(ONELINE_ONE_IDENTIFIER + " has failed.");
@@ -599,8 +625,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testMetabolomicsData() {
         String data = getString(METABOLOMICS_DATA);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(METABOLOMICS_DATA + " has failed.");
@@ -617,8 +644,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testGeneNameList() {
         String data = getString(GENE_NAME_LIST);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(GENE_NAME_LIST + " has failed.");
@@ -634,8 +662,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testGeneNcbi() {
         String data = getString(GENE_NCBI);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(GENE_NCBI + " has failed.");
@@ -652,8 +681,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testMicroarrayData() {
         String data = getString(MICROARRAY_DATA);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(MICROARRAY_DATA + " has failed.");
@@ -670,8 +700,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testSmallMoleculesChebi() {
         String data = getString(SMALL_MOLECULES_CHEBI);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(SMALL_MOLECULES_CHEBI + " has failed.");
@@ -688,8 +719,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testSmallMoleculesKegg() {
         String data = getString(SMALL_MOLECULES_KEGG);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(SMALL_MOLECULES_KEGG + " has failed.");
@@ -706,8 +738,9 @@ public class AnalysisTests_v3 {
     @Test
     public void testUniprotAccessionList() {
         String data = getString(UNIPROT_ACCESSION_LIST);
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(UNIPROT_ACCESSION_LIST + " has failed.");
@@ -825,7 +858,7 @@ public class AnalysisTests_v3 {
     @Test
     public void testPrideSample() {
         String data = getString(PRIDE_SAMPLE);
-        InputFormat_v3 p = new InputFormat_v3();
+        ParserExtended p = new ParserExtended();
         try {
             p.parseData(data);
         } catch (ParserException e) {
@@ -843,7 +876,7 @@ public class AnalysisTests_v3 {
     @Test
     public void testSampleWithSpacesWithoutHeader() {
         String data = getString(SAMPLE_WITH_SPACES_WITHOUT_HEADER);
-        InputFormat_v3 p = new InputFormat_v3();
+        ParserExtended p = new ParserExtended();
         try {
             p.parseData(data);
         } catch (ParserException e) {
@@ -859,7 +892,7 @@ public class AnalysisTests_v3 {
     @Test
     public void testSampleWithTabWithoutHeader() {
         String data = getString(SAMPLE_WITH_TAB_WITHOUT_HEADER);
-        InputFormat_v3 p = new InputFormat_v3();
+        ParserExtended p = new ParserExtended();
         try {
             p.parseData(data);
         } catch (ParserException e) {
@@ -875,7 +908,7 @@ public class AnalysisTests_v3 {
     @Test
     public void testSampleWithColonWithoutHeader() {
         String data = getString(SAMPLE_WITH_COLON_WITHOUT_HEADER);
-        InputFormat_v3 p = new InputFormat_v3();
+        ParserExtended p = new ParserExtended();
         try {
             p.parseData(data);
         } catch (ParserException e) {

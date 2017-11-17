@@ -1,9 +1,9 @@
 package org.reactome.server.analysis.core.model;
 
 import org.reactome.server.analysis.core.util.MapList;
-import org.reactome.server.analysis.parser.InputFormat_v3;
-import org.reactome.server.analysis.parser.tools.ProteoformProcessorPRO;
-import org.reactome.server.analysis.parser.tools.ProteoformProcessorSimple;
+import org.reactome.server.analysis.parser.ParserExtended;
+import org.reactome.server.analysis.parser.ParserProteoformPRO;
+import org.reactome.server.analysis.parser.ParserProteoformSimple;
 
 public class Proteoform {
     private String UniProtAcc;
@@ -35,17 +35,17 @@ public class Proteoform {
         this.PTMs = PTMs;
     }
 
-    public String toString(InputFormat_v3.ProteoformFormat format) {
+    public String toString(ParserExtended.ProteoformFormat format) {
         StringBuilder str = new StringBuilder();
         String[] mods;
         switch (format) {
             case SIMPLE:
-                return ProteoformProcessorSimple.getString(this);
+                return ParserProteoformSimple.getString(this);
             case GPMDB:
                 //TODO
                 break;
             case PRO:
-                return ProteoformProcessorPRO.getString(this);
+                return ParserProteoformPRO.getString(this);
         }
         return str.toString();
     }

@@ -1,4 +1,4 @@
-#Proteoforms with null coordinates
+#Proteoforms
 P08151;00046:null,01148:null
 P08151;00696:null
 P08151;00046:null

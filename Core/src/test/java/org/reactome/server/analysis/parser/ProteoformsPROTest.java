@@ -11,6 +11,7 @@ import org.reactome.server.analysis.parser.exception.ParserException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.reactome.server.analysis.parser.tools.ParserFactory.createParser;
 import static org.reactome.server.analysis.parser.util.FileUtils.getString;
 
 class ProteoformsPROTest {
@@ -56,8 +57,9 @@ class ProteoformsPROTest {
     @Tag("Valid")
     void oneLineWithManySpacesTest(TestInfo testInfo) {
         String data = getString(PATH_VALID + "oneLineWithManySpaces.txt");
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserProteoformPRO.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(testInfo.getDisplayName() + " has failed");
@@ -80,8 +82,9 @@ class ProteoformsPROTest {
      */
     void oneLineWithCommasTest(TestInfo testInfo) {
         String data = getString(PATH_INVALID + "oneLineWithComas.txt");
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserProteoformPRO.class);
             p.parseData(data);
             Assert.fail(testInfo.getDisplayName() + " has failed");
         } catch (ParserException e) {
@@ -93,8 +96,9 @@ class ProteoformsPROTest {
     @Tag("Valid")
     void oneLineWithTabsTest(TestInfo testInfo) {
         String data = getString(PATH_VALID + "oneLineWithTabs.txt");
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserProteoformPRO.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(testInfo.getDisplayName() + " has failed");
@@ -114,8 +118,9 @@ class ProteoformsPROTest {
         // Whether it has the semi-colon or not, the single uniprot accession should be accepted.
     void oneLineOnlyUniprotAccessionsTest(TestInfo testInfo) {
         String data = getString(PATH_VALID + "oneLineWithOneUniprot.txt");
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserProteoformPRO.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(testInfo.getDisplayName() + " has failed");
@@ -131,8 +136,9 @@ class ProteoformsPROTest {
     @Tag("Valid")
     void oneLineProteinWithOnePTMTest(TestInfo testInfo) {
         String data = getString(PATH_VALID + "oneLineProteinWithOnePTM.txt");
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserProteoformPRO.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(testInfo.getDisplayName() + " has failed");
@@ -151,8 +157,9 @@ class ProteoformsPROTest {
     @Tag("Valid")
     void oneLineProteinWithMultiplePTMsTest(TestInfo testInfo) {
         String data = getString(PATH_VALID + "oneLineProteinWithMultiplePTMs.txt");
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserProteoformPRO.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(testInfo.getDisplayName() + " has failed");
@@ -171,8 +178,9 @@ class ProteoformsPROTest {
     @Tag("Valid")
     void oneLineNullCoordinateTest(TestInfo testInfo) {
         String data = getString(PATH_VALID + "oneLineNullCoordinate.txt");
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserProteoformPRO.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(testInfo.getDisplayName() + " has failed");
@@ -191,8 +199,9 @@ class ProteoformsPROTest {
     @Tag("Valid")
     void oneLineHasIsoformTest(TestInfo testInfo) {
         String data = getString(PATH_VALID + "oneLineHasIsoform.txt");
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserProteoformPRO.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(testInfo.getDisplayName() + " has failed");
@@ -209,8 +218,9 @@ class ProteoformsPROTest {
     @Tag("Valid")
     void oneLineHasIsoformAndPTMsTest(TestInfo testInfo) {
         String data = getString(PATH_VALID + "oneLineHasIsoformAndPTMs.txt");
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserProteoformPRO.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(testInfo.getDisplayName() + " has failed");
@@ -231,8 +241,9 @@ class ProteoformsPROTest {
     void oneLineWithHeadersTest(TestInfo testInfo) {
 
         String data = getString(PATH_VALID + "oneLineWithHeaders.txt");
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserProteoformPRO.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(testInfo.getDisplayName() + " has failed");
@@ -254,8 +265,9 @@ class ProteoformsPROTest {
     void oneLineStartsWithHashTest(TestInfo testInfo) {
 
         String data = getString(PATH_INVALID + "oneLineStartsWithHash.txt");
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserProteoformPRO.class);
             p.parseData(data);
             Assert.fail(testInfo.getDisplayName() + " has failed.");
         } catch (ParserException e) {
@@ -267,8 +279,9 @@ class ProteoformsPROTest {
     @Tag("Invalid")
     void oneLineStartsWithComment(TestInfo testInfo) {
         String data = getString(PATH_INVALID + "oneLineStartsWithComment.txt");
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserProteoformPRO.class);
             p.parseData(data);
             Assert.fail(testInfo.getDisplayName() + " has failed.");
         } catch (ParserException e) {
@@ -280,8 +293,9 @@ class ProteoformsPROTest {
     @Tag("Valid")
     void multipleLinesWithExpressionValuesTest(TestInfo testInfo) {
         String data = getString(PATH_VALID + "multipleLinesWithExpressionValues.txt");
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserProteoformPRO.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(testInfo.getDisplayName() + " has failed");
@@ -300,8 +314,9 @@ class ProteoformsPROTest {
     @Tag("Valid")
     void multipleLinesOnlyUniprotAccessionsTest(TestInfo testInfo) {
         String data = getString(PATH_VALID + "multipleLinesOnlyUniprotAccessions.txt");
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserProteoformPRO.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(testInfo.getDisplayName() + " has failed");
@@ -317,8 +332,9 @@ class ProteoformsPROTest {
     @Tag("Valid")
     void multipleLinesWithMultiplePTMsTest(TestInfo testInfo) {
         String data = getString(PATH_VALID + "multipleLinesWithMultiplePTMs.txt");
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserProteoformPRO.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(testInfo.getDisplayName() + " has failed");
@@ -337,8 +353,9 @@ class ProteoformsPROTest {
     @Tag("Valid")
     void multipleLinesNullCoordinateTest(TestInfo testInfo) {
         String data = getString(PATH_VALID + "multipleLinesNullCoordinate.txt");
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserProteoformPRO.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(testInfo.getDisplayName() + " has failed");
@@ -355,16 +372,34 @@ class ProteoformsPROTest {
 
     @Test
     @Tag("Invalid")
+    void multipleLinesNullCoordinateSpacedHeaderTest(TestInfo testInfo) {
+        String data = getString(PATH_INVALID + "multipleLinesNullCoordinateSpacedHeader.txt");
+        Parser p = createParser(data);
+        try {
+            Assert.assertEquals(p.getClass(), ParserProteoformPRO.class);
+            p.parseData(data);
+            Assert.fail(testInfo.getDisplayName() + " was expected to fail beause header has multiple columns and the rest of rows not.");
+        } catch (ParserException e) {
+        }
+    }
+
+    @Test
+    @Tag("Invalid")
         // Proteoforms will not follow the format specified in the regex, therefore it is taken
         // as a regular id, but then the number of columns will not match
     void multipleLinesWithInvalidPTMTypeTest(TestInfo testInfo) {
         String data = getString(PATH_INVALID + "multipleLinesWithInvalidPTMType.txt");
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserProteoformPRO.class);
             p.parseData(data);
             Assert.fail(testInfo.getDisplayName() + " has failed.");
         } catch (ParserException e) {
-            Assert.assertTrue("It should fail to detect the Proteoforms, then it process the line as regular if, spliting wrong the line.", e.getErrorMessages().contains("Line 2 does not have 6 column(s). 8 Column(s) found."));
+            Assert.assertTrue("Line does not match the proteoform PRO format.", e.getErrorMessages().contains("Line 2 does not follow the proteoform format PRO."));
+            Assert.assertTrue("Line does not match the proteoform PRO format.", e.getErrorMessages().contains("Line 3 does not follow the proteoform format PRO."));
+            Assert.assertTrue("Line does not match the proteoform PRO format.", e.getErrorMessages().contains("Line 5 does not follow the proteoform format PRO."));
+            Assert.assertTrue("Line does not match the proteoform PRO format.", e.getErrorMessages().contains("Line 7 does not follow the proteoform format PRO."));
+            Assert.assertTrue("Line does not match the proteoform PRO format.", e.getErrorMessages().contains("Line 9 does not follow the proteoform format PRO."));
         }
     }
 
@@ -372,8 +407,9 @@ class ProteoformsPROTest {
     @Tag("Valid")
     void multipleLinesWithIsoformsTest(TestInfo testInfo) {
         String data = getString(PATH_VALID + "multipleLinesWithIsoforms.txt");
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserProteoformPRO.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(testInfo.getDisplayName() + " has failed");
@@ -392,14 +428,17 @@ class ProteoformsPROTest {
     @Tag("Invalid")
     void multipleLinesBrokenFileTest(TestInfo testInfo) {
         String data = getString(PATH_INVALID + "multipleLinesBrokenFile.txt");
-        InputFormat_v3 p = new InputFormat_v3();
+        Parser p = createParser(data);
         try {
+            Assert.assertEquals(p.getClass(), ParserProteoformPRO.class);
             p.parseData(data);
             Assert.fail(testInfo.getDisplayName() + " has failed.");
         } catch (ParserException e) {
             Assert.assertTrue("Should have less columns than first line.", e.getErrorMessages().contains("Line 2 does not have 5 column(s). 1 Column(s) found."));
             Assert.assertTrue("Should have more columns than the first line.", e.getErrorMessages().contains("Line 3 does not have 5 column(s). 8 Column(s) found."));
-            Assert.assertTrue("Should have more columns than the first line.", e.getErrorMessages().contains("Line 7 does not have 5 column(s). 9 Column(s) found."));
+            Assert.assertTrue("Should have more columns than the first line.", e.getErrorMessages().contains("Line 4 does not have 5 column(s). 2 Column(s) found."));
+            Assert.assertTrue("Should have more columns than the first line.", e.getErrorMessages().contains("Line 5 does not have 5 column(s). 3 Column(s) found."));
+            Assert.assertTrue("Line 7 should not be valid.", e.getErrorMessages().contains("Line 7 does not follow the proteoform format PRO."));
         }
     }
 

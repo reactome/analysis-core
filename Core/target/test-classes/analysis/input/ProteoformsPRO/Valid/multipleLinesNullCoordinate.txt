@@ -1,4 +1,4 @@
-#Proteoforms with null coordinates
+#Proteoforms
 UniProtKB:P08151,Ser-null,MOD:00046|Lys-null,MOD:01148
 UniProtKB:P08151,XXX-null,MOD:00696
 UniProtKB:P08151,Ser-null,MOD:00046

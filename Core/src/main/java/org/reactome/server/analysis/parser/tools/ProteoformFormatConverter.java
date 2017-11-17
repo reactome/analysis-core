@@ -1,7 +1,7 @@
 package org.reactome.server.analysis.parser.tools;
 
 import org.reactome.server.analysis.core.model.Proteoform;
-import org.reactome.server.analysis.parser.InputFormat_v3;
+import org.reactome.server.analysis.parser.ParserExtended;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -25,7 +25,7 @@ public class ProteoformFormatConverter {
         // Convert each proteoform
         for(String line : lines){
             Proteoform proteoform = ProteoformsProcessor.getProteoform(line);
-            outFile.write(proteoform.toString(InputFormat_v3.ProteoformFormat.PRO) + "\n");
+            outFile.write(proteoform.toString(ParserExtended.ProteoformFormat.PRO) + "\n");
         }
     }
 }

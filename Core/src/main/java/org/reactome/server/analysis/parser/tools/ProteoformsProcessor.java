@@ -1,16 +1,20 @@
 package org.reactome.server.analysis.parser.tools;
 
 import org.reactome.server.analysis.core.model.Proteoform;
-import org.reactome.server.analysis.parser.InputFormat_v3.ProteoformFormat;
+import org.reactome.server.analysis.parser.Parser;
+import org.reactome.server.analysis.parser.ParserExtended.ProteoformFormat;
+import org.reactome.server.analysis.parser.ParserProteoformSimple;
+import org.reactome.server.analysis.parser.ParserProteoformPRO;
+import org.reactome.server.analysis.parser.ParserProteoformGPMDB;
 import org.reactome.server.analysis.parser.response.Response;
 
 import java.util.List;
 
 import static org.reactome.server.analysis.parser.tools.InputPatterns.*;
-import static org.reactome.server.analysis.parser.tools.ProteoformProcessorPRO.matches_Proteoform_Pro;
-import static org.reactome.server.analysis.parser.tools.ProteoformProcessorPRO.matches_Proteoform_Pro_With_Expression_Values;
-import static org.reactome.server.analysis.parser.tools.ProteoformProcessorSimple.matches_Proteoform_Simple;
-import static org.reactome.server.analysis.parser.tools.ProteoformProcessorSimple.matches_Proteoform_Simple_With_Expression_Values;
+import static org.reactome.server.analysis.parser.ParserProteoformPRO.matches_Proteoform_Pro;
+import static org.reactome.server.analysis.parser.ParserProteoformPRO.matches_Proteoform_Pro_With_Expression_Values;
+import static org.reactome.server.analysis.parser.ParserProteoformSimple.matches_Proteoform_Simple;
+import static org.reactome.server.analysis.parser.ParserProteoformSimple.matches_Proteoform_Simple_With_Expression_Values;
 
 public class ProteoformsProcessor {
 
@@ -19,16 +23,16 @@ public class ProteoformsProcessor {
         Proteoform proteoform = null;
         switch (format) {
             case SIMPLE:
-                    proteoform = ProteoformProcessorSimple.getProteoform(line);
+                    proteoform = ParserProteoformSimple.getProteoform(line);
                 break;
             case PRO:
-                    proteoform = ProteoformProcessorPRO.getProteoform(line);
+                    proteoform = ParserProteoformPRO.getProteoform(line);
                 break;
             case PIR_ID:
                     proteoform = ProteoformProcessorPIR.getProteoform(line);
                 break;
             case GPMDB:
-                    proteoform = ProteoformProcessorGPMDB.getProteoform(line);
+                    proteoform = ParserProteoformGPMDB.getProteoform(line);
                 break;
         }
         return proteoform;
@@ -41,14 +45,14 @@ public class ProteoformsProcessor {
                 if (!matches_Proteoform_Simple_With_Expression_Values(line)) {
                     warnings.add(Response.getMessage(Response.INLINE_PROBLEM, i + 1, 1));
                 } else {
-                    proteoform = ProteoformProcessorSimple.getProteoform(line, i + 1, warnings);
+                    proteoform = ParserProteoformSimple.getProteoform(line, i + 1, warnings);
                 }
                 break;
             case PRO:
                 if (!matches_Proteoform_Pro_With_Expression_Values(line)) {
                     warnings.add(Response.getMessage(Response.INLINE_PROBLEM, i + 1, 1));
                 } else {
-                    proteoform = ProteoformProcessorPRO.getProteoform(line, i + 1);
+                    proteoform = ParserProteoformPRO.getProteoform(line, i + 1);
                 }
                 break;
             case PIR_ID:
@@ -62,7 +66,7 @@ public class ProteoformsProcessor {
                 if (!matches_Proteoform_Gpmdb_With_Expression_Values(line)) {
                     warnings.add(Response.getMessage(Response.INLINE_PROBLEM, i + 1, 1));
                 } else {
-                    proteoform = ProteoformProcessorGPMDB.getProteoform(line, i + 1);
+                    proteoform = ParserProteoformGPMDB.getProteoform(line, i + 1);
                 }
                 break;
             case NONE:
@@ -137,9 +141,9 @@ public class ProteoformsProcessor {
      * @return
      */
     public static ProteoformFormat checkForProteoforms(String line){
-        if(ProteoformProcessorPRO.contains_Proteoform_Pro(line)){
+        if(ParserProteoformPRO.check(line)){
             return ProteoformFormat.PRO;
-        } else if(ProteoformProcessorSimple.contains_Proteoform_Simple(line)){
+        } else if(ParserProteoformSimple.check(line)){
             return ProteoformFormat.SIMPLE;
         }
         return ProteoformFormat.NONE;

@@ -1,3 +1,5 @@
+# Script to make plots showing the number of matching reactions and pathways to proteins and proteoforms.
+
 
 proteoformFrequencies <- read.csv("ReactomeAllProteoformsFrequencies.csv", sep = ",", header = T)
 proteinFrequencies <- read.csv("ReactomeAllProteinFrequencies.csv", sep = ",", header = T)

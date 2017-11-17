@@ -19,19 +19,19 @@ public class InputPerformanceTest {
     public static void main(String args[]) throws IOException, ParserException {
 
         Set<InputTypeEnum> typesToTest = new HashSet<>();
-        Set<InputProcessor> processorVersions = new HashSet<>();
+        Set<Parser> processorVersions = new HashSet<>();
         FileWriter timesFile = new FileWriter(PATH_STATS + "Times.csv");
         Stopwatch stopwatch = Stopwatch.createUnstarted();
 
 //        typesToTest.add(InputTypeEnum.uniprotList);
         typesToTest.add(InputTypeEnum.uniprotListAndModSites);
 
-        processorVersions.add(new InputFormat_v3());
-//        processorVersions.add(new InputFormat());
+        processorVersions.add(new ParserExtended());
+//        processorVersions.add(new ParserOriginal());
 
         timesFile.write("Version,Test,Size,ms,Repetition\n");
 
-        for (InputProcessor p : processorVersions) {
+        for (Parser p : processorVersions) {
             for (InputTypeEnum t : typesToTest) {
                 for (int s : sizes) {
                     for (int w = 0; w < WARMUP_OFFSET; w++) {

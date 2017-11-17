@@ -5,7 +5,8 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
 import org.reactome.server.analysis.core.model.AnalysisIdentifier;
 import org.reactome.server.analysis.core.model.UserData;
-import org.reactome.server.analysis.parser.InputFormat;
+import org.reactome.server.analysis.parser.Parser;
+import org.reactome.server.analysis.parser.ParserOriginal;
 import org.reactome.server.analysis.parser.exception.ParserException;
 import org.springframework.util.DigestUtils;
 
@@ -13,6 +14,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
+
+import static org.reactome.server.analysis.parser.tools.ParserFactory.createParser;
 
 /**
  * Parses the input to create a UserData object with the data to be analysed
@@ -99,9 +102,11 @@ public abstract class InputUtils {
     */
 
     private static UserData processData(String data, String md5) throws IOException, ParserException {
-        InputFormat parser = new InputFormat();
+
+        Parser parser = createParser(data);
         parser.parseData(data);
 
         return new UserData(parser.getHeaderColumnNames(), parser.getAnalysisIdentifierSet(), md5, parser.getWarningResponses());
     }
+
 }

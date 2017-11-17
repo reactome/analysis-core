@@ -24,24 +24,17 @@ import static org.reactome.server.analysis.parser.tools.ProteoformsProcessor.che
  * <p>
  * Supported input formats: Accession lists, Expression matrices, simple proteoform lists, Protein Ontology (PRO) proteoform lists
  */
-public class InputFormat_v3 extends InputProcessor {
+public class ParserExtended extends Parser {
 
-    private static Logger logger = Logger.getLogger(InputFormat_v3.class.getName());
+    private static Logger logger = Logger.getLogger(ParserExtended.class.getName());
 
     public static Logger getLogger() {
         return logger;
     }
 
     public static void setLogger(Logger logger) {
-        InputFormat_v3.logger = logger;
+        ParserExtended.logger = logger;
     }
-
-    /**
-     * This is the default header for oneline file and multiple line file
-     * Changing here will propagate in both.
-     */
-    private static final String DEFAULT_IDENTIFIER_HEADER = "";
-    private static final String DEFAULT_EXPRESSION_HEADER = "col";
 
     /**
      * Pride is using colon, we decided to remove it from the parser
@@ -114,6 +107,7 @@ public class InputFormat_v3 extends InputProcessor {
         if (cleanInput.equalsIgnoreCase("")) {        // no data to be analysed
             errorResponses.add(Response.getMessage(Response.EMPTY_FILE));
         } else {        // If there is content in the input
+
             String[] lines = cleanInput.split("[\r\n]");   // Split lines. Do not add + here. It will remove empty lines
 
             int firstLineNumber = isOneLineFile(lines);
@@ -130,41 +124,6 @@ public class InputFormat_v3 extends InputProcessor {
             logger.error("Error analysing your data");
             throw new ParserException("Error analysing your data", errorResponses);
         }
-    }
-
-    /**
-     * ---- FOR VERY SPECIFIC CASES, BUT VERY USEFUL FOR REACTOME ----
-     * There're cases where the user inputs a file with one single line to be analysed
-     * This method performs a quick view into the file and count the lines. It stops if file has more than one line.
-     * p.s empty lines are always ignored
-     * To avoid many iteration to the same file, during counting lines the main attributes are being set and used in the
-     * analyse content method.
-     * This method ignores blank lines,spaces, tabs and so on.
-     *
-     * @param input the file already trimmed.
-     * @return If the file has one valid line returns the number of line. Otherwise returns a negative number.
-     */
-    private int isOneLineFile(String[] input) {
-
-        int lineNumber = -1;
-        int countNonEmptyLines = 0;
-        for (int N = 0; N < input.length; N++) {
-
-            // Cleaning the line in other to eliminate blank or spaces spread in the file
-            String cleanLine = input[N].trim();
-
-            if (StringUtils.isNotEmpty(cleanLine) || StringUtils.isNotBlank(cleanLine)) {
-                countNonEmptyLines++;
-                lineNumber = N;
-
-                // We don't need to keep counting...
-                if (countNonEmptyLines > 1) {
-                    lineNumber = -1;
-                    break;
-                }
-            }
-        }
-        return lineNumber;
     }
 
     /**
@@ -586,6 +545,11 @@ public class InputFormat_v3 extends InputProcessor {
      */
     public List<String> getWarningResponses() {
         return warningResponses;
+    }
+
+    @Override
+    public boolean flexibleCheck() {
+        return false;
     }
 
     /**

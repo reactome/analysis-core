@@ -16,9 +16,9 @@ import java.util.regex.Pattern;
  *
  * @author Guilherme Viteri <gviteri@ebi.ac.uk>
  */
-public class InputFormat extends InputProcessor {
+public class ParserOriginal extends Parser {
 
-    private static Logger logger = Logger.getLogger(InputFormat.class.getName());
+    private static Logger logger = Logger.getLogger(ParserOriginal.class.getName());
 
     /**
      * This is the default header for oneline file and multiple line file
@@ -40,7 +40,6 @@ public class InputFormat extends InputProcessor {
     private static final String MULTI_LINE_CONTENT_SPLIT_REGEX = "[\\s,;]+";
 
     private List<String> headerColumnNames = new LinkedList<>();
-    private Set<AnalysisIdentifier> analysisIdentifierSet = new LinkedHashSet<>();
     private boolean hasHeader = false;
 
     /**
@@ -48,9 +47,6 @@ public class InputFormat extends InputProcessor {
      * All the following lines must match this threshold.
      */
     private int thresholdColumn = 0;
-
-    private List<String> errorResponses = new LinkedList<>();
-    private List<String> warningResponses = new LinkedList<>();
 
     /**
      * Ignoring the initial blank lines and start parsing from the
@@ -67,7 +63,8 @@ public class InputFormat extends InputProcessor {
      * @param input file already converted into a String.
      * @throws IOException, ParserException
      */
-    public void parseData(String input) throws IOException, ParserException {
+    public void parseData(String input) throws ParserException {
+
         long start = System.currentTimeMillis();
 
         String clean = input.trim();
@@ -79,13 +76,13 @@ public class InputFormat extends InputProcessor {
             String[] lines = input.split("[\r\n]"); // Do not add + here. It will remove empty lines
 
             // check and parser whether one line file is present.
-            boolean isOneLine = isOneLineFile(lines);
-            if (!isOneLine) {
-                // Prepare header
-                analyseHeaderColumns(lines);
-
-                // Prepare content
-                analyseContent(lines);
+            int uniqueLineRow = isOneLineFile(lines);
+            if (uniqueLineRow >= 0) {
+                hasHeader = false;
+                analyseOneLineFile(lines[uniqueLineRow]);
+            } else {
+                analyseHeaderColumns(lines);                    // Prepare header
+                analyseContent(lines);                          // Prepare content
             }
 
         }
@@ -98,46 +95,6 @@ public class InputFormat extends InputProcessor {
             throw new ParserException("Error analysing your data", errorResponses);
         }
 
-    }
-
-    /**
-     * ---- FOR VERY SPECIFIC CASES, BUT VERY USEFUL FOR REACTOME ----
-     * There're cases where the user inputs a file with one single line to be analysed
-     * This method performs a quick view into the file and count the lines. It stops if file has more than one line.
-     * p.s empty lines are always ignored
-     * To avoid many iteration to the same file, during counting lines the main attributes are being set and used in the
-     * analyse content method.
-     * This method ignores blank lines,spaces, tabs and so on.
-     *
-     * @param input the file
-     * @return true if file has one line, false otherwise.
-     */
-    private boolean isOneLineFile(String[] input) {
-
-        int countNonEmptyLines = 0;
-        String validLine = "";
-
-        for (int i = 0; i < input.length; i++) {
-            // Cleaning the line in other to eliminate blank or spaces spread in the file
-            String cleanLine = input[i].trim();
-            if (StringUtils.isNotEmpty(cleanLine) || StringUtils.isNotBlank(cleanLine)) {
-                countNonEmptyLines++;
-
-                // Line without parsing - otherwise we can't eliminate blank space and tabs spread in the file.
-                validLine = input[i];
-
-                // We don't need to keep counting...
-                if (countNonEmptyLines > 1) {
-                    return false;
-                }
-            }
-        }
-
-        hasHeader = false;
-
-        analyseOneLineFile(validLine);
-
-        return true;
     }
 
     /**
@@ -392,6 +349,11 @@ public class InputFormat extends InputProcessor {
      */
     public List<String> getWarningResponses() {
         return warningResponses;
+    }
+
+    @Override
+    public boolean flexibleCheck() {
+        return false;
     }
 
     /**

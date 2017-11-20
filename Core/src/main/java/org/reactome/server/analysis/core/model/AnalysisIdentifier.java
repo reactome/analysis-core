@@ -18,6 +18,15 @@ public class AnalysisIdentifier implements Comparable<AnalysisIdentifier> {
 
     private String id;
     private List<Double> exp;
+    private Long startCoordinate;
+    private Long endCoordinate;
+    /*
+     * The data structure to store the ptm set for a proteoform. Keys are psi mod identifiers (five digits).
+     * Values are lists of numbers for the coordinates of the ptms.
+     * Map implemented as TreeMap to be sorted.
+     */
+    private MapList<String, Long> ptms;
+
 
     /**
      * Notice that this constructor initializes also the ptm set as empty. Then when comparing to AnalysisIdentifiers
@@ -28,12 +37,16 @@ public class AnalysisIdentifier implements Comparable<AnalysisIdentifier> {
     public AnalysisIdentifier(String id) {
         this.id = id;
         this.exp = new LinkedList<Double>();
+        startCoordinate = null;
+        endCoordinate = null;
         this.ptms = new MapList<>();
     }
 
     public AnalysisIdentifier(String id, List<Double> exp) {
         this.id = id;
         this.exp = exp;
+        startCoordinate = null;
+        endCoordinate = null;
         this.ptms = new MapList<>();
     }
 
@@ -55,13 +68,6 @@ public class AnalysisIdentifier implements Comparable<AnalysisIdentifier> {
     public List<Double> getExp() {
         return exp;
     }
-
-    /**
-     * The data structure to store the ptm set for a proteoform. Keys are psi mod identifiers (five digits).
-     * Values are lists of numbers for the coordinates of the ptms.
-     * Map implemented as TreeMap to be sorted.
-     */
-    private MapList<String, Long> ptms;
 
     public MapList<String, Long> getPtms() {
         return ptms;
@@ -91,6 +97,10 @@ public class AnalysisIdentifier implements Comparable<AnalysisIdentifier> {
         //noinspection RedundantIfStatement
         if (id != null ? !id.equals(that.id) : that.id != null) return false;
 
+        if (startCoordinate != null ? !startCoordinate.equals(that.startCoordinate) : that.startCoordinate != null) return false;
+
+        if (endCoordinate != null ? !endCoordinate.equals(that.endCoordinate) : that.endCoordinate != null) return false;
+
         // Verify the number of ptms is equal
         if (ptms != null ? ptms.size() != that.getPtms().size() : that.getPtms() != null) return false;
 
@@ -119,6 +129,10 @@ public class AnalysisIdentifier implements Comparable<AnalysisIdentifier> {
     @Override
     public String toString() {
         return this.id + "[" + this.ptms.toString() + "]";
+    }
+
+    public String toFullString(){
+        return this.id + "(" + startCoordinate + "-" + endCoordinate + ")," + "[" + this.ptms.toString() + "]";
     }
 
     @Override

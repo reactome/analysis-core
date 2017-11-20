@@ -28,9 +28,6 @@ public class ProteoformsProcessor {
             case PRO:
                     proteoform = ParserProteoformPRO.getProteoform(line);
                 break;
-            case PIR_ID:
-                    proteoform = ProteoformProcessorPIR.getProteoform(line);
-                break;
             case GPMDB:
                     proteoform = ParserProteoformGPMDB.getProteoform(line);
                 break;
@@ -53,13 +50,6 @@ public class ProteoformsProcessor {
                     warnings.add(Response.getMessage(Response.INLINE_PROBLEM, i + 1, 1));
                 } else {
                     proteoform = ParserProteoformPRO.getProteoform(line, i + 1);
-                }
-                break;
-            case PIR_ID:
-                if (!matches_Proteoform_Pir_With_Expression_Values(line)) {
-                    warnings.add(Response.getMessage(Response.INLINE_PROBLEM, i + 1, 1));
-                } else {
-                    proteoform = ProteoformProcessorPIR.getProteoform(line, i + 1);
                 }
                 break;
             case GPMDB:

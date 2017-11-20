@@ -225,7 +225,6 @@ public class AnalysisTests_v3 {
         Assert.assertEquals(6, p.getHeaderColumnNames().size());
         Assert.assertEquals(9, p.getAnalysisIdentifierSet().size());
         Assert.assertEquals(0, p.getWarningResponses().size());
-
     }
 
     @Test

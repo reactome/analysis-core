@@ -132,7 +132,24 @@ A0A022YWF9
 A0A022YWF9;246:00916,467:00916,632:00916
 ~~~~
 
-#### Protein Ontology (TODO)
+#### Protein Ontology
+
+
+
+### How are subsequence ranges annotated in Reactome
+Proteins are commonly processed with cleaving or modifications in order to perform their functions. Very often they do not stay complete the way they are right after translation. For example, the initial residue is removed, because it is just the starting signal of the protein and all of them share that initial methionine. Sometimes, also peptide regions have to be removed so that the protein can actually perform its task. In other situations, only a subsequence of the protein is necessary to perform the task, then it is necessary to specify the range of the subsequence with respect to the full sequence.
+
+By default the sequences refer to the canonical sequence of the proteins. In case they refer to other variants of the sequence then, the isoform is specified.
+
+The subsequences of the proteins are represented by the class "EntityWithAccessionedSequence" in Reactome. It always has "startCoordinate" and "endCoordinate" fields to specify the start and end amino acids in the full sequence of the protein. When the whole protein sequence is meant, then either the start and end are not specified or the coordinates of the start and end positions of the full sequence are annotated. In some cases, either the start or end coordinate are not known, therefore they are left blank.
+
+### How are Isoforms annotated in Reactome
+
+The isoform number 1 is the main isoform of the protein, which is selected by UniProt. The isoforms annotated in Reactome are not updated regularly. Therefore, in case the isoform numbering changes in UniProt, the annotated isoforms in Reactome might diverge from the current ones.
+
+When a protein has only one version then there is no need to specify the isoform. The default isoform is "-1", which is often ommited. When an isoform is specified, it means only that isoform can perform the function it is supposed to do. In those cases, even the isoform "-1" will be annotated. Otherwise, there is no need to annotate it. This applies also for the proteins having ine or more isoforms.
+
+// TODO: Create a script to perform a check in Reactome if the coordinates of the subsequence ranges and full sequence coordinates match the ones of the actual sequences in UniProt. Extend to check also the ptm coordinates. In case there are some discrepancies, download the history of the protein from UniProt and check if the protein was really annotated according to the sequence by that time. OUTPUT the list of corrections needed to be made in order to keep the information matched.
 
 #### PEFF (TODO)
 

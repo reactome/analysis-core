@@ -1,14 +1,14 @@
 package org.reactome.server.analysis.parser;
 
 import org.junit.Assert;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.reactome.server.analysis.parser.exception.ParserException;
 import org.springframework.context.annotation.Description;
 
-import java.io.File;
-
+import static org.junit.jupiter.api.Assertions.*;
 import static org.reactome.server.analysis.parser.tools.ParserFactory.createParser;
-import static org.reactome.server.analysis.parser.util.ConstantHolder.REPETITIONS;
 import static org.reactome.server.analysis.parser.util.FileUtils.getString;
 
 class ProteoformsPEFFTest {
@@ -18,19 +18,190 @@ class ProteoformsPEFFTest {
 
     @Test
     @Tag("Valid")
-    void examplePEFF_Minimal_ValidTest(TestInfo testInfo) {
+    void exampleMinimalValidTest(TestInfo testInfo) {
         String data = getString(PATH_VALID + "PEFF_Minimal_Valid.peff");
         Parser p = createParser(data);
         try {
-            Assert.assertEquals(p.getClass(), ParserProteoformPEFF.class);
+            assertEquals(p.getClass(), ParserProteoformPEFF.class);
             p.parseData(data);
         } catch (ParserException e) {
             Assert.fail(testInfo.getDisplayName() + " has failed");
         }
 
-        Assert.assertEquals(1, p.getHeaderColumnNames().size());
-        Assert.assertEquals(1, p.getAnalysisIdentifierSet().size());
-        Assert.assertEquals(0, p.getWarningResponses().size());
+        assertEquals(1, p.getHeaderColumnNames().size());
+        assertEquals(1, p.getAnalysisIdentifierSet().size());
+        assertEquals(0, p.getWarningResponses().size());
+    }
+
+    @Test
+    @Tag("Valid")
+    void exampleTinyValidTest(TestInfo testInfo) {
+        String data = getString(PATH_VALID + "PEFF_Tiny_Valid.peff");
+        Parser p = createParser(data);
+        try {
+            assertEquals(p.getClass(), ParserProteoformPEFF.class);
+            p.parseData(data);
+        } catch (ParserException e) {
+            fail(testInfo.getDisplayName() + " has failed");
+        }
+
+        assertEquals(1, p.getHeaderColumnNames().size());
+        assertEquals(3, p.getAnalysisIdentifierSet().size());
+        assertEquals(2, p.getWarningResponses().size());
+
+        assertAll("p.getWarningResponses()",
+                () -> assertTrue(p.getWarningResponses().contains("ModRes term '|Custom Mod 1' cannot be resolved in PSI-MOD or UniMod and may not be interpretable by reading software at position 16 in entry 'nr:gi|136429|sp|P00761.1|TRYP_PIG'")),
+                () -> assertTrue(p.getWarningResponses().contains("ModRes term 'ModCV:22|Floxilation' cannot be resolved in PSI-MOD or UniMod and may not be interpretable by reading software at position 18 in entry 'nr:gi|136429|sp|P00761.1|TRYP_PIG'")));
+    }
+
+
+    @Test
+    @Tag("Valid")
+    void exampleSmallValid09Test(TestInfo testInfo) {
+        String data = getString(PATH_VALID + "SmallTestDB-PEFF0.9.peff");
+        Parser p = createParser(data);
+        try {
+            assertEquals(p.getClass(), ParserProteoformPEFF.class);
+            p.parseData(data);
+        } catch (ParserException e) {
+            Assert.fail(testInfo.getDisplayName() + " has failed");
+        }
+
+        assertEquals(1, p.getHeaderColumnNames().size());
+        assertEquals(29, p.getAnalysisIdentifierSet().size());
+        assertEquals(4, p.getWarningResponses().size());
+
+        assertAll("p.getWarningResponses()",
+                () -> assertTrue(p.getWarningResponses().contains("No PEFF version provided. Assuming and allowing pre-release version 0.9 for now in file header")),
+                () -> assertTrue(p.getWarningResponses().contains("ModRes term '|1' cannot be resolved in PSI-MOD or UniMod and may not be interpretable by reading software at position 1 in entry 'sp:Q62622_CHAIN0'")),
+                () -> assertTrue(p.getWarningResponses().contains("ModRes term '|63' cannot be resolved in PSI-MOD or UniMod and may not be interpretable by reading software at position 63 in entry 'sp:Q62622_CHAIN0'")),
+                () -> assertTrue(p.getWarningResponses().contains("Attribute \\Length is not present in entry 'nr:gi|136429|sp|P00761.1|TRYP_PIG'")));
+    }
+
+    @Test
+    @Tag("Valid")
+    void exampleSmallValid10Test(TestInfo testInfo) {
+        String data = getString(PATH_VALID + "SmallTestDB-PEFF1.0.peff");
+        Parser p = createParser(data);
+        try {
+            assertEquals(p.getClass(), ParserProteoformPEFF.class);
+            p.parseData(data);
+        } catch (ParserException e) {
+            Assert.fail(testInfo.getDisplayName() + " has failed");
+        }
+
+        assertEquals(1, p.getHeaderColumnNames().size());
+        assertEquals(29, p.getAnalysisIdentifierSet().size());
+        assertEquals(2, p.getWarningResponses().size());
+
+        assertAll("p.getWarningResponses()",
+                () -> assertTrue(p.getWarningResponses().contains("ModRes term '1|ACET_nterm' cannot be resolved in PSI-MOD or UniMod and may not be interpretable by reading software at position 1 in entry 'sp:Q62622_CHAIN0'")),
+                () -> assertTrue(p.getWarningResponses().contains("ModRes term '63|PHOS' cannot be resolved in PSI-MOD or UniMod and may not be interpretable by reading software at position 63 in entry 'sp:Q62622_CHAIN0'")));
+    }
+
+    @Test
+    @Tag("Invalid")
+    void exampleMinimalInvalidTest(TestInfo testInfo) {
+        String data = getString(PATH_VALID + "PEFF_Minimal_INValid1.peff");
+        Parser p = createParser(data);
+        try {
+            assertEquals(p.getClass(), ParserProteoformPEFF.class);
+            p.parseData(data);
+            Assert.fail(testInfo.getDisplayName() + " has failed");
+        } catch (ParserException e) {
+            // Some things should go wrong
+            assertEquals(11, p.getWarningResponses().size());
+            assertAll("p.getWarningResponses()",
+                    () -> assertTrue(p.getWarningResponses().contains("Only PEFF 1.0 is currently supported, but this file claims to be PEFF version '0.0'. We will press on and hope for the best, but it probably won't end well in file header")),
+                    () -> assertTrue(p.getWarningResponses().contains("Mandatory header attribute 'Prefix' is missing in header")),
+                    () -> assertTrue(p.getWarningResponses().contains("Mandatory header attribute 'DbSource' is missing in header")),
+                    () -> assertTrue(p.getWarningResponses().contains("Mandatory header attribute 'DbVersion' is missing in header")),
+                    () -> assertTrue(p.getWarningResponses().contains("Mandatory header attribute 'SequenceType' is missing in header")),
+                    () -> assertTrue(p.getWarningResponses().contains("Mandatory header attribute 'NumberOfEntries' is missing in header")),
+                    () -> assertTrue(p.getWarningResponses().contains("The database key in the accession is not defined from 'sp:Q9Y2X3'")),
+                    () -> assertTrue(p.getWarningResponses().contains("Term 'Color' not found in CV (and the database 'sp' is not defined so no custom keys) in entry 'sp:Q9Y2X3'")),
+                    () -> assertTrue(p.getWarningResponses().contains("The database key in the accession is not defined from 'sp:Q9Y2X4'")),
+                    () -> assertTrue(p.getWarningResponses().contains("The \\Length= attribute does not match calculated sequence length \\Length=5 should be 11 in entry 'sp:Q9Y2X4'")),
+                    () -> assertTrue(p.getWarningResponses().contains("Attribute \\Length is not present in entry 'sp:Q9Y2X3'"))
+            );
+        }
+    }
+
+    @Test
+    @Tag("Invalid")
+    void exampleTinyInvalidTest(TestInfo testInfo) {
+        String data = getString(PATH_INVALID + "PEFF_Tiny_INValid1.peff");
+        Parser p = createParser(data);
+        try {
+            assertEquals(p.getClass(), ParserProteoformPEFF.class);
+            p.parseData(data);
+            Assert.fail(testInfo.getDisplayName() + " has failed");
+        } catch (ParserException e) {
+            // Some things should go wrong
+            assertEquals(11, p.getWarningResponses().size());
+            assertAll("p.getWarningResponses()",
+                    () -> assertTrue(p.getWarningResponses().contains("Only PEFF 1.0 is currently supported, but this file claims to be PEFF version '1.99'. We will press on and hope for the best, but it probably won't end well in file header")),
+                    () -> assertTrue(p.getWarningResponses().contains("Line '# Forecast=Rainy and sunbreaks' is not permitted in overall header. Only GeneralComment is permitted in file header")),
+                    () -> assertTrue(p.getWarningResponses().contains("Term 'BogusTag' not found in CV or in custom keys in entry 'sp:Q9Y2X3'")),
+                    () -> assertTrue(p.getWarningResponses().contains("The \\Length= attribute does not match calculated sequence length \\Length=520 should be 529 in entry 'sp:Q9Y2X3'")),
+                    () -> assertTrue(p.getWarningResponses().contains("ModRes 'MOD:00046' has a name 'O-phospho-L-threonine' instead of O-phospho-L-serine at position 7 in entry 'nxp:NX_P11171-2'")),
+                    () -> assertTrue(p.getWarningResponses().contains("Residue 'L' is not a permitted site for MOD:00046 = O-phospho-L-serine at position 7 in entry 'nxp:NX_P11171-2'")),
+                    () -> assertTrue(p.getWarningResponses().contains("Residue 'P' is not a permitted site for MOD:00047 = O-phospho-L-threonine at position 61 in entry 'nxp:NX_P11171-2'")),
+                    () -> assertTrue(p.getWarningResponses().contains("VariantSimple substitution contains too many characters 'RS' in entry 'nxp:NX_P11171-2'")),
+                    () -> assertTrue(p.getWarningResponses().contains("Variant contains illegal character '-' in entry 'nxp:NX_P11171-2'")),
+                    () -> assertTrue(p.getWarningResponses().contains("Variant startPosition must be <= endPosition in '55|52||litRep' in entry 'nxp:NX_P11171-2'")),
+                    () -> assertTrue(p.getWarningResponses().contains("The database key in the accession is not defined from 'nr:gi|136429|sp|P00761.1|TRYP_PIG'")),
+                    () -> assertTrue(p.getWarningResponses().contains("ModRes 'UNIMOD:4' has a name 'Carboximethyl' instead of Carbamidomethyl at position 16 in entry 'nr:gi|136429|sp|P00761.1|TRYP_PIG'")),
+                    () -> assertTrue(p.getWarningResponses().contains("Residue 'A' is not a permitted site for UNIMOD:4 = Carbamidomethyl at position 16 in entry 'nr:gi|136429|sp|P00761.1|TRYP_PIG'")),
+                    () -> assertTrue(p.getWarningResponses().contains("Stated NumberOfEntries for database 'sp' is 2, but 1 were counted in the file in file header")),
+                    () -> assertTrue(p.getWarningResponses().contains("Stated NumberOfEntries for database 'nxp' is 3, but 1 were counted in the file in file header")),
+                    () -> assertTrue(p.getWarningResponses().contains("Line '# GeneralComment=' is missing a value. This is not good, but is legal in file header")),
+                    () -> assertTrue(p.getWarningResponses().contains("ModRes term '|Custom Mod 1' cannot be resolved in PSI-MOD or UniMod and may not be interpretable by reading software at position 16 in entry 'nr:gi|136429|sp|P00761.1|TRYP_PIG'")),
+                    () -> assertTrue(p.getWarningResponses().contains("ModRes term 'ModCV:22|Floxilation' cannot be resolved in PSI-MOD or UniMod and may not be interpretable by reading software at position 18 in entry 'nr:gi|136429|sp|P00761.1|TRYP_PIG'"))
+            );
+        }
+    }
+
+    @Test
+    @Tag("Valid")
+    void isValid_lowerCase_true() {
+
+    }
+
+    @Test
+    @Tag("Valid")
+    @Description("One database header block")
+    void singleDatabaseHeaderBlockTest() {
+        Assert.fail("Not implemented");
+    }
+
+    @Test
+    @Tag("Valid")
+    @Description("Two database header blocks")
+    void twoDatabaseHeaderBlocksTest() {
+        Assert.fail("Not implemented");
+    }
+
+
+    @Test
+    @Tag("Valid")
+    @Description("Multiple database header blocks")
+    void multipleDatabaseHeaderBlocksTest() {
+
+    }
+
+    @Test
+    @Tag("Valid")
+    @Description("Send warning that DbName was not specified.")
+    void singleDatabaseHeaderBlockMissingDbNameTest() {
+
+    }
+
+    @Test
+    @Tag("Valid")
+    @Description("Send warning when at least one of the key elements are not specified.")
+    void multipleDatabaseHeaderBlocksMissingKeysTest() {
+
     }
 
     @Test
@@ -162,41 +333,5 @@ class ProteoformsPEFFTest {
 
     }
 
-    private static final String PATH = "analysis/parser/PEFF/";
-
-    @RepeatedTest(REPETITIONS)
-    @DisplayName("Tiny valid example")
-    void isValid_Tiny_Example_true() {
-        File file = getFileFromResources(PATH.concat("Valid/PEFF_Tiny_Valid.peff"));
-
-    }
-
-    private File getFileFromResources(String concat) {
-        return null;
-    }
-
-    @RepeatedTest(REPETITIONS)
-    @DisplayName("Minimal valid example")
-    void isValid_Minimal_Example_true() {
-        File file = getFileFromResources(PATH.concat("Valid/PEFF_Minimal_Valid.peff"));
-    }
-
-    @RepeatedTest(REPETITIONS)
-    @DisplayName("Tiny invalid example")
-    void isValid_Tiny_Example_false() {
-        File file = getFileFromResources(PATH.concat("Invalid/PEFF_Tiny_INValid1.peff"));
-    }
-
-    @RepeatedTest(REPETITIONS)
-    @DisplayName("Minimal invalid example")
-    void isValid_Minimal_Example_false() {
-        File file = getFileFromResources(PATH.concat("Invalid/PEFF_Minimal_INValid1.peff"));
-    }
-
-    @RepeatedTest(REPETITIONS)
-    @DisplayName("Uses lower case valid")
-    void isValid_lowerCase_true() {
-
-    }
 
 }

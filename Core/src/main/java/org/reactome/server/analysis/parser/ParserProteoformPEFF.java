@@ -2,7 +2,6 @@ package org.reactome.server.analysis.parser;
 
 import org.reactome.server.analysis.parser.exception.ParserException;
 
-import java.io.IOException;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,21 +26,21 @@ public class ParserProteoformPEFF extends Parser {
     /**
      * Format rules:
      * - Always the first line contains "# PEFF N.N"
-     *
+     * <p>
      * - Contains two sections:
-     *      File header section
-     *          - File description block
-     *          - Sequence database description block 1
-     *          ...
-     *          - Sequence database description block m
-     *      Individual sequence entries section
-     *          - Sequence Entry 1 from sequence database 1
-     *          ...
-     *          - Sequence Entry n from sequence database 1
-     *          ...
-     *          - Sequence Entry 1 from sequence database n
-     *          ...
-     *          - Sequence Entry o from sequence database n
+     * File header section
+     * - File description block
+     * - Sequence database description block 1
+     * ...
+     * - Sequence database description block m
+     * Individual sequence entries section
+     * - Sequence Entry 1 from sequence database 1
+     * ...
+     * - Sequence Entry n from sequence database 1
+     * ...
+     * - Sequence Entry 1 from sequence database n
+     * ...
+     * - Sequence Entry o from sequence database n
      */
 
     private static final String LINE_JUMP = "\\s*\\r?\\n\\s*";
@@ -57,7 +56,7 @@ public class ParserProteoformPEFF extends Parser {
     private static final String NUMBER_OF_ENTRIES = "# NumberOfEntries";
     private static final String SEQUENCE_TYPE = "# SequenceType";
     private static final String DB_VERSION = "# DbVersion";
-    private static final String DB_HEADER_BLOCK = "\\s*" + DB_NAME  + LINE_JUMP + "(" +  + "|" + ")";
+    private static final String DB_HEADER_BLOCK = "\\s*" + DB_NAME + LINE_JUMP + "(" + +"|" + ")";
 
 
     private static final String SEQUENCE_ENTRY = "";
@@ -97,16 +96,21 @@ public class ParserProteoformPEFF extends Parser {
         headerColumnNames.add(DEFAULT_IDENTIFIER_HEADER);
 
         // Skip the "File header section"
-            // For each sequence database information block
-                // Read the mandatory header fields: DbName (first), DbVersion, DbSource, NumberOfEntries, SequenceType
-                // Read until the end of the database block: "# //"
-            // When the
+        // For each sequence database information block
+        // Read the mandatory header fields: DbName (first), DbVersion, DbSource, NumberOfEntries, SequenceType
+        // Read until the end of the database block: "# //"
+        // When the
 
-        input.toCharArray();
         Scanner in = new Scanner(input);
-        while(in.hasNext()){
-            System.out.println(in.next());
+        String line;
+
+        while(in.hasNextLine()){
+            String
+            if(line.equals("# //")){
+                break;
+            }
         }
+
     }
 
     /**
@@ -125,8 +129,8 @@ public class ParserProteoformPEFF extends Parser {
 
         input.toCharArray();
         Scanner in = new Scanner(input);
-        while(in.hasNext()){
-            System.out.println(in.next());
+        while (in.hasNext()) {
+            System.out.println(in.nextLine());
         }
     }
 
@@ -143,7 +147,7 @@ public class ParserProteoformPEFF extends Parser {
         // When the
 
         Scanner in = new Scanner(input);
-        while(in.hasNext()){
+        while (in.hasNext()) {
             System.out.println(in.next());
         }
     }

@@ -5,11 +5,9 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.reactome.server.analysis.core.model.AnalysisIdentifier;
 import org.reactome.server.analysis.core.model.Proteoform;
-import org.reactome.server.analysis.core.util.MapList;
 import org.reactome.server.analysis.parser.exception.ParserException;
 import org.reactome.server.analysis.parser.response.Response;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -43,7 +41,8 @@ public class ParserProteoformPRO extends Parser {
      * The draft of the format is at: doi: 10.1093/nar/gkw1075
      */
 
-    private static final String PROTEOFORM_PRO = "UniProtKB:([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})([-]\\d{1,2})?(,\\d+-\\d+)?(,\\p{Alpha}{3}-(\\d{1,11}|[Nn][Uu][Ll][Ll])(\\/\\p{Alpha}{3}-(\\d{1,11}|[Nn][Uu][Ll][Ll]))*,MOD:\\d{5}(\\|\\p{Alpha}{3}-(\\d{1,11}|[Nn][Uu][Ll][Ll])(\\/\\p{Alpha}{3}-(\\d{1,11}|[Nn][Uu][Ll][Ll]))*,MOD:\\d{5})*)?";
+    private static final String COORDINATE = "(\\d{1,11}|([Nn][Uu][Ll][Ll])|\\?)";
+    private static final String PROTEOFORM_PRO = "UniProtKB:([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})([-]\\d{1,2})?(," + COORDINATE + "-" + COORDINATE + ")?(,\\p{Alpha}{3}-(\\d{1,11}|[Nn][Uu][Ll][Ll])(\\/\\p{Alpha}{3}-(\\d{1,11}|([Nn][Uu][Ll][Ll])))*,MOD:\\d{5}(\\|\\p{Alpha}{3}-(\\d{1,11}|[Nn][Uu][Ll][Ll])(\\/\\p{Alpha}{3}-(\\d{1,11}|[Nn][Uu][Ll][Ll]))*,MOD:\\d{5})*)?";
     private static final String ONELINE_MULTIPLE_PROTEOFORM_PRO = "^\\s*" + PROTEOFORM_PRO + "(\\s+" + PROTEOFORM_PRO + ")*\\s*$";
     private static final Pattern PATTERN_PROTEOFORM_PRO = Pattern.compile(PROTEOFORM_PRO);
     private static final Pattern PATTERN_PROTEOFORM_PRO_WITH_EXPRESSION_VALUES = Pattern.compile(PROTEOFORM_PRO + EXPRESSION_VALUES);
@@ -74,17 +73,22 @@ public class ParserProteoformPRO extends Parser {
 
     /**
      * Receives a trimmed line that has already been proved to follow the regex for PRO Proteoform.
+     * <p>
+     * The proteoform consists of five attributes: uniprot accession, isoform, start and end coordinates
+     * and post-translational modifications.
      *
      * @param line
      * @param i
      * @return
      */
     public static Proteoform getProteoform(String line, int i) {
+
+        Proteoform proteoform = new Proteoform("");
         StringBuilder protein = new StringBuilder();
         StringBuilder coordinate = null;
         List<Long> coordinateList = new ArrayList<>();
         StringBuilder mod = null;
-        MapList<String, Long> ptms = new MapList<>();
+        final int lineLength = line.length();
 
         int pos = 0;
         char c = line.charAt(pos);
@@ -95,7 +99,7 @@ public class ParserProteoformPRO extends Parser {
         while (true) {        // Read the accession section
             protein.append(c);
             pos++;
-            if (pos >= line.length()) {
+            if (pos >= lineLength) {
                 break;
             }
             c = line.charAt(pos);
@@ -103,20 +107,51 @@ public class ParserProteoformPRO extends Parser {
                 break;
             }
         }           // The proteoform should come at least until here
+        proteoform.setUniProtAcc(protein.toString());
         if (c == ',') {
-            pos++;
-            if (pos < line.length()) {        // If there are still characters
-                pos++;      // Advance after the comma of the accession or out of the string
+            pos++;      // Advance after the comma of the accession or out of the string
+            if (pos < lineLength) {        // If there are still characters
                 c = line.charAt(pos);
 
-                while (Character.isDigit(c) || c == '-') {   // If there is a subsequence, skip it
-                    pos++;
-                    if (pos >= line.length()) {
-                        break;
-                    }
-                    c = line.charAt(pos);
+                // Read the next piece of text until the next '-'
+                StringBuilder str = new StringBuilder();
+                while (c != '-') {
+                    str.append(c);
+                    c = line.charAt(++pos);
                 }
-                while (pos < line.length()) {       //Read the post-translational modifications section
+
+                // If it is a start coordinate
+                if (StringUtils.isNumeric(str.toString()) || str.toString().equals("?") || str.toString().toLowerCase().equals("null")) {
+                    proteoform.setStartCoordinate(interpretCoordinateString(str.toString()));
+                    c = line.charAt(++pos);
+
+                    //Read the endCoordinate
+                    coordinate = new StringBuilder();
+                    while (Character.isAlphabetic(c) || Character.isDigit(c) || c == '?') {
+                        coordinate.append(c);
+                        pos++;
+                        if (pos >= lineLength) {
+                            break;
+                        }
+                        c = line.charAt(pos);
+                    }
+                    proteoform.setEndCoordinate(interpretCoordinateString(coordinate.toString()));
+                    pos++;
+                }
+                // If it was a PTM modified residue
+                else {
+                    proteoform.setStartCoordinate(null);
+                    proteoform.setEndCoordinate(null);
+                    pos -= str.toString().length();
+                }
+                // Here pos should e pointing at the comma or the next position after the end
+                if(pos < lineLength){
+                    if(line.charAt(pos-1) != ','){
+                        return proteoform;
+                    }
+                }
+                // Here the pos should point to the comma; either after the uniprot accession or the subsequence ranges.
+                while (pos < lineLength) {       //Read the post-translational modifications section
                     c = line.charAt(pos);           //While there are characters to read expect: \w{3}-\d+/PTM/PTM,MOD:#####
 
                     if (c == '|') {
@@ -136,7 +171,7 @@ public class ParserProteoformPRO extends Parser {
                             coordinate.append(c);
                             c = line.charAt(++pos);
                         }
-                        coordinateList.add(coordinate.toString().toLowerCase().equals("null") ? null : Long.valueOf(coordinate.toString()));
+                        coordinateList.add(interpretCoordinateString(coordinate.toString()));
                     }
                     while (c != ':') {    // Skip the "MOD:"
                         c = line.charAt(++pos);
@@ -146,14 +181,14 @@ public class ParserProteoformPRO extends Parser {
                         mod.append(line.charAt(++pos));
                     }
                     for (Long site : coordinateList) {
-                        ptms.add(mod.toString(), site);
+                        proteoform.addPtm(mod.toString(), site);
                     }
                     pos++;
                 }
             }
         }
 
-        return new Proteoform(protein.toString(), ptms);
+        return proteoform;
     }
 
     public static Proteoform getProteoform(String line) {
@@ -311,13 +346,15 @@ public class ParserProteoformPRO extends Parser {
                     if (proteoform != null) {
                         AnalysisIdentifier rtn = new AnalysisIdentifier(proteoform.getUniProtAcc());
                         rtn.setPtms(proteoform.getPTMs());
+                        rtn.setStartCoordinate(proteoform.getStartCoordinate());
+                        rtn.setEndCoordinate(proteoform.getEndCoordinate());
                         analysisIdentifierSet.add(rtn);
                     } else {
                         isValidToken = false;
                     }
                 }
                 if (!isValidToken) {
-                    errorResponses.add(Response.getMessage(Response.INVALID_SINGLE_LINE, 1, thresholdColumn, tokens));
+                    errorResponses.add(Response.getMessage(Response.INVALID_TOKEN, content[0], "PRO"));
                     continue;
                 }
             }
@@ -425,6 +462,8 @@ public class ParserProteoformPRO extends Parser {
             if (thresholdColumn == tokens) {
                 String first = st.nextToken();
                 AnalysisIdentifier rtn = new AnalysisIdentifier(proteoform.getUniProtAcc());
+                rtn.setStartCoordinate(proteoform.getStartCoordinate());
+                rtn.setEndCoordinate(proteoform.getEndCoordinate());
                 rtn.setPtms(proteoform.getPTMs());
 
                 int j = 1;

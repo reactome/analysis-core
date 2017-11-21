@@ -41,11 +41,13 @@ class ProteoformsPROTest {
     private static final String PATH_INVALID = "target/test-classes/analysis/input/ProteoformsPRO/Invalid/";
 
     static List<AnalysisIdentifier> aiSet;
+    static List<AnalysisIdentifier> aiSetWithSubsequenceRanges;
     static List<AnalysisIdentifier> aiSetWithNull;
     static List<AnalysisIdentifier> aiSetWithMultiplePTMs;
     static List<AnalysisIdentifier> aiSetWithIsoforms;
     static List<AnalysisIdentifier> aiSetMultipleLinesWithIsoforms;
     static List<AnalysisIdentifier> aiSetWithExpressionValues;
+    static List<AnalysisIdentifier> aiSetWithExpressionValuesAndSubsequences;
     static List<AnalysisIdentifier> aiSetOneLineWithMultiplePTMs;
     static List<AnalysisIdentifier> aiSetOneLineNullCoordinate;
     static List<AnalysisIdentifier> aiSetOneLineHasIsoform;
@@ -88,7 +90,7 @@ class ProteoformsPROTest {
             p.parseData(data);
             Assert.fail(testInfo.getDisplayName() + " has failed");
         } catch (ParserException e) {
-            Assert.assertTrue("One line proteoform files are not separated by commas.", e.getErrorMessages().contains("A single line input is invalid. Found proteins and values together."));
+            Assert.assertTrue("One line proteoform files are not separated by commas.", e.getErrorMessages().contains("Token UniProtKB:Q13950-2,Lys-null,MOD:01148,UniProtKB:Q13950-2,Ser-280/Ser-284/Ser-288,MOD:00046,UniProtKB:Q13950-2,Ser-183,MOD:00046|Thr-185/Thr-187,MOD:00047,UniProtKB:Q13950-2,Ser-280/Ser-284/Ser-288,MOD:00046|Lys-null,MOD:01148,UniProtKB:Q13950-2,Ser-418,MOD:00046,UniProtKB:Q13950-2,Ser-451,MOD:00046,UniProtKB:Q13950-2,Ser-280/Ser-298,MOD:00046,UniProtKB:Q13950-1,Ser-294/Ser-312,MOD:00046,UniProtKB:Q13950-1,Ser-294/Ser-298/Ser-302,MOD:00046,UniProtKB:Q13950-1,Ser-196,MOD:00046|Thr-198/Thr-200,MOD:00047,UniProtKB:Q13950-1,Lys-null,MOD:01148,UniProtKB:Q13950-1,UniProtKB:Q13950-1,Ser-294/Ser-298/Ser-302,MOD:00046|Lys-null,MOD:01148,UniProtKB:Q13950-1,Ser-465,MOD:00046,UniProtKB:Q13950-1,Ser-432,MOD:00046 does not follow the proteoform format PRO."));
         }
     }
 
@@ -442,8 +444,85 @@ class ProteoformsPROTest {
         }
     }
 
+    @Test
+    @Tag("Valid")
+    void oneLineWithSubsequenceRangesTest(TestInfo testInfo) {
+        String data = getString(PATH_VALID + "oneLineWithSubsequenceRanges.txt");
+        Parser p = createParser(data);
+        try {
+            Assert.assertEquals(p.getClass(), ParserProteoformPRO.class);
+            p.parseData(data);
+        } catch (ParserException e) {
+            Assert.fail(testInfo.getDisplayName() + " has failed");
+        }
+
+        Assert.assertEquals(1, p.getHeaderColumnNames().size());
+        Assert.assertEquals(12, p.getAnalysisIdentifierSet().size());
+        Assert.assertEquals(0, p.getWarningResponses().size());
+
+        for (AnalysisIdentifier ai : aiSetWithSubsequenceRanges) {
+            Assert.assertTrue("Looking for " + ai.toString(), p.getAnalysisIdentifierSet().contains(ai));
+        }
+    }
+
+    @Test
+    @Tag("Invalid")
+    void oneLineWithBrokenSubsequenceRangesTest(TestInfo testInfo) {
+        String data = getString(PATH_INVALID + "oneLineWithBrokenSubsequenceRanges.txt");
+        Parser p = createParser(data);
+        try {
+            Assert.assertEquals(p.getClass(), ParserProteoformPRO.class);
+            p.parseData(data);
+            Assert.fail(testInfo.getDisplayName() + " has failed.");
+        } catch (ParserException e) {
+            Assert.assertTrue("Invalid token with broken subsequence range:", e.getErrorMessages().contains("Token UniProtKB:P56589,1 does not follow the proteoform format PRO."));
+            Assert.assertTrue("Invalid token with broken subsequence range:", e.getErrorMessages().contains("Token UniProtKB:P56696,1-6p5 does not follow the proteoform format PRO."));
+            Assert.assertTrue("Invalid token with broken subsequence range:", e.getErrorMessages().contains("Token UniProtKB:P56703,-355,XXX-212,MOD:01381|XXX-null,MOD:00160 does not follow the proteoform format PRO."));
+            Assert.assertTrue("Invalid token with broken subsequence range:", e.getErrorMessages().contains("Token UniProtKB:P56703,22- does not follow the proteoform format PRO."));
+        }
+    }
+
+    @Test
+    @Tag("Valid")
+    void multipleLinesWithSubsequenceRangesTest(TestInfo testInfo) {
+        String data = getString(PATH_VALID + "multipleLinesWithSubsequenceRanges.txt");
+        Parser p = createParser(data);
+        try {
+            Assert.assertEquals(p.getClass(), ParserProteoformPRO.class);
+            p.parseData(data);
+        } catch (ParserException e) {
+            Assert.fail(testInfo.getDisplayName() + " has failed");
+        }
+
+        Assert.assertEquals(6, p.getHeaderColumnNames().size());
+        Assert.assertEquals(12, p.getAnalysisIdentifierSet().size());
+        Assert.assertEquals(0, p.getWarningResponses().size());
+
+        for (AnalysisIdentifier ai : aiSetWithExpressionValuesAndSubsequences) {
+            Assert.assertTrue("Looking for " + ai.toString(), p.getAnalysisIdentifierSet().contains(ai));
+        }
+    }
+
+    @Test
+    @Tag("Invalid")
+    void multipleLinesWithBrokenSubsequenceRangesTest(TestInfo testInfo) {
+        String data = getString(PATH_INVALID + "multipleLinesWithBrokenSubsequenceRanges.txt");
+        Parser p = createParser(data);
+        try {
+            Assert.assertEquals(p.getClass(), ParserProteoformPRO.class);
+            p.parseData(data);
+            Assert.fail(testInfo.getDisplayName() + " has failed.");
+        } catch (ParserException e) {
+            Assert.assertTrue("Invalid line.", e.getErrorMessages().contains("Line 2 does not follow the proteoform format PRO."));
+            Assert.assertTrue("Invalid line.", e.getErrorMessages().contains("Line 4 does not follow the proteoform format PRO."));
+            Assert.assertTrue("Invalid line.", e.getErrorMessages().contains("Line 12 does not follow the proteoform format PRO."));
+            Assert.assertTrue("Invalid line.", e.getErrorMessages().contains("Line 13 does not follow the proteoform format PRO."));
+        }
+    }
+
     @BeforeAll
     public static void setUp() {
+
         aiSet = new ArrayList<>();
 
         AnalysisIdentifier ai = new AnalysisIdentifier("P56589");
@@ -487,6 +566,64 @@ class ProteoformsPROTest {
         ai.addPtm("00017", 130L);
         ai.addPtm("01632", 130L);
         aiSet.add(ai);
+
+
+        /****************/
+
+        aiSetWithSubsequenceRanges = new ArrayList<>();
+
+        ai = new AnalysisIdentifier("P56589");
+        aiSetWithSubsequenceRanges.add(ai);
+
+        ai = new AnalysisIdentifier("P56589");
+        ai.setStartCoordinate(1L);
+        ai.setEndCoordinate(373L);
+        aiSetWithSubsequenceRanges.add(ai);
+
+        ai = new AnalysisIdentifier("P56696");
+        ai.setStartCoordinate(1L);
+        ai.setEndCoordinate(695L);
+        aiSetWithSubsequenceRanges.add(ai);
+
+        ai = new AnalysisIdentifier("P56703");
+        ai.setStartCoordinate(22L);
+        ai.setEndCoordinate(355L);
+        ai.addPtm("01381", 212L);
+        ai.addPtm("00160", null);
+        aiSetWithSubsequenceRanges.add(ai);
+
+        ai = new AnalysisIdentifier("P56703");
+        ai.setStartCoordinate(22L);
+        ai.setEndCoordinate(355L);
+        aiSetWithSubsequenceRanges.add(ai);
+
+        ai = new AnalysisIdentifier("P58549");
+        aiSetWithSubsequenceRanges.add(ai);
+
+        ai = new AnalysisIdentifier("P58753");
+        ai.addPtm("00048", 86L);
+        ai.addPtm("00048", 106L);
+        ai.addPtm("00048", 159L);
+        ai.addPtm("00048", 187L);
+        aiSetWithSubsequenceRanges.add(ai);
+
+        ai = new AnalysisIdentifier("P58753");
+        aiSetWithSubsequenceRanges.add(ai);
+
+        ai = new AnalysisIdentifier("P58876");
+        ai.addPtm("00064", null);
+        aiSetWithSubsequenceRanges.add(ai);
+
+        ai = new AnalysisIdentifier("P58876");
+        aiSetWithSubsequenceRanges.add(ai);
+
+        ai = new AnalysisIdentifier("P60468");
+        aiSetWithSubsequenceRanges.add(ai);
+
+        ai = new AnalysisIdentifier("P60484");
+        ai.addPtm("00017", 130L);
+        ai.addPtm("01632", 130L);
+        aiSetWithSubsequenceRanges.add(ai);
 
 
         /****************/
@@ -712,6 +849,86 @@ class ProteoformsPROTest {
 
         ai = new AnalysisIdentifier("O14791");
         aiSetWithExpressionValues.add(ai);
+
+        /**************************/
+
+        aiSetWithExpressionValuesAndSubsequences = new ArrayList<>();
+
+        ai = new AnalysisIdentifier("O14641");
+        ai.setStartCoordinate(1L);
+        ai.setEndCoordinate(736L);
+        ai.addPtm("00696", null);
+        aiSetWithExpressionValuesAndSubsequences.add(ai);
+
+        ai = new AnalysisIdentifier("O14678");
+        ai.setStartCoordinate(1L);
+        ai.setEndCoordinate(736L);
+        ai.addPtm("01649", 319L);
+        ai.addPtm("00014", 319L);
+        aiSetWithExpressionValuesAndSubsequences.add(ai);
+
+        ai = new AnalysisIdentifier("O14775-1");
+        ai.setStartCoordinate(1L);
+        ai.setEndCoordinate(395L);
+        aiSetWithExpressionValuesAndSubsequences.add(ai);
+
+        ai = new AnalysisIdentifier("P08581");
+        ai.setStartCoordinate(25L);
+        ai.setEndCoordinate(1390L);
+        ai.addPtm("00048", 1349L);
+        ai.addPtm("00048", 1356L);
+        aiSetWithExpressionValuesAndSubsequences.add(ai);
+
+        ai = new AnalysisIdentifier("O14965");
+        ai.setStartCoordinate(1L);
+        ai.setEndCoordinate(403L);
+        ai.addPtm("00047", 288L);
+        aiSetWithExpressionValuesAndSubsequences.add(ai);
+
+        ai = new AnalysisIdentifier("O14904");
+        ai.setStartCoordinate(30L);
+        ai.setEndCoordinate(365L);
+        ai.addPtm("01381", 221L);
+        ai.addPtm("00160", null);
+        aiSetWithExpressionValuesAndSubsequences.add(ai);
+
+        ai = new AnalysisIdentifier("O14841");
+        ai.setStartCoordinate(1L);
+        ai.setEndCoordinate(1288L);
+        ai.addPtm("00011", 323L);
+        ai.addPtm("01646", 323L);
+        aiSetWithExpressionValuesAndSubsequences.add(ai);
+
+        ai = new AnalysisIdentifier("O14841");
+        ai.setStartCoordinate(1L);
+        ai.setEndCoordinate(960L);
+        ai.addPtm("00019", 1089L);
+        ai.addPtm("01650", 1089L);
+        aiSetWithExpressionValuesAndSubsequences.add(ai);
+
+        ai = new AnalysisIdentifier("O14791");
+        ai.setStartCoordinate(28L);
+        ai.setEndCoordinate(398L);
+        aiSetWithExpressionValuesAndSubsequences.add(ai);
+
+        ai = new AnalysisIdentifier("P13942");
+        ai.setStartCoordinate(20L);
+        ai.setEndCoordinate(null);
+        ai.addPtm("00162", null);
+        aiSetWithExpressionValuesAndSubsequences.add(ai);
+
+        ai = new AnalysisIdentifier("P13942");
+        ai.setStartCoordinate(null);
+        ai.setEndCoordinate(1736L);
+        ai.addPtm("00039", null);
+        ai.addPtm("00037", null);
+        ai.addPtm("00038", null);
+        aiSetWithExpressionValuesAndSubsequences.add(ai);
+
+        ai = new AnalysisIdentifier("P20908");
+        ai.setStartCoordinate(null);
+        ai.setEndCoordinate(null);
+        aiSetWithExpressionValuesAndSubsequences.add(ai);
 
         /******************************/
 

@@ -18,6 +18,7 @@ public class AnalysisIdentifier implements Comparable<AnalysisIdentifier> {
 
     private String id;
     private List<Double> exp;
+
     private Long startCoordinate;
     private Long endCoordinate;
     /*
@@ -67,6 +68,22 @@ public class AnalysisIdentifier implements Comparable<AnalysisIdentifier> {
 
     public List<Double> getExp() {
         return exp;
+    }
+
+    public Long getStartCoordinate() {
+        return startCoordinate;
+    }
+
+    public void setStartCoordinate(Long startCoordinate) {
+        this.startCoordinate = startCoordinate;
+    }
+
+    public Long getEndCoordinate() {
+        return endCoordinate;
+    }
+
+    public void setEndCoordinate(Long endCoordinate) {
+        this.endCoordinate = endCoordinate;
     }
 
     public MapList<String, Long> getPtms() {
@@ -128,7 +145,7 @@ public class AnalysisIdentifier implements Comparable<AnalysisIdentifier> {
 
     @Override
     public String toString() {
-        return this.id + "[" + this.ptms.toString() + "]";
+        return this.id + "," + startCoordinate + "-" + endCoordinate + "," + "[" + this.ptms.toString() + "]";
     }
 
     public String toFullString(){

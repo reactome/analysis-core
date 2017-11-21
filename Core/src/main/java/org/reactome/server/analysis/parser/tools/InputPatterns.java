@@ -101,4 +101,20 @@ public class InputPatterns {
         Matcher m = PATTERN_NUMERIC.matcher(str);
         return m.matches();
     }
+
+    public static Long interpretCoordinateString(String s) {
+        if (s == null) {
+            return null;
+        }
+        if (s.length() == 0) {
+            return null;
+        }
+        if (s.equals("?")) {
+            return null;
+        }
+        if(s.toLowerCase().equals("null")){
+            return null;
+        }
+        return Long.valueOf(s);
+    }
 }

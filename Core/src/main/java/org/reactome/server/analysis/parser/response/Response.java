@@ -28,6 +28,7 @@ public class Response {
     // Proteoforms
     public final static Integer PROTEOFORM_MISMATCH = 500;
     public final static Integer INVALID_PROTEOFORM_LINE = 501;
+    public final static Integer FORMAT_NOT_SUPPORTED = 502;
 
     /**
      * messages - Strings
@@ -46,6 +47,7 @@ public class Response {
     // Proteoforms
     private final static String MESSAGE_PROTEOFORM_MISMATCH = "Line {0} does not match the Proteoform format in previous lines.";
     private final static String MESSAGE_INVALID_PROTEOFORM_LINE = "Line {0} does not follow the proteoform format {1}.";
+    private final static String MESSAGE_FORMAT_NOT_SUPPORTED = "The format {0} is not supported as input.";
 
     /**
      * handles Error codes to Message strings
@@ -70,6 +72,7 @@ public class Response {
         // Proteoforms
         codeToMessage.put(PROTEOFORM_MISMATCH, MESSAGE_PROTEOFORM_MISMATCH);
         codeToMessage.put(INVALID_PROTEOFORM_LINE, MESSAGE_INVALID_PROTEOFORM_LINE);
+        codeToMessage.put(FORMAT_NOT_SUPPORTED, MESSAGE_FORMAT_NOT_SUPPORTED);
     }
 
     /**

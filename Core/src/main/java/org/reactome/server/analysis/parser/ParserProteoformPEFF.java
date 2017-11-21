@@ -1,6 +1,7 @@
 package org.reactome.server.analysis.parser;
 
 import org.reactome.server.analysis.parser.exception.ParserException;
+import org.reactome.server.analysis.parser.response.Response;
 
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -43,6 +44,7 @@ public class ParserProteoformPEFF extends Parser {
      * - Sequence Entry o from sequence database n
      */
 
+    // TODO: Finish writing regular expressions for the respective sections of the PEFF file.
     private static final String LINE_JUMP = "\\s*\\r?\\n\\s*";
     private static final String FIRST_LINE = "# PEFF 1.0";
     private static final String FIRST_LINE_FLEXIBLE = "\\s+#\\s*PEFF\\s*1.\\d+";
@@ -56,13 +58,11 @@ public class ParserProteoformPEFF extends Parser {
     private static final String NUMBER_OF_ENTRIES = "# NumberOfEntries";
     private static final String SEQUENCE_TYPE = "# SequenceType";
     private static final String DB_VERSION = "# DbVersion";
-    private static final String DB_HEADER_BLOCK = "\\s*" + DB_NAME + LINE_JUMP + "(" + +"|" + ")";
-
+    private static final String DB_HEADER_BLOCK = "\\s*" + DB_NAME + LINE_JUMP + "(" + DB_SOURCE +"|"+ NUMBER_OF_ENTRIES +"|"+ SEQUENCE_TYPE +"|"+ DB_VERSION + ")";
 
     private static final String SEQUENCE_ENTRY = "";
-
-    private static final Pattern PATTERN_PROTEOFORM_PEFF = Pattern.compile(PROTEOFORM_PEFF);
-    private static final Pattern PATTERN_PROTEOFORM_PEFF_WITH_EXPRESSION_VALUES = Pattern.compile(PROTEOFORM_PEFF + EXPRESSION_VALUES);
+    private static final String SEQUENCE_ENTRIES_BLOCK = "";
+    private static final Pattern PATTERN_PROTEOFORM_PEFF = Pattern.compile(FILE_DESCRIPTION_BLOCK  + DB_HEADER_BLOCK + SEQUENCE_ENTRIES_BLOCK); //TODO
 
     public static boolean check(String str) {
         Matcher m = PATTERN_PROTEOFORM_PEFF.matcher(str);
@@ -84,32 +84,31 @@ public class ParserProteoformPEFF extends Parser {
      * Expects the file to be well formed following the strict rules of PEFF.
      */
     public void parseData(String input) throws ParserException {
+        errorResponses.add(Response.getMessage(Response.FORMAT_NOT_SUPPORTED, "PEFF"));
+
         parseDataByLines(input);
     }
 
-    /**
+    /*
      * Expects the file to be well formed following the strict rules of PEFF.
      * It parses line by line.
      */
-    // TODO
-    public void parseDataByLines(String input) throws ParserException {
+    private void parseDataByLines(String input) throws ParserException {
         headerColumnNames.add(DEFAULT_IDENTIFIER_HEADER);
-
-        // Skip the "File header section"
-        // For each sequence database information block
-        // Read the mandatory header fields: DbName (first), DbVersion, DbSource, NumberOfEntries, SequenceType
-        // Read until the end of the database block: "# //"
-        // When the
 
         Scanner in = new Scanner(input);
         String line;
 
         while(in.hasNextLine()){
-            String
-            if(line.equals("# //")){
-                break;
+            line = in.nextLine();
+
+            if(line.startsWith(">")){
+                processSequenceEntryHeaderLine(line);
             }
         }
+    }
+
+    private void processSequenceEntryHeaderLine(String line) {
 
     }
 

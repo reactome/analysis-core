@@ -2,7 +2,7 @@ package org.reactome.server.analysis.parser.util;
 
 import java.time.Duration;
 
-import static org.reactome.server.analysis.parser.util.ConstantHolder.WARMUP_OFFSET;
+import static org.reactome.server.analysis.parser.InputPerformanceTest.WARMUP_OFFSET;
 
 public class Statistics {
 

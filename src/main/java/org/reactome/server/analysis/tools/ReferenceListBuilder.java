@@ -12,36 +12,110 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class ExampleFinder {
+/**
+ * Queries Reactome graph database to generate a file with a list of all possible proteins or proteoforms.
+ */
+public class ReferenceListBuilder {
 
     private static final String FILE_REACTOME_ALL_PROTEOFORMS = "./resources/reactomeAllProteoforms.txt";
-    private static final String FILE_REACTOME_ALL_PROTEIN_IDENTIFIERS = "./resources/HumanReactomeProteins.txt";
+    private static final String FILE_REACTOME_ALL_PROTEINS = "./resources/reactomAllProteins.txt";
     private static final String FILE_UNIPROT_ALL_HUMAN_CURATED = "./resources/Human20218.txt";
     private static Set<String> proteins;
     private static final int NUMBER_REACTOME_PROTEOFORMS = 14824;
     private static final int NUMBER_REACTOME_PROTEINS = 10682;
     private static final int NUMBER_REACTOME_ISOFORMS = 10845;
 
-    private static final String QUERY_GET_PROTEIN_PROTEOFORMS = "MATCH (pe:PhysicalEntity)-[:referenceEntity]->(re:ReferenceEntity{identifier:{id}})\n" +
+    private static final String QUERY_GET_ALL_PROTEINS = "MATCH (pe:PhysicalEntity)-[:referenceEntity]->(re:ReferenceEntity)\nWHERE pe.speciesName = \"Homo sapiens\" AND re.databaseName = \"UniProt\"\nRETURN DISTINCT (CASE WHEN size(re.variantIdentifier) > 0 THEN re.variantIdentifier ELSE re.identifier END) as proteinAccession\nORDER BY proteinAccession";
+
+    private static final String QUERY_GET_PROTEIN_PROTEOFORMS = "MATCH (pe:PhysicalEntity)-[:referenceEntity]->(re:ReferenceEntity{identifier:{id}})\nWHERE pe.speciesName = \"Homo sapiens\" AND re.databaseName = \"UniProt\"\nWITH DISTINCT pe, re\nOPTIONAL MATCH (pe)-[:hasModifiedResidue]->(tm:TranslationalModification)-[:psiMod]->(mod:PsiMod)\nWITH DISTINCT pe,\n                re.identifier AS proteinAccession,\n                re.variantIdentifier AS isoform,\n                tm.coordinate as coordinate, \n                mod.identifier as type ORDER BY type, coordinate\nWITH DISTINCT pe, \n\t\t\t\tproteinAccession,\n                isoform,\n                COLLECT(CASE WHEN coordinate IS NOT NULL THEN coordinate ELSE \"null\" END + \":\" + type) AS ptms\nRETURN DISTINCT proteinAccession, isoform, pe.startCoordinate as startCoordinate, pe.endCoordinate as endCoordinate, ptms";
+
+    private static final String QUERY_GET_ALL_PROTEOFORMS = "MATCH (pe:PhysicalEntity)-[:referenceEntity]->(re:ReferenceEntity)\n" +
+            "WHERE pe.speciesName = \"Homo sapiens\" AND re.databaseName = \"UniProt\"\n" +
             "WITH DISTINCT pe, re\n" +
-            "OPTIONAL MATCH (pe)-[:hasModifiedResidue]->(tm)-[:psiMod]->(mod)\n" +
-            "WITH DISTINCT pe.displayName AS physicalEntity,\n" +
-            "                re.identifier AS referenceEntity,\n" +
-            "                re.variantIdentifier AS variantIdentifier,\n" +
+            "OPTIONAL MATCH (pe)-[:hasModifiedResidue]->(tm:TranslationalModification)-[:psiMod]->(mod:PsiMod)\n" +
+            "WITH DISTINCT pe,\n" +
+            "                (CASE WHEN size(re.variantIdentifier) > 0 THEN re.variantIdentifier ELSE re.identifier END) as proteinAccession,\n" +
             "                tm.coordinate as coordinate, \n" +
             "                mod.identifier as type ORDER BY type, coordinate\n" +
-            "WITH DISTINCT physicalEntity, \n" +
-            "\t\t\t\treferenceEntity,\n" +
-            "                variantIdentifier,\n" +
+            "WITH DISTINCT pe, \n" +
+            "\t\t\t\tproteinAccession,\n" +
             "                COLLECT(CASE WHEN coordinate IS NOT NULL THEN coordinate ELSE \"null\" END + \":\" + type) AS ptms\n" +
-            "RETURN DISTINCT referenceEntity, variantIdentifier, ptms";
+            "RETURN DISTINCT proteinAccession,  pe.startCoordinate as startCoordinate, pe.endCoordinate as endCoordinate, ptms";
+
+    /**
+     * Gets a data structure containing all the proteoforms in Reactome. It tries to read from a file at {@link FILE_REACTOME_ALL_PROTEOFORMS}
+     * but if it does not exist or is incomplete, then it queries Reactome to create the file and make a full list.
+     *
+     * @return MapList<String,MapList<String,Long>> It uses MapList to avoid repeating the UniProt Accession and then
+     * a nested MapList to avoid repeating the mod types.
+     */
+    public static MapList<String, MapList<String, Long>> getAllProteoforms() throws IOException {
+        MapList<String, MapList<String, Long>> proteoforms = new MapList<>();
+
+        // Read file with all proteoforms in Reactome
+        File file = new File(FILE_REACTOME_ALL_PROTEOFORMS);
+        if (file.exists() && !file.isDirectory()) {
+            // Read file with all the Proteoforms in Reactome
+            proteoforms = readAllProteoforms();
+        }
+        // If it hasn't the right total number of rows
+        if (proteoforms.size() != NUMBER_REACTOME_ISOFORMS) {   //It counts the number of proteins, because the proteoform entries are collapsed in a single MapList
+
+            try {
+                file.createNewFile();
+
+                //Read all the human proteins
+                File fileUniprot = new File(FILE_REACTOME_ALL_PROTEINS);
+                FileInputStream fileInputStreamUniprot = new FileInputStream(fileUniprot);
+                BufferedInputStream bfUniprot = new BufferedInputStream(fileInputStreamUniprot);
+
+                FileWriter fwProteoforms = new FileWriter(FILE_REACTOME_ALL_PROTEOFORMS);
+
+                proteins = new TreeSet<>();
+                String line;
+                while ((line = readNextLine(bfUniprot)).length() > 0) {
+                    proteins.add(line);
+                }
+
+                // Query Reactome for all the proteoforms for each protein
+                ReactomeGraphCore.initialise("localhost", "7474", "neo4j", "neo4j2", ReactomeNeo4jConfig.class);
+                for (String protein : proteins) {
+                    MapList<String, MapList<String, Long>> oneProteinProteoforms = getProteoforms(protein);
+                    for (String isoform : oneProteinProteoforms.keySet()) {
+                        for (MapList<String, Long> proteoform : oneProteinProteoforms.getElements(isoform)) {
+                            proteoforms.add(isoform, proteoform); // Store the proteoform in memory
+
+                            boolean firstPtm = true;
+                            // Write the proteoform to the file
+                            fwProteoforms.write(isoform + ";");
+                            for (String modType : proteoform.keySet()) {
+                                for (Long coordinate : proteoform.getElements(modType)) {
+                                    if (!firstPtm) {
+                                        fwProteoforms.write(",");
+                                    }
+                                    fwProteoforms.write(modType.toString() + ":" + (coordinate == null ? null : coordinate.toString()));
+                                    firstPtm = false;
+                                }
+                            }
+                            fwProteoforms.write("\n");
+                        }
+                    }
+                }
+                fwProteoforms.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            proteoforms = readAllProteoforms();
+        }
+
+        return proteoforms;
+    }
 
     /**
      * For each protein (UniProt accession) in Reactome, get the top n proteins with the biggest number of pathway/reaction
      * hits difference between different forms of the protein.
      * The form of the protein is specified by a set of annotated translational modifications.
      */
-
     public static void Main(String args[]) {
         Map<String, Integer> hitDifferences = new HashMap<String, Integer>();
         //TODO
@@ -100,75 +174,6 @@ public class ExampleFinder {
      */
     private static Set<String> getEwasByPTMs() {
         return null;
-    }
-
-    /**
-     * Gets a data structure containing all the proteoforms in Reactome. It tries to read from a file at {@link FILE_REACTOME_ALL_PROTEOFORMS}
-     * but if it does not exist or is incomplete, then it queries Reactome to create the file and make a full list.
-     *
-     * @return MapList<String,MapList<String,Long>> It uses MapList to avoid repeating the UniProt Accession and then
-     * a nested MapList to avoid repeating the mod types.
-     */
-    public static MapList<String, MapList<String, Long>> getAllProteoforms() throws IOException {
-        MapList<String, MapList<String, Long>> proteoforms = new MapList<>();
-
-        // Read file with all proteoforms in Reactome
-        File file = new File(FILE_REACTOME_ALL_PROTEOFORMS);
-        if (file.exists() && !file.isDirectory()) {
-            // Read file with all the Proteoforms in Reactome
-            proteoforms = readAllProteoforms();
-        }
-        // If it hasn't the right total number of rows
-        if (proteoforms.size() != NUMBER_REACTOME_ISOFORMS) {   //It counts the number of proteins, because the proteoform entries are collapsed in a single MapList
-
-            try {
-                file.createNewFile();
-
-                //Read all the human proteins
-                File fileUniprot = new File(FILE_REACTOME_ALL_PROTEIN_IDENTIFIERS);
-                FileInputStream fileInputStreamUniprot = new FileInputStream(fileUniprot);
-                BufferedInputStream bfUniprot = new BufferedInputStream(fileInputStreamUniprot);
-
-                FileWriter fwProteoforms = new FileWriter(FILE_REACTOME_ALL_PROTEOFORMS);
-
-                proteins = new TreeSet<>();
-                String line;
-                while ((line = readNextLine(bfUniprot)).length() > 0) {
-                    proteins.add(line);
-                }
-
-                // Query Reactome for all the proteoforms for each protein
-                ReactomeGraphCore.initialise("localhost", "7474", "neo4j", "neo4j2", ReactomeNeo4jConfig.class);
-                for (String protein : proteins) {
-                    MapList<String, MapList<String, Long>> oneProteinProteoforms = getProteoforms(protein);
-                    for (String isoform : oneProteinProteoforms.keySet()) {
-                        for (MapList<String, Long> proteoform : oneProteinProteoforms.getElements(isoform)) {
-                            proteoforms.add(isoform, proteoform); // Store the proteoform in memory
-
-                            boolean firstPtm = true;
-                            // Write the proteoform to the file
-                            fwProteoforms.write(isoform + ";");
-                            for (String modType : proteoform.keySet()) {
-                                for (Long coordinate : proteoform.getElements(modType)) {
-                                    if (!firstPtm) {
-                                        fwProteoforms.write(",");
-                                    }
-                                    fwProteoforms.write(modType.toString() + ":" + (coordinate == null ? null : coordinate.toString()));
-                                    firstPtm = false;
-                                }
-                            }
-                            fwProteoforms.write("\n");
-                        }
-                    }
-                }
-                fwProteoforms.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            proteoforms = readAllProteoforms();
-        }
-
-        return proteoforms;
     }
 
     /**

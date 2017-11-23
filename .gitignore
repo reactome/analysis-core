@@ -26,3 +26,4 @@ resources/DensityHitPathways.png
 resources/DensityHitPathways4.svg
 resources/uniprot-all.fasta.gz
 resources/uniprot-all.fasta/
+Core/target/test-classes/

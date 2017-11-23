@@ -2,62 +2,96 @@ package org.reactome.server.analysis.parser;
 
 import com.google.common.base.Stopwatch;
 import org.reactome.server.analysis.parser.exception.ParserException;
-import org.reactome.server.analysis.parser.util.ConstantHolder.*;
 
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.text.DecimalFormat;
 import java.time.Duration;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
+import static org.reactome.server.analysis.parser.tools.ParserFactory.createParser;
 import static org.reactome.server.analysis.parser.util.ConstantHolder.*;
-import static org.reactome.server.analysis.parser.util.FileUtils.getString_channel;
 
 public class InputPerformanceTest {
 
+    public static final int REPETITIONS = 10;   //Number of times a specific test is run
+    public static final int SAMPLE_SETS = 200;   //Number of random sample sets to be used
+    public static final int WARMUP_OFFSET = 2;  // Number of runs for the warm up
+
+    //    public static int SIZES[] = {1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000};
+    public static int SIZES[] = {1, 200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400, 2600, 2800, 3000, 3200, 3400, 3600, 3800, 4000,
+            4200, 4400, 4600, 4800, 5000};
+
+    public static final String ALL_PROTEINS = "C:\\Users\\Francisco\\Documents\\phd\\Projects\\Golden\\resources\\ReactomeAllProteins.csv";
+    public static final String ALL_PROTEOFORMS_SIMPLE = "C:\\Users\\Francisco\\Documents\\PhD\\Projects\\Golden\\resources\\ReactomeAllProteoformsSimple.txt";
+    public static final String ALL_PROTEOFORMS_PRO = "C:\\Users\\Francisco\\Documents\\PhD\\Projects\\Golden\\resources\\ReactomeAllProteoformsPRO.txt";
+
     public static void main(String args[]) throws IOException, ParserException {
 
-        Set<InputTypeEnum> typesToTest = new HashSet<>();
-        Set<Parser> processorVersions = new HashSet<>();
+        Map<String, String> sources = new TreeMap<>();
         FileWriter timesFile = new FileWriter(PATH_STATS + "Times.csv");
         Stopwatch stopwatch = Stopwatch.createUnstarted();
+        PrintWriter output = new PrintWriter(System.out);
 
-//        typesToTest.add(InputTypeEnum.uniprotList);
-        typesToTest.add(InputTypeEnum.uniprotListAndModSites);
+        timesFile.write("Type,Sample,Size,ms,Repetition\n");
 
-        processorVersions.add(new ParserExtended());
-//        processorVersions.add(new ParserOriginal());
+        sources.put("Protein", ALL_PROTEINS);
+        sources.put("ProteoformSimple", ALL_PROTEOFORMS_SIMPLE);
+        sources.put("ProteoformPRO", ALL_PROTEOFORMS_PRO);
 
-        timesFile.write("Version,Test,Size,ms,Repetition\n");
+        for (String source : sources.keySet()) {
 
-        for (Parser p : processorVersions) {
-            for (InputTypeEnum t : typesToTest) {
-                for (int s : sizes) {
-                    for (int w = 0; w < WARMUP_OFFSET; w++) {
-                        String input = getString_channel(PATH + t + "_" + String.format("%05d", s) + ".txt");
-                        p.parseData(input);
+            List<String> allElementsList = getFileAsList(sources.get(source));      //Read the total possible entities and put it in an array
+
+            for (int T = 0; T < SAMPLE_SETS; T++) {
+
+                Collections.shuffle(allElementsList);           // Shuffle full list to get sample
+                String[] allElements = new String[allElementsList.size()];
+                allElements = allElementsList.toArray(allElements);
+
+                int numElementsAdded = 0;
+                StringBuilder input = new StringBuilder();
+                for (int size : SIZES) {                        // Perform warmup runs
+
+                    while (numElementsAdded < size) {           // Create input of desired size
+                        input.append(allElements[numElementsAdded++] + "\n");
                     }
-                }
-                for (int s : sizes) {
-                    for (int r = 0; r < REPETITIONS; r++) {
-                        String input = getString_channel(PATH + t + "_" + String.format("%05d", s) + ".txt");
+
+                    for (int R = 0; R < WARMUP_OFFSET; R++) {   // Performed warm up runs
+                        System.out.println("Warming up:\t" + source + "\t Sample: " + T + "\t" + "Size: " + size);
+                        Parser p = createParser(input.toString());
+                        p.parseData(input.toString());
+                    }
+                    for (int R = 0; R < REPETITIONS; R++) {     // Performed timed runs
+
+                        System.out.println("Running:\t" + source + "\t Sample: " + T + "\t" + "Size: " + size);
+
                         stopwatch.start();
 
-                        p.parseData(input);
+                        Parser p = createParser(input.toString());
+                        p.parseData(input.toString());
 
                         stopwatch.stop();
                         Duration duration = stopwatch.elapsed();
-                        // Write: Version, input type, size, time
-                        timesFile.write(p.getClass().getSimpleName() + "," + t + "," + s + "," + new DecimalFormat("#0.000").format(duration.toNanos() / 1000000.0) + "," + r + "\n");
-                        timesFile.flush();
-//                        System.out.println(p.getClass().getSimpleName() + "," + t + "," + s + "," + new DecimalFormat("#0.000").format(duration.toNanos() / 1000000.0) + "," + r);
                         stopwatch.reset();
+
+                        timesFile.write(source + "," + T + "," + size + "," + new DecimalFormat("#0.000").format(duration.toNanos() / 1000000.0) + "," + R + "\n");
+                        timesFile.flush();
                     }
                 }
             }
         }
 
         timesFile.close();
+    }
+
+    public static List<String> getFileAsList(String fileName) throws IOException {
+        List<String> lines = new ArrayList<>();
+        BufferedReader br = new BufferedReader(new FileReader(fileName), 8192);
+        String line;
+        while ((line = br.readLine()) != null) {
+            lines.add(line);
+        }
+        br.close();
+        return lines;
     }
 }

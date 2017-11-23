@@ -34,9 +34,14 @@ public class ParserProteoformPRO extends Parser {
      * - Positions of modification are relative to the full length of the isoform.
      * - Missing a subsequence section indicates that the class encompasses either multiple species or isoforms.
      * - Missing modification blocks with a subsequence indicates that the class is defined by subsequence only.
+     * - If there is a subsequence then the comma separator is added, otherwise is not added.
+     * - If there is at least one modification block, an extra comma separator is added
+     * - The line never ends in comma.
+     * - There string ",," is never found.
      * - NOTE: In our casse we will only use the accession numbers and set of post translational modifications
      * to identify a particular proteoform, to make our analysis consistent with the rest of the formats.
      * - We allow the position to be null, so that it is also consistent with the rest.
+     * - The missing coordinates are represented as "?" or "null" or "NULL", never left blank.
      * <p>
      * The draft of the format is at: doi: 10.1093/nar/gkw1075
      */
@@ -145,8 +150,8 @@ public class ParserProteoformPRO extends Parser {
                     pos -= str.toString().length();
                 }
                 // Here pos should e pointing at the comma or the next position after the end
-                if(pos < lineLength){
-                    if(line.charAt(pos-1) != ','){
+                if (pos < lineLength) {
+                    if (line.charAt(pos - 1) != ',') {
                         return proteoform;
                     }
                 }
@@ -197,7 +202,17 @@ public class ParserProteoformPRO extends Parser {
 
     public static String getString(Proteoform proteoform) {
         StringBuilder str = new StringBuilder();
+
+        //Print the protein accession
         str.append("UniProtKB:" + proteoform.getUniProtAcc());
+
+        // Print the subsequence range
+        if (proteoform.getStartCoordinate() != null || proteoform.getEndCoordinate() != null) {
+            Long start = proteoform.getStartCoordinate();
+            Long end = proteoform.getEndCoordinate();
+            str.append("," + (start != null ? start : "?") + "-" + (end != null ? end : "?"));
+        }
+
         if (proteoform.getPTMs().values().size() > 0) {
             str.append(",");
             String[] mods = proteoform.getPTMs().keySet().stream().toArray(String[]::new);

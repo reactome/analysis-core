@@ -3,9 +3,6 @@ package org.reactome.server.analysis.tools;
 import org.reactome.server.analysis.core.util.MapList;
 
 import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +24,6 @@ public class TestProteoformsGenerator {
     public static void main(String args[]) throws IOException {
 
         createConstants();
-        createProteoformsTests();
     }
 
     private static void createConstants() {
@@ -35,7 +31,7 @@ public class TestProteoformsGenerator {
         String fileName = "uniprotListAndModSites_";
 
         for (int I = 0; I < sizes.length; I++) {
-            System.out.println("public static final String " + fileName + String.format("%06d", sizes[I]) + " = PATH.concat(\"" + fileName +  String.format("%06d", sizes[I]) + ".txt\");");
+            System.out.println("public static final String " + fileName + String.format("%06d", sizes[I]) + " = PATH.concat(\"" + fileName + String.format("%06d", sizes[I]) + ".txt\");");
 //            generateFile(sizes[I], fileName, flatProteoforms);
         }
 
@@ -50,17 +46,6 @@ public class TestProteoformsGenerator {
         while (protein.length() > 0) {
             proteins.add(protein);
             protein = readNextString(bf);
-        }
-    }
-
-    public static void createProteoformsTests() throws IOException {
-
-        flatProteoforms = Files.readAllLines(Paths.get(ALL_REACTOME_PROTEOFORMS_PATH, ALL_REACTOME_PROTEOFORMS_FILE), Charset.defaultCharset());
-        String fileName = "uniprotListAndModSites_";
-
-        for (int I = 0; I < sizes.length; I++) {
-            writeTest(sizes[I], fileName, PARSER_TYPE.InputFormatExtended);
-//            generateFile(sizes[I], fileName, flatProteoforms);
         }
     }
 
@@ -92,28 +77,5 @@ public class TestProteoformsGenerator {
             str.append((char) i);
         }
         return str.toString();
-    }
-
-    private static void writeTest(int size, String fileName, PARSER_TYPE parserVersion) {
-
-        System.out.println("@RepeatedTest(REPETITIONS)");
-        System.out.println("public void test" + fileName + String.format("%06d", size) + "() throws ParserException {");
-        System.out.println("File file = getFileFromResources(" + fileName + String.format("%06d", size) + ");");
-        System.out.println(parserVersion.toString() + " format = null;\n" +
-                "        try {\n" +
-                "            format = parser" + (parserVersion.equals(PARSER_TYPE.InputFormat) ? "" : "Extended") + "(file);\n" +
-                "        } catch (ParserException e) {\n" +
-                "            Assert.fail(" + fileName + String.format("%06d", size) + " + \" has failed.\");" +
-                "        }\n");
-        System.out.println("Assert.assertEquals(1, format.getHeaderColumnNames().size());");
-        System.out.println("Assert.assertEquals(" + size + ", format.getAnalysisIdentifierSet().size());");
-        System.out.println("Assert.assertEquals(1, format.getWarningResponses().size());");
-
-        System.out.println("}\n\n");
-    }
-
-    private enum PARSER_TYPE {
-        InputFormat,
-        InputFormatExtended
     }
 }

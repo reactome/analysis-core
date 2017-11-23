@@ -73,7 +73,8 @@ public class ParserExtended extends Parser {
         SIMPLE,
         PRO,
         PIR_ID,
-        GPMDB
+        GPMDB,
+        NEO4J
     }
 
 

@@ -9,7 +9,7 @@ import org.reactome.server.graph.utils.ReactomeGraphCore;
 import java.io.*;
 import java.util.*;
 
-import static org.reactome.server.analysis.tools.ExampleFinder.getAllProteoforms;
+import static org.reactome.server.analysis.tools.ReferenceListBuilder.getAllProteoforms;
 
 public class StatFilesGenerator {
     private static final String FILE_REACTIONS_AND_PATHWAYS_FREQUENCIES = "./resources/Reactions_And_Pathways_Frequencies.csv";

@@ -1,15 +1,14 @@
 package org.reactome.server.analysis.parser.tools;
 
 import org.reactome.server.analysis.core.model.Proteoform;
-import org.reactome.server.analysis.parser.Parser;
+import org.reactome.server.analysis.parser.*;
 import org.reactome.server.analysis.parser.ParserExtended.ProteoformFormat;
-import org.reactome.server.analysis.parser.ParserProteoformSimple;
-import org.reactome.server.analysis.parser.ParserProteoformPRO;
-import org.reactome.server.analysis.parser.ParserProteoformGPMDB;
 import org.reactome.server.analysis.parser.response.Response;
 
 import java.util.List;
 
+import static org.reactome.server.analysis.parser.ParserExtended.ProteoformFormat.NONE;
+import static org.reactome.server.analysis.parser.ParserProteoformNeo4j.matches_Proteoform_Neo4j_With_Expression_Values;
 import static org.reactome.server.analysis.parser.tools.InputPatterns.*;
 import static org.reactome.server.analysis.parser.ParserProteoformPRO.matches_Proteoform_Pro;
 import static org.reactome.server.analysis.parser.ParserProteoformPRO.matches_Proteoform_Pro_With_Expression_Values;
@@ -22,6 +21,9 @@ public class ProteoformsProcessor {
         ProteoformFormat format = checkForProteoforms(line);
         Proteoform proteoform = null;
         switch (format) {
+            case NEO4J:
+                proteoform = ParserProteoformNeo4j.getProteoform(line);
+                break;
             case SIMPLE:
                     proteoform = ParserProteoformSimple.getProteoform(line);
                 break;
@@ -59,6 +61,12 @@ public class ProteoformsProcessor {
                     proteoform = ParserProteoformGPMDB.getProteoform(line, i + 1);
                 }
                 break;
+            case NEO4J:
+                if(!matches_Proteoform_Neo4j_With_Expression_Values(line)){
+                    warnings.add(Response.getMessage(Response.INLINE_PROBLEM, i + 1, 1));
+                } else {
+                    proteoform = ParserProteoformNeo4j.getProteoform(line, i + 1, warnings);
+                }
             case NONE:
                 throw new RuntimeException("The line " + i + " should marked as a proteoform.");
         }
@@ -92,31 +100,31 @@ public class ProteoformsProcessor {
                     resultFormat = ProteoformFormat.SIMPLE;
                 } else if (resultFormat != ProteoformFormat.SIMPLE) {
                     //errorResponses.add(Response.getMessage(Response.PROTEOFORM_MISMATCH, i + 1));
-                    return ProteoformFormat.NONE;
+                    return NONE;
                 }
             } else if (matches_Proteoform_Pro(line)) {
                 if (resultFormat == ProteoformFormat.UNKNOWN) {
                     resultFormat = ProteoformFormat.PRO;
                 } else if (resultFormat != ProteoformFormat.PRO) {
-                    return ProteoformFormat.NONE;
+                    return NONE;
                 }
             } else if (matches_Proteoform_Pir(line)) {
                 if (resultFormat == ProteoformFormat.UNKNOWN) {
                     resultFormat = ProteoformFormat.PIR_ID;
                 } else if (resultFormat != ProteoformFormat.PIR_ID) {
-                    return ProteoformFormat.NONE;
+                    return NONE;
                 }
             } else if (matches_Proteoform_Gpmdb(line)) {
                 if (resultFormat == ProteoformFormat.UNKNOWN) {
                     resultFormat = ProteoformFormat.GPMDB;
                 } else if (resultFormat != ProteoformFormat.GPMDB) {
-                    return ProteoformFormat.NONE;
+                    return NONE;
                 }
             } else {
                 if (resultFormat == ProteoformFormat.UNKNOWN) {
-                    resultFormat = ProteoformFormat.NONE;
-                } else if (resultFormat != ProteoformFormat.NONE) {
-                    return ProteoformFormat.NONE;
+                    resultFormat = NONE;
+                } else if (resultFormat != NONE) {
+                    return NONE;
                 }
             }
             linesChecked++;
@@ -135,8 +143,10 @@ public class ProteoformsProcessor {
             return ProteoformFormat.PRO;
         } else if(ParserProteoformSimple.check(line)){
             return ProteoformFormat.SIMPLE;
+        } else if(ParserProteoformNeo4j.check(line)){
+            return ProteoformFormat.NEO4J;
         }
-        return ProteoformFormat.NONE;
+        return NONE;
     }
 
     public static ProteoformFormat checkForProteoformsWithExpressionValues(String[] content, int startOnLine) {
@@ -154,31 +164,31 @@ public class ProteoformsProcessor {
                     resultFormat = ProteoformFormat.SIMPLE;
                 } else if (resultFormat != ProteoformFormat.SIMPLE) {
                     //errorResponses.add(Response.getMessage(Response.PROTEOFORM_MISMATCH, i + 1));
-                    return ProteoformFormat.NONE;
+                    return NONE;
                 }
             } else if (matches_Proteoform_Pro_With_Expression_Values(line)) {
                 if (resultFormat == ProteoformFormat.UNKNOWN) {
                     resultFormat = ProteoformFormat.PRO;
                 } else if (resultFormat != ProteoformFormat.PRO) {
-                    return ProteoformFormat.NONE;
+                    return NONE;
                 }
             } else if (matches_Proteoform_Pir_With_Expression_Values(line)) {
                 if (resultFormat == ProteoformFormat.UNKNOWN) {
                     resultFormat = ProteoformFormat.PIR_ID;
                 } else if (resultFormat != ProteoformFormat.PIR_ID) {
-                    return ProteoformFormat.NONE;
+                    return NONE;
                 }
             } else if (matches_Proteoform_Gpmdb_With_Expression_Values(line)) {
                 if (resultFormat == ProteoformFormat.UNKNOWN) {
                     resultFormat = ProteoformFormat.GPMDB;
                 } else if (resultFormat != ProteoformFormat.GPMDB) {
-                    return ProteoformFormat.NONE;
+                    return NONE;
                 }
             } else {
                 if (resultFormat == ProteoformFormat.UNKNOWN) {
-                    resultFormat = ProteoformFormat.NONE;
-                } else if (resultFormat != ProteoformFormat.NONE) {
-                    return ProteoformFormat.NONE;
+                    resultFormat = NONE;
+                } else if (resultFormat != NONE) {
+                    return NONE;
                 }
             }
             linesChecked++;

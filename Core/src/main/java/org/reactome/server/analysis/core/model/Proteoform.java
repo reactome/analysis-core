@@ -2,6 +2,7 @@ package org.reactome.server.analysis.core.model;
 
 import org.reactome.server.analysis.core.util.MapList;
 import org.reactome.server.analysis.parser.ParserExtended;
+import org.reactome.server.analysis.parser.ParserProteoformNeo4j;
 import org.reactome.server.analysis.parser.ParserProteoformPRO;
 import org.reactome.server.analysis.parser.ParserProteoformSimple;
 
@@ -59,6 +60,8 @@ public class Proteoform {
                 return ParserProteoformSimple.getString(this);
             case PRO:
                 return ParserProteoformPRO.getString(this);
+            case NEO4J:
+                return ParserProteoformNeo4j.getString(this);
             default:
                     return UniProtAcc + "," + startCoordinate + "-" + endCoordinate + "," + PTMs.toString();
         }

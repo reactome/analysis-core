@@ -1,5 +1,6 @@
 package org.reactome.server.analysis.parser.tools;
 
+import org.apache.commons.lang.StringUtils;
 import org.reactome.server.analysis.core.model.Proteoform;
 import org.reactome.server.analysis.parser.ParserExtended;
 
@@ -17,15 +18,20 @@ public class ProteoformFormatConverter {
 
     public static void main(String args[]) throws IOException {
         // Read a file
-        Path filePath = Paths.get("C:\\Users\\Francisco\\Documents\\phd\\Projects\\Golden\\resources", "reactomeAllProteoforms.txt");
+
+        Path filePath = Paths.get("C:\\Users\\Francisco\\Documents\\phd\\Projects\\Golden\\resources", "ReactomeAllProteoformsPRO.txt");
+        FileWriter outFile = new FileWriter("C:\\Users\\Francisco\\Documents\\phd\\Projects\\Golden\\resources\\ReactomeAllProteoformsCopy.txt");
         List<String> lines = Files.readAllLines(filePath, Charset.defaultCharset());
-//        FileWriter outFile = new FileWriter("C:\\Users\\Francisco\\Documents\\phd\\Projects\\Golden\\Core\\target\\test-classes\\analysis\\input\\ProteoformsCustom\\reactomeAllProteoforms.txt");
-        FileWriter outFile = new FileWriter("C:\\Users\\Francisco\\Documents\\phd\\Projects\\Golden\\Core\\target\\test-classes\\analysis\\input\\ProteoformsPRO\\reactomeAllProteoforms.txt");
 
         // Convert each proteoform
         for(String line : lines){
             Proteoform proteoform = ProteoformsProcessor.getProteoform(line);
-            outFile.write(proteoform.toString(ParserExtended.ProteoformFormat.PRO) + "\n");
+
+            if(proteoform != null){
+                String str = proteoform.toString(ParserExtended.ProteoformFormat.PRO);
+                outFile.write(str + "\n");
+            }
         }
+        outFile.close();
     }
 }

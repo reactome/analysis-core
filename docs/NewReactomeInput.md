@@ -1,23 +1,4 @@
-# Reactome Analysis tool v2
-
-# Improvements
-
-* Use Google Guava Stopwatch class to measure input preprocessing performance.
-    
-    It is based on the System.nanoTime(), instead of System.currentTimeMillis(), 
-    which measures the elapsed wall-clock time. In contrast, System.nanoTime() returns the current value of the most 
-    precise available system timer, which is specifically developed to measure elapsed time.
-    
- * Faster reading of expression input.
-  
-  Traverse the input fewer times. Currently, it is traversing all input at least 3 times using:
- split, replaceAll, and StringTokenizer. 
- 
- * Added possibility to specify proteoforms.
-    * Add support for PEFF format.
-    * Added support for Protein Ontology (PRO) format.
-    * Added support for a simple custom proteoform format.
-    
+# Extended Reactome Analysis tool
 
 ## Definitions
 
@@ -60,6 +41,43 @@ An input proteoform is not matched (not considered found) when at least one of t
 - One input PTM has no perfect or imperfect match:
     - At least one input PTM is more specific than the stored PTMs. In other words, the input PTM type is a child of the stored PTM type in the ontology hierarchy tree.
     - At least one input PTM with the same coordinate was not found in the stored proteoform.
+
+# Knowledge annotated in Reactome
+
+### How are subsequence ranges annotated in Reactome
+Proteins are commonly processed with cleaving or modifications in order to perform their functions. Very often they do not stay complete the way they are right after translation. For example, the initial residue is removed, because it is just the starting signal of the protein and all of them share that initial methionine. Sometimes, also peptide regions have to be removed so that the protein can actually perform its task. In other situations, only a subsequence of the protein is necessary to perform the task, then it is necessary to specify the range of the subsequence with respect to the full sequence.
+
+By default the sequences refer to the canonical sequence of the proteins. In case they refer to other variants of the sequence then, the isoform is specified. 
+
+The subsequences of the proteins are represented by the class "EntityWithAccessionedSequence" (_ewas_) in Reactome. It always has "startCoordinate" and "endCoordinate" fields to specify the start and end amino acids in the full sequence of the protein. When the whole protein sequence is meant, then either the start and end are not specified or the coordinates of the start and end positions of the full sequence are annotated. In some cases, either the start or end coordinate are not known, therefore they are left blank. The display name of the _ewas_ will contain in parenthesis the subsequence range.
+
+
+### How are Isoforms annotated in Reactome
+
+The isoform number 1 is the main isoform of the protein, which is selected by UniProt. The isoforms annotated in Reactome are not updated regularly. Therefore, in case the isoform numbering changes in UniProt, the annotated isoforms in Reactome might diverge from the current ones.
+
+When a protein has only one version then there is no need to specify the isoform. The default isoform is "-1", which is often ommited. When an isoform is specified, it means only that isoform can perform the function it is supposed to do. In those cases, even the isoform "-1" will be annotated. Otherwise, there is no need to annotate it. This applies also for the proteins having ine or more isoforms.
+
+// TODO: Create a script to perform a check in Reactome if the coordinates of the subsequence ranges and full sequence coordinates match the ones of the actual sequences in UniProt. Extend to check also the ptm coordinates. In case there are some discrepancies, download the history of the protein from UniProt and check if the protein was really annotated according to the sequence by that time. OUTPUT the list of 
+corrections needed to be made in order to keep the information matched.
+
+# Overall analysis process
+
+## How was it?
+
+    ### Input
+
+    ### Search and Matching
+
+    ### Statistical Analysis
+
+## How is it now?
+
+    ### Input
+
+    ### Search and Matching
+
+    ### Statistical Analysis
 
 ## Input Formats
 
@@ -136,20 +154,9 @@ A0A022YWF9;246:00916,467:00916,632:00916
 
 
 
-### How are subsequence ranges annotated in Reactome
-Proteins are commonly processed with cleaving or modifications in order to perform their functions. Very often they do not stay complete the way they are right after translation. For example, the initial residue is removed, because it is just the starting signal of the protein and all of them share that initial methionine. Sometimes, also peptide regions have to be removed so that the protein can actually perform its task. In other situations, only a subsequence of the protein is necessary to perform the task, then it is necessary to specify the range of the subsequence with respect to the full sequence.
 
-By default the sequences refer to the canonical sequence of the proteins. In case they refer to other variants of the sequence then, the isoform is specified.
 
-The subsequences of the proteins are represented by the class "EntityWithAccessionedSequence" in Reactome. It always has "startCoordinate" and "endCoordinate" fields to specify the start and end amino acids in the full sequence of the protein. When the whole protein sequence is meant, then either the start and end are not specified or the coordinates of the start and end positions of the full sequence are annotated. In some cases, either the start or end coordinate are not known, therefore they are left blank.
 
-### How are Isoforms annotated in Reactome
-
-The isoform number 1 is the main isoform of the protein, which is selected by UniProt. The isoforms annotated in Reactome are not updated regularly. Therefore, in case the isoform numbering changes in UniProt, the annotated isoforms in Reactome might diverge from the current ones.
-
-When a protein has only one version then there is no need to specify the isoform. The default isoform is "-1", which is often ommited. When an isoform is specified, it means only that isoform can perform the function it is supposed to do. In those cases, even the isoform "-1" will be annotated. Otherwise, there is no need to annotate it. This applies also for the proteins having ine or more isoforms.
-
-// TODO: Create a script to perform a check in Reactome if the coordinates of the subsequence ranges and full sequence coordinates match the ones of the actual sequences in UniProt. Extend to check also the ptm coordinates. In case there are some discrepancies, download the history of the protein from UniProt and check if the protein was really annotated according to the sequence by that time. OUTPUT the list of corrections needed to be made in order to keep the information matched.
 
 #### PEFF (TODO)
 
@@ -177,14 +184,84 @@ An unknown PTM coordinate is stored as null, to avoid counting the 0 in the rang
 
 #### Input reader
 
-#### Input matching
+### Matching
 
-#### Intermediate data structure
+First, the proteins are filtered to only those with that UniProt accession.
+Second, proteins are filtered by isoform.
+Third, proteins are filtered by subsequence ranges.
+Fourth, the set of ptms is matched.
 
-#### Results analysis
+How it is annotated in Reactome?
+There are ReferenceEntity 
+
+## Intermediate data structure
+
+## Results analysis
+
+# Improvements
+
+* Use Google Guava Stopwatch class to measure input preprocessing performance.
+    
+    It is based on the System.nanoTime(), instead of System.currentTimeMillis(), 
+    which measures the elapsed wall-clock time. In contrast, System.nanoTime() returns the current value of the most 
+    precise available system timer, which is specifically developed to measure elapsed time.
+    
+ * Faster reading of expression input.
+  
+  Traverse the input fewer times. Currently, it is traversing all input at least 3 times using:
+ split, replaceAll, and StringTokenizer. 
+ 
+ * Added possibility to specify proteoforms.
+    * Add support for PEFF format.
+    * Added support for Protein Ontology (PRO) format.
+    * Added support for a simple custom proteoform format.
 
 # References
 \[1\] [UniProt: the universal protein knowledgebase. Nucleic Acids Res. 45: D158-D169 (2017)](http://dx.doi.org/doi:10.1093/nar/gkw1099) <br>
 \[2\] [The PSI-MOD community standard for representation of protein modification data. Nature Biotechnology 26, 864 - 866 (2008)](http://www.nature.com/nbt/journal/v26/n8/full/nbt0808-864.html) <br>
+
+
+# Reactome queries
+
+## Get all protein modification types from PSI-MOD annotated in Reactome.
+~~~~
+MATCH (n:PsiMod) 
+WHERE n.databaseName = "MOD"
+RETURN n.identifier, n.name
+~~~~
+## Number of times a ptm was annotated to a human protein sequence
+~~~~
+MATCH (re:ReferenceEntity)<-[:referenceEntity]-(ewas:EntityWithAccessionedSequence)
+WHERE re.databaseName = 'UniProt' AND ewas.speciesName = 'Homo sapiens'
+WITH re, ewas
+MATCH (ewas)-[:hasModifiedResidue]->(mr:TranslationalModification)-[:psiMod]->(mod:PsiMod)
+RETURN DISTINCT mod.identifier as Identifier, mod.name as Name, count(ewas) as AnnotationTimes
+ORDER by AnnotationTimes DESC
+~~~~
+## Get all reactome proteins
+~~~~
+MATCH (pe:PhysicalEntity)-[:referenceEntity]->(re:ReferenceEntity)
+WHERE pe.speciesName = "Homo sapiens" AND re.databaseName = "UniProt"
+RETURN DISTINCT (CASE WHEN size(re.variantIdentifier) > 0 THEN re.variantIdentifier ELSE re.identifier END) as proteinAccession
+ORDER BY proteinAccession
+~~~~
+## Get proteoforms of a protein
+~~~~
+MATCH (pe:PhysicalEntity)-[:referenceEntity]->(re:ReferenceEntity{identifier:{id}})
+WHERE pe.speciesName = "Homo sapiens" AND re.databaseName = "UniProt"
+WITH DISTINCT pe, re
+OPTIONAL MATCH (pe)-[:hasModifiedResidue]->(tm:TranslationalModification)-[:psiMod]->(mod:PsiMod)
+WITH DISTINCT pe,
+                (CASE WHEN size(re.variantIdentifier) > 0 THEN re.variantIdentifier ELSE re.identifier END) as proteinAccession,
+                tm.coordinate as coordinate, 
+                mod.identifier as type ORDER BY type, coordinate
+WITH DISTINCT pe, 
+				proteinAccession,
+                COLLECT(type + ":" + CASE WHEN coordinate IS NOT NULL THEN coordinate ELSE "null" END) AS ptms
+RETURN DISTINCT proteinAccession,  
+				(CASE WHEN pe.startCoordinate IS NOT NULL AND pe.startCoordinate <> -1 THEN pe.startCoordinate ELSE "null" END) as startCoordinate, 
+                (CASE WHEN pe.endCoordinate IS NOT NULL AND pe.endCoordinate <> -1 THEN pe.endCoordinate ELSE "null" END) as endCoordinate, 
+                ptms
+~~~~
 
 hp

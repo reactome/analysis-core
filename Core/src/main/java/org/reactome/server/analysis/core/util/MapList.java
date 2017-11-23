@@ -9,7 +9,7 @@ import java.util.*;
  */
 public class MapList<S, T> implements Serializable {
 
-    protected Map<S, List<T>> map = new HashMap<>();
+    protected TreeMap<S, List<T>> map = new TreeMap<>();
 
     public boolean add(S identifier, T elem) {
         List<T> aux = getOrCreate(identifier);

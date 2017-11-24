@@ -122,7 +122,7 @@ public class HierarchiesData {
     }
 
     /**
-     * Use this method to calculate FDR from a list of pvalues using Benjamini-Hochberg
+     * Use this method to calculate FDR from a list of p-values using Benjamin-Hochberg
      * method. The implementation of this method is based on the source code for MEMo
      * (http://cbio.mskcc.org/tools/memo/).
      * @param list a list of PathwayStatic objects representing the hit pathways and their pValue

@@ -238,7 +238,14 @@ MATCH (ewas)-[:hasModifiedResidue]->(mr:TranslationalModification)-[:psiMod]->(m
 RETURN DISTINCT mod.identifier as Identifier, mod.name as Name, count(ewas) as AnnotationTimes
 ORDER by AnnotationTimes DESC
 ~~~~
-## Get all reactome proteins
+## Get all Reactome proteins
+~~~~
+MATCH (pe:PhysicalEntity)-[:referenceEntity]->(re:ReferenceEntity)
+WHERE pe.speciesName = "Homo sapiens" AND re.databaseName = "UniProt"
+RETURN DISTINCT re.identifier as proteinAccession
+ORDER BY proteinAccession
+~~~~
+## Get all Reactome proteins with isoform distinction
 ~~~~
 MATCH (pe:PhysicalEntity)-[:referenceEntity]->(re:ReferenceEntity)
 WHERE pe.speciesName = "Homo sapiens" AND re.databaseName = "UniProt"
@@ -263,5 +270,26 @@ RETURN DISTINCT proteinAccession,
                 (CASE WHEN pe.endCoordinate IS NOT NULL AND pe.endCoordinate <> -1 THEN pe.endCoordinate ELSE "null" END) as endCoordinate, 
                 ptms
 ~~~~
-
+## Get the participants of a pathway
+~~~~
+MATCH (p:Pathway{stId:"R-HSA-2219528"})-[:hasEvent*]->(rle:ReactionLikeEvent),
+      (rle)-[:input|output|catalystActivity|entityFunctionalStatus|physicalEntity|regulatedBy|regulator|hasComponent|hasMember|hasCandidate*]->(pe:PhysicalEntity),
+      (pe)-[:referenceEntity]->(re:ReferenceEntity)-[:referenceDatabase]->(rd:ReferenceDatabase)
+      WHERE rd.displayName = "UniProt"
+RETURN DISTINCT re.dbId
+~~~~
+## Get the reactions that belong to a pathway
+Notice that this query allows duplicates, since 
+~~~~
+MATCH (p:Pathway{stId:"R-HSA-2219528"})-[:hasEvent*]->(rle:ReactionLikeEvent)
+RETURN rle.stId, rle.displayName
+~~~~
+## Get the participants of a pathway, restricting only to humans and proteins
+~~~~
+MATCH (p:Pathway{stId:"R-HSA-2219528"})-[:hasEvent*]->(rle:ReactionLikeEvent),
+      (rle)-[:input|output|catalystActivity|physicalEntity|regulatedBy|regulator|hasComponent|hasMember|hasCandidate*]->(pe:PhysicalEntity),
+      (pe)-[:referenceEntity]->(re:ReferenceEntity)-[:referenceDatabase]->(rd:ReferenceDatabase)
+      WHERE p.speciesName = "Homo sapiens" AND rle.speciesName = "Homo sapiens" AND rd.displayName = "UniProt"
+RETURN DISTINCT rle.stId, rle.displayName, re.identifier AS Identifier, rd.displayName AS Database
+~~~~
 hp

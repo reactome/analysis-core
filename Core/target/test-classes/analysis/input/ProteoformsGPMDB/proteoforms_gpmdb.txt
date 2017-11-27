@@ -1,5 +1,0 @@
-P10412-1:pm.S141+Phospho;
-ENSP00000339186:pm.K26+Trimethyl/Acetyl;
-ENSP00000339186:pm.T262+Phospho;
-QRTFRC:pm.S141+Phospho;T144+Phospho;Q145+Deamidated;
-ENSP00000339186:pm.T262=MOD:00047;

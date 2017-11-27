@@ -19,7 +19,7 @@ import static org.reactome.server.analysis.parser.util.FileUtils.getString;
 
 public class AnalysisTests_v3 {
 
-    private static final String PATH = "target/test-classes/analysis/input/";
+    private static final String PATH = "src/test/resources/analysis/input/";
 
     /**
      * MULTIPLE LINES INPUTS

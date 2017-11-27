@@ -46,8 +46,8 @@ class ProteoformsSimpleTest {
     private static final String PROTEOFORM_CUSTOM = PATH.concat("proteoforms_custom.txt");
     private static final String PROTEOFORM_CUSTOM_ONE_PROTEIN = PATH.concat("proteoforms_custom_one_protein.txt");
 
-    private static final String PATH_VALID = "target/test-classes/analysis/input/ProteoformsSimple/Valid/";
-    private static final String PATH_INVALID = "target/test-classes/analysis/input/ProteoformsSimple/Invalid/";
+    private static final String PATH_VALID = "src/test/resources/analysis/input/ProteoformsSimple/Valid/";
+    private static final String PATH_INVALID = "src/test/resources/analysis/input/ProteoformsSimple/Invalid/";
 
     static List<AnalysisIdentifier> aiSet;
     static List<AnalysisIdentifier> aiSet2;
@@ -61,6 +61,7 @@ class ProteoformsSimpleTest {
     @Test
     @Tag("Valid")
     void oneLineWithManySpacesTest(TestInfo testInfo) {
+
         String data = getString(PATH_VALID + "oneLineWithManySpaces.txt");
         Parser p = createParser(data);
         try {
@@ -371,19 +372,6 @@ class ProteoformsSimpleTest {
 
         for (AnalysisIdentifier ai : aiSetWithNull2) {
             Assert.assertTrue("Looking for " + ai.toString(), p.getAnalysisIdentifierSet().contains(ai));
-        }
-    }
-
-    @Test
-    @Tag("Invalid")
-    void multipleLinesNullCoordinateSpacedHeaderTest(TestInfo testInfo) {
-        String data = getString(PATH_INVALID + "multipleLinesNullCoordinateSpacedHeader.txt");
-        Parser p = createParser(data);
-        try {
-            Assert.assertEquals(p.getClass(), ParserProteoformSimple.class);
-            p.parseData(data);
-            Assert.fail(testInfo.getDisplayName() + " was expected to fail beause header has multiple columns and the rest of rows not.");
-        } catch (ParserException e) {
         }
     }
 

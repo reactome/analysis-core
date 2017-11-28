@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.reactome.server.analysis.parser.tools.ParserFactory.createParser;
-import static org.reactome.server.analysis.parser.util.ConstantHolder.PATH;
 import static org.reactome.server.analysis.parser.util.FileUtils.getString;
 
 class ProteoformsSimpleTest {
@@ -42,9 +41,6 @@ class ProteoformsSimpleTest {
      * - Headers follow this regex "(#|//).*([\t,;]+(#|//).*)*", where .* stands for the header text itself.
      * - Can contain expression values
      */
-
-    private static final String PROTEOFORM_CUSTOM = PATH.concat("proteoforms_custom.txt");
-    private static final String PROTEOFORM_CUSTOM_ONE_PROTEIN = PATH.concat("proteoforms_custom_one_protein.txt");
 
     private static final String PATH_VALID = "src/test/resources/analysis/input/ProteoformsSimple/Valid/";
     private static final String PATH_INVALID = "src/test/resources/analysis/input/ProteoformsSimple/Invalid/";

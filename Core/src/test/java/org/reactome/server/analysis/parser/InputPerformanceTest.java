@@ -9,7 +9,6 @@ import java.time.Duration;
 import java.util.*;
 
 import static org.reactome.server.analysis.parser.tools.ParserFactory.createParser;
-import static org.reactome.server.analysis.parser.util.ConstantHolder.*;
 
 public class InputPerformanceTest {
 
@@ -27,7 +26,7 @@ public class InputPerformanceTest {
     public static void main(String args[]) throws IOException, ParserException {
 
         Map<String, String> sources = new TreeMap<>();
-        FileWriter timesFile = new FileWriter(PATH_STATS + "Times.csv");
+        FileWriter timesFile = new FileWriter("Times.csv");
         Stopwatch stopwatch = Stopwatch.createUnstarted();
         PrintWriter output = new PrintWriter(System.out);
 

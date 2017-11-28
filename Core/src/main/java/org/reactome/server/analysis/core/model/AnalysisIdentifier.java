@@ -40,7 +40,6 @@ public class AnalysisIdentifier implements Comparable<AnalysisIdentifier> {
      *
      * @param id
      */
-
     public AnalysisIdentifier(String id) {
         this.id = id;
         this.exp = new LinkedList<Double>();
@@ -101,7 +100,6 @@ public class AnalysisIdentifier implements Comparable<AnalysisIdentifier> {
     public void addPtm(String psiModId, Long coordinate){
         ptms.add(psiModId, coordinate);
     }
-
 
     @Override
     public boolean equals(Object o) {

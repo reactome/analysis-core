@@ -7,7 +7,6 @@ import org.reactome.server.analysis.core.model.AnalysisIdentifier;
 import org.reactome.server.analysis.parser.exception.ParserException;
 
 import java.io.*;
-
 import static org.reactome.server.analysis.parser.tools.ParserFactory.createParser;
 import static org.reactome.server.analysis.parser.util.FileUtils.getString;
 
@@ -172,7 +171,6 @@ public class AnalysisTests {
         Assert.assertEquals(9, p.getAnalysisIdentifierSet().size());
         Assert.assertTrue("Missing header was expected", p.getWarningResponses().contains("Missing header. Using a default one."));
         Assert.assertEquals(1, p.getWarningResponses().size());
-
     }
 
     @Test
@@ -190,7 +188,6 @@ public class AnalysisTests {
         Assert.assertEquals(9, p.getAnalysisIdentifierSet().size());
         Assert.assertTrue("First line does not match the expected result.", p.getWarningResponses().contains("The first line seems to be a header. Make sure it is being initialised by # or //."));
         Assert.assertEquals(1, p.getWarningResponses().size());
-
     }
 
     @Test
@@ -208,7 +205,6 @@ public class AnalysisTests {
         Assert.assertTrue("Header does not match", p.getHeaderColumnNames().contains("10h After"));
         Assert.assertEquals(9, p.getAnalysisIdentifierSet().size());
         Assert.assertEquals(0, p.getWarningResponses().size());
-
     }
 
     @Test
@@ -270,7 +266,6 @@ public class AnalysisTests {
         Assert.assertEquals(5, p.getHeaderColumnNames().size());
         Assert.assertEquals(77, p.getAnalysisIdentifierSet().size());
         Assert.assertEquals(0, p.getWarningResponses().size());
-
     }
 
     @Test
@@ -327,7 +322,6 @@ public class AnalysisTests {
         Assert.assertEquals(5, p.getHeaderColumnNames().size());
         Assert.assertEquals(77, p.getAnalysisIdentifierSet().size());
         Assert.assertEquals(3, p.getWarningResponses().size());
-
     }
 
     @Test
@@ -337,12 +331,10 @@ public class AnalysisTests {
         try {
             Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
-
             Assert.fail(BROKEN_FILE + " should fail.");
         } catch (ParserException e) {
             Assert.assertEquals(5, e.getErrorMessages().size());
         }
-
     }
 
     @Test
@@ -363,7 +355,6 @@ public class AnalysisTests {
         Assert.assertEquals(4, p.getHeaderColumnNames().size());
         Assert.assertEquals(310000, p.getAnalysisIdentifierSet().size());
         Assert.assertEquals(0, p.getWarningResponses().size());
-
     }
 
     @Test
@@ -411,7 +402,6 @@ public class AnalysisTests {
         try {
             Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
-
             Assert.fail(ONELINE_START_WITH_HASH + " has failed.");
         } catch (ParserException e) {
             Assert.assertTrue("Expecting start with comment", e.getErrorMessages().contains("A single line input cannot start with hash or comment."));
@@ -432,7 +422,6 @@ public class AnalysisTests {
         Assert.assertEquals(1, p.getHeaderColumnNames().size());
         Assert.assertEquals(6, p.getAnalysisIdentifierSet().size());
         Assert.assertEquals(0, p.getWarningResponses().size());
-
     }
 
     @Test
@@ -453,7 +442,6 @@ public class AnalysisTests {
         Assert.assertEquals(1, p.getHeaderColumnNames().size());
         Assert.assertEquals(6, p.getAnalysisIdentifierSet().size());
         Assert.assertEquals(0, p.getWarningResponses().size());
-
     }
 
     @Test
@@ -463,7 +451,6 @@ public class AnalysisTests {
         try {
             Assert.assertEquals(p.getClass(), ParserOriginal.class);
             p.parseData(data);
-
         } catch (ParserException e) {
             Assert.fail(ONELINE_ID_EXPRESSIONS_MIXED + " has failed.");
         }
@@ -471,7 +458,6 @@ public class AnalysisTests {
         Assert.assertEquals(1, p.getHeaderColumnNames().size());
         Assert.assertEquals(7, p.getAnalysisIdentifierSet().size());
         Assert.assertEquals(0, p.getWarningResponses().size());
-
     }
 
     @Test
@@ -488,7 +474,6 @@ public class AnalysisTests {
         Assert.assertEquals(1, p.getHeaderColumnNames().size());
         Assert.assertEquals(6, p.getAnalysisIdentifierSet().size());
         Assert.assertEquals(0, p.getWarningResponses().size());
-
     }
 
     @Test
@@ -505,7 +490,6 @@ public class AnalysisTests {
         Assert.assertEquals(1, p.getHeaderColumnNames().size());
         Assert.assertEquals(6, p.getAnalysisIdentifierSet().size());
         Assert.assertEquals(0, p.getWarningResponses().size());
-
     }
 
     @Test
@@ -522,7 +506,6 @@ public class AnalysisTests {
         Assert.assertEquals(1, p.getHeaderColumnNames().size());
         Assert.assertEquals(6, p.getAnalysisIdentifierSet().size());
         Assert.assertEquals(0, p.getWarningResponses().size());
-
     }
 
     @Test
@@ -539,7 +522,6 @@ public class AnalysisTests {
         Assert.assertTrue(p.getHeaderColumnNames().size() == 1);
         Assert.assertTrue(p.getAnalysisIdentifierSet().size() == 6);
         Assert.assertTrue(p.getWarningResponses().size() == 0);
-
     }
 
     @Test
@@ -556,7 +538,6 @@ public class AnalysisTests {
         Assert.assertEquals(1, p.getHeaderColumnNames().size());
         Assert.assertEquals(4, p.getAnalysisIdentifierSet().size());
         Assert.assertEquals(0, p.getWarningResponses().size());
-
     }
 
     @Test
@@ -597,7 +578,6 @@ public class AnalysisTests {
         Assert.assertEquals(6, p.getHeaderColumnNames().size());
         Assert.assertEquals(1, p.getAnalysisIdentifierSet().size());
         Assert.assertEquals(0, p.getWarningResponses().size());
-
     }
 
     @Test
@@ -615,7 +595,6 @@ public class AnalysisTests {
         Assert.assertEquals(1, p.getAnalysisIdentifierSet().size());
         Assert.assertTrue("Looking for PTEN", p.getAnalysisIdentifierSet().contains(new AnalysisIdentifier("PTEN")));
         Assert.assertEquals(0, p.getWarningResponses().size());
-
     }
 
     /**
@@ -637,7 +616,6 @@ public class AnalysisTests {
         Assert.assertEquals(899, p.getAnalysisIdentifierSet().size());
         Assert.assertTrue("Looking for C00137", p.getAnalysisIdentifierSet().contains(new AnalysisIdentifier("C00137")));
         Assert.assertEquals(0, p.getWarningResponses().size());
-
     }
 
     @Test
@@ -674,7 +652,6 @@ public class AnalysisTests {
         Assert.assertEquals(128, p.getAnalysisIdentifierSet().size());
         Assert.assertTrue("Looking for 89795", p.getAnalysisIdentifierSet().contains(new AnalysisIdentifier("89795")));
         Assert.assertEquals(0, p.getWarningResponses().size());
-
     }
 
     @Test
@@ -693,7 +670,6 @@ public class AnalysisTests {
         Assert.assertEquals(1203, p.getAnalysisIdentifierSet().size());
         Assert.assertTrue("Looking for 200000_s_at", p.getAnalysisIdentifierSet().contains(new AnalysisIdentifier("200000_s_at")));
         Assert.assertEquals(0, p.getWarningResponses().size());
-
     }
 
     @Test
@@ -712,7 +688,6 @@ public class AnalysisTests {
         Assert.assertEquals(336, p.getAnalysisIdentifierSet().size());
         Assert.assertTrue("Looking for 1604", p.getAnalysisIdentifierSet().contains(new AnalysisIdentifier("1604")));
         Assert.assertEquals(0, p.getWarningResponses().size());
-
     }
 
     @Test
@@ -731,7 +706,6 @@ public class AnalysisTests {
         Assert.assertEquals(899, p.getAnalysisIdentifierSet().size());
         Assert.assertTrue("Looking for C00010", p.getAnalysisIdentifierSet().contains(new AnalysisIdentifier("C00010")));
         Assert.assertEquals(0, p.getWarningResponses().size());
-
     }
 
     @Test
@@ -760,6 +734,7 @@ public class AnalysisTests {
     private File writeHugeFile() {
 
         System.setProperty("line.separator", "\n");
+
         File file = new File(PATH + "max_file_size.txt");
 
         FileWriter fw = null;
@@ -775,7 +750,9 @@ public class AnalysisTests {
             bw.write("Column 1\t");
             bw.write("Column 2\t");
             bw.write("Column 3");
+
 //            bw.newLine();
+
             bw.write("\n");
 
             for (int i = 0; i < 310000; i++) {
@@ -784,6 +761,7 @@ public class AnalysisTests {
                 bw.write("5.1234\t");
                 bw.write("4.1234\t");
                 bw.write("3.1234");
+
 //                bw.newLine();
                 bw.write("\n");
 
@@ -815,6 +793,7 @@ public class AnalysisTests {
      * If you want to test a 10mb file, please remove @Ignore in the method
      */
     private File writeOneLineHugeFile() {
+
 
         File file = new File(PATH + "one_line_max_file_size.txt");
 
@@ -868,12 +847,11 @@ public class AnalysisTests {
         Assert.assertTrue("Header format in Pride file", p.getHeaderColumnNames().contains("PRIDE assay:27929"));
         Assert.assertEquals(3, p.getAnalysisIdentifierSet().size());
         //Assert.assertEquals(0, p.getWarningResponses().size());
-
-
     }
 
     @Test
     public void testSampleWithSpacesWithoutHeader() {
+
         String data = getString(SAMPLE_WITH_SPACES_WITHOUT_HEADER);
         Parser p = createParser(data);
         try {
@@ -885,11 +863,11 @@ public class AnalysisTests {
         Assert.assertEquals(2, p.getHeaderColumnNames().size());
         Assert.assertEquals(2, p.getAnalysisIdentifierSet().size());
         Assert.assertEquals(1, p.getWarningResponses().size());
-
     }
 
     @Test
     public void testSampleWithTabWithoutHeader() {
+
         String data = getString(SAMPLE_WITH_TAB_WITHOUT_HEADER);
         Parser p = createParser(data);
         try {
@@ -901,7 +879,6 @@ public class AnalysisTests {
         Assert.assertEquals(2, p.getHeaderColumnNames().size());
         Assert.assertEquals(2, p.getAnalysisIdentifierSet().size());
         Assert.assertEquals(1, p.getWarningResponses().size());
-
     }
 
     @Test
@@ -917,7 +894,6 @@ public class AnalysisTests {
         Assert.assertEquals(1, p.getHeaderColumnNames().size());
         Assert.assertEquals(2, p.getAnalysisIdentifierSet().size());
         Assert.assertEquals(1, p.getWarningResponses().size());
-
     }
 }
 

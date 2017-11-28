@@ -15,7 +15,6 @@ public class PathwayHierarchy implements Serializable {
 
     private Set<PathwayRoot> children;
     private SpeciesNode species;
-
     private PathwayNodeData data;
 
     public PathwayHierarchy(SpeciesNode species) {

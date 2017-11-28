@@ -34,5 +34,4 @@
 
     <context:property-placeholder location="classpath:db.properties" ignore-unresolvable="true"/>
 -->
-
 </beans>

@@ -13,7 +13,7 @@ public class PhysicalEntityGraph {
         this.nodes = new HashSet<PhysicalEntityNode>();
     }
 
-    public void addRoot(PhysicalEntityNode node){
+    public void addRoot(PhysicalEntityNode node) {
         this.nodes.add(node);
     }
 
@@ -21,7 +21,7 @@ public class PhysicalEntityGraph {
         return nodes;
     }
 
-    public Set<PhysicalEntityNode> getAllNodes(){
+    public Set<PhysicalEntityNode> getAllNodes() {
         Set<PhysicalEntityNode> rtn = new HashSet<PhysicalEntityNode>();
         for (PhysicalEntityNode node : this.nodes) {
             rtn.addAll(node.getAllNodes());
@@ -37,7 +37,7 @@ public class PhysicalEntityGraph {
 //        return rtn;
 //    }
 
-    public void setLinkToParent(){
+    public void setLinkToParent() {
         for (PhysicalEntityNode node : nodes) {
             node.setLinkToParent(null);
         }
@@ -49,7 +49,7 @@ public class PhysicalEntityGraph {
         }
     }
 
-    public void prepareToSerialise(){
+    public void prepareToSerialise() {
         for (PhysicalEntityNode node : nodes) {
             node.removeLinkToParent();
         }

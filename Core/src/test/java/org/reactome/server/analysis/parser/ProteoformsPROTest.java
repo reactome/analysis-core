@@ -345,7 +345,6 @@ class ProteoformsPROTest {
         Assert.assertEquals(1, p.getHeaderColumnNames().size());
         Assert.assertEquals(8, p.getAnalysisIdentifierSet().size());
         Assert.assertEquals(1, p.getWarningResponses().size());
-
     }
 
     @Test

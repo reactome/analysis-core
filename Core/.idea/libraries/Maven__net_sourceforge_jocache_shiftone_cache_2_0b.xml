@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: net.sourceforge.jocache:shiftone-cache:2.0b">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/net/sourceforge/jocache/shiftone-cache/2.0b/shiftone-cache-2.0b.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/net/sourceforge/jocache/shiftone-cache/2.0b/shiftone-cache-2.0b-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/net/sourceforge/jocache/shiftone-cache/2.0b/shiftone-cache-2.0b-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: psidev.psi.mi:psi25-xml:1.8.5">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/psidev/psi/mi/psi25-xml/1.8.5/psi25-xml-1.8.5.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/psidev/psi/mi/psi25-xml/1.8.5/psi25-xml-1.8.5-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/psidev/psi/mi/psi25-xml/1.8.5/psi25-xml-1.8.5-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

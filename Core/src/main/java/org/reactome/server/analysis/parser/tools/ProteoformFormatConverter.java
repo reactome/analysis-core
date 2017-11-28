@@ -19,7 +19,7 @@ public class ProteoformFormatConverter {
         // Read a file
 
         Path filePath = Paths.get("resources", "ReactomeAllProteoformsPRO.txt");
-        FileWriter outFile = new FileWriter("C:\\Users\\Francisco\\Documents\\phd\\Projects\\Golden\\resources\\ReactomeAllProteoformsCopy.txt");
+        FileWriter outFile = new FileWriter("File.txt");
         List<String> lines = Files.readAllLines(filePath, Charset.defaultCharset());
 
         // Convert each proteoform

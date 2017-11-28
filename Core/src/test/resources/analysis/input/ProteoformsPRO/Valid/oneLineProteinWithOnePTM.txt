@@ -1,0 +1,1 @@
+UniProtKB:Q9H8P0,Ser-10,MOD:01646

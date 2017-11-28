@@ -28,7 +28,7 @@ public class AnalysisBuilder {
     private InteractorsBuilder interactorsBuilder;
 
     public void build(MySQLAdaptor dba, InteractorsDatabase interactorsDatabase, String fileName){
-        this.pathwaysBuilder.build(dba);
+        this.pathwaysBuilder.build(dba);                                                // Create pathway hierarchies
         this.rleBuilder.build(dba, this.pathwaysBuilder.getPathwayLocation());
         this.peBuilder.build(dba, rleBuilder.getEntityPathwayReaction());
         this.interactorsBuilder.build(peBuilder.getPhysicalEntityGraph(), interactorsDatabase);

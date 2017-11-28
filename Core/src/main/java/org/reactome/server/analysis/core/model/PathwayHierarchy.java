@@ -12,9 +12,9 @@ import java.util.Set;
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
  */
 public class PathwayHierarchy implements Serializable {
+
     private Set<PathwayRoot> children;
     private SpeciesNode species;
-
     private PathwayNodeData data;
 
     public PathwayHierarchy(SpeciesNode species) {
@@ -64,5 +64,9 @@ public class PathwayHierarchy implements Serializable {
     public void processInteractor(InteractorIdentifier identifier, MainIdentifier mainIdentifier, Set<AnalysisReaction> reactions){
         this.data.addInteractors(mainIdentifier, identifier);
         this.data.addReactions(mainIdentifier.getResource(), reactions);
+    }
+
+    public String toString(){
+        return "";
     }
 }

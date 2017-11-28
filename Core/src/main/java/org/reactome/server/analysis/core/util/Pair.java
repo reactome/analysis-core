@@ -3,7 +3,7 @@ package org.reactome.server.analysis.core.util;
 /**
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
  */
-public class Pair<S,T> {
+public class Pair<S, T> {
     private S fst;
     private T snd;
 
@@ -39,5 +39,10 @@ public class Pair<S,T> {
         int result = fst != null ? fst.hashCode() : 0;
         result = 31 * result + (snd != null ? snd.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return (this.getFst() == null ? "null" : getFst()) + ":" + (this.getSnd() == null ? "null" : this.getSnd());
     }
 }

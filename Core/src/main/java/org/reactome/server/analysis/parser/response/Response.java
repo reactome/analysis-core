@@ -25,6 +25,12 @@ public class Response {
     public final static Integer START_WITH_HASH = 459;
     public final static Integer INVALID_SINGLE_LINE = 460;
 
+    // Proteoforms
+    public final static Integer PROTEOFORM_MISMATCH = 500;
+    public final static Integer INVALID_PROTEOFORM_LINE = 501;
+    public final static Integer FORMAT_NOT_SUPPORTED = 502;
+    public final static Integer INVALID_TOKEN = 503;
+
     /**
      * messages - Strings
      */
@@ -38,6 +44,12 @@ public class Response {
     private final static String MESSAGE_START_WITH_NUMBER = "A single line input cannot start with number.";
     private final static String MESSAGE_START_WITH_HASH = "A single line input cannot start with hash or comment.";
     private final static String MESSAGE_INVALID_SINGLE_LINE = "A single line input is invalid. Found proteins and values together.";
+
+    // Proteoforms
+    private final static String MESSAGE_PROTEOFORM_MISMATCH = "Line {0} does not match the Proteoform format in previous lines.";
+    private final static String MESSAGE_INVALID_PROTEOFORM_LINE = "Line {0} does not follow the proteoform format {1}.";
+    private final static String MESSAGE_INVALID_TOKEN = "Token {0} does not follow the proteoform format {1}.";
+    private final static String MESSAGE_FORMAT_NOT_SUPPORTED = "The format {0} is not supported as input.";
 
     /**
      * handles Error codes to Message strings
@@ -58,6 +70,12 @@ public class Response {
         codeToMessage.put(START_WITH_NUMBER, MESSAGE_START_WITH_NUMBER);
         codeToMessage.put(START_WITH_HASH, MESSAGE_START_WITH_HASH);
         codeToMessage.put(INVALID_SINGLE_LINE, MESSAGE_INVALID_SINGLE_LINE);
+
+        // Proteoforms
+        codeToMessage.put(PROTEOFORM_MISMATCH, MESSAGE_PROTEOFORM_MISMATCH);
+        codeToMessage.put(INVALID_PROTEOFORM_LINE, MESSAGE_INVALID_PROTEOFORM_LINE);
+        codeToMessage.put(FORMAT_NOT_SUPPORTED, MESSAGE_FORMAT_NOT_SUPPORTED);
+        codeToMessage.put(INVALID_TOKEN, MESSAGE_INVALID_TOKEN);
     }
 
     /**

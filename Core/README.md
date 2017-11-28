@@ -18,6 +18,7 @@ java -jar tools-jar-with-dependencies.jar build \
       -d db \ 
       -u user \
       -p passwd \
+      -g pathTO/interactors.db \
       -o pathTO/analysis_vXX.bin
 ```
 

@@ -9,8 +9,6 @@ public class ParserFactory {
             return new ParserProteoformPRO();
         } else if (ParserProteoformSimple.check(input)) {
             return new ParserProteoformSimple();
-        } else if (ParserProteoformPEFF.check(input)) {
-            return new ParserProteoformPEFF();
         }
         return new ParserOriginal();
     }

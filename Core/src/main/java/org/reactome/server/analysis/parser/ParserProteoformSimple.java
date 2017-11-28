@@ -297,7 +297,7 @@ public class ParserProteoformSimple extends Parser {
 
         // Check if it is a regular line or a proteoform line
         String[] content = {firstLine};
-        ParserExtended.ProteoformFormat proteoformType = checkForProteoformsWithExpressionValues(content, 0);
+        Parser.ProteoformFormat proteoformType = checkForProteoformsWithExpressionValues(content, 0);
 
         // Split the line in chunks of characters
         String[] chunks = firstLine.split(SPACES);
@@ -367,7 +367,7 @@ public class ParserProteoformSimple extends Parser {
             if (matches_Proteoform_Simple_With_Expression_Values(line)) {
                 analyseContentLineWithOneProteoform(line, i);
             } else {
-                errorResponses.add(Response.getMessage(Response.INVALID_PROTEOFORM_LINE, i + 1, ParserExtended.ProteoformFormat.SIMPLE));
+                errorResponses.add(Response.getMessage(Response.INVALID_PROTEOFORM_LINE, i + 1, Parser.ProteoformFormat.SIMPLE));
                 continue;
             }
         }

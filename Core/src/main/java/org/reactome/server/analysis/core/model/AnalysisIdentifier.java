@@ -18,7 +18,6 @@ public class AnalysisIdentifier implements Comparable<AnalysisIdentifier> {
 
     private String id;
     private List<Double> exp;
-
     private Long startCoordinate;
     private Long endCoordinate;
     /*
@@ -28,6 +27,12 @@ public class AnalysisIdentifier implements Comparable<AnalysisIdentifier> {
      */
     private MapList<String, Long> ptms;
 
+    public AnalysisIdentifier(AnalysisIdentifier aux){
+        this(aux.getId());
+        for (Double ev : aux.getExp()) {
+            this.add(ev);
+        }
+    }
 
     /**
      * Notice that this constructor initializes also the ptm set as empty. Then when comparing to AnalysisIdentifiers
@@ -35,6 +40,7 @@ public class AnalysisIdentifier implements Comparable<AnalysisIdentifier> {
      *
      * @param id
      */
+
     public AnalysisIdentifier(String id) {
         this.id = id;
         this.exp = new LinkedList<Double>();
@@ -49,13 +55,6 @@ public class AnalysisIdentifier implements Comparable<AnalysisIdentifier> {
         startCoordinate = null;
         endCoordinate = null;
         this.ptms = new MapList<>();
-    }
-
-    public AnalysisIdentifier(AnalysisIdentifier aux) {
-        this(aux.getId());
-        for (Double ev : aux.getExp()) {
-            this.add(ev);
-        }
     }
 
     public boolean add(Double value) {
@@ -103,9 +102,9 @@ public class AnalysisIdentifier implements Comparable<AnalysisIdentifier> {
         ptms.add(psiModId, coordinate);
     }
 
+
     @Override
     public boolean equals(Object o) {
-//        System.out.println("equals: " + this + " and " + o.toString());
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
@@ -134,22 +133,12 @@ public class AnalysisIdentifier implements Comparable<AnalysisIdentifier> {
 
     @Override
     public int hashCode() {
-//        System.out.println("hashCode: " + id);
-
         return id != null ? id.hashCode() : 0;
-
-//        int hash = id != null ? id.hashCode() : 0;
-//        hash += (this.ptms != null ? this.ptms.hashCode() : 0);
-//        return hash;
     }
 
     @Override
     public String toString() {
         return this.id + "," + startCoordinate + "-" + endCoordinate + "," + "[" + this.ptms.toString() + "]";
-    }
-
-    public String toFullString(){
-        return this.id + "(" + startCoordinate + "-" + endCoordinate + ")," + "[" + this.ptms.toString() + "]";
     }
 
     @Override

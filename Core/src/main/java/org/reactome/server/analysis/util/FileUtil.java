@@ -44,5 +44,4 @@ public abstract class FileUtil {
 
         logger.trace(fileName + " is a valid file name");
     }
-
 }

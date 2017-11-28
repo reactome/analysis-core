@@ -10,7 +10,6 @@ import java.util.Set;
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
  */
 public class PathwayRoot extends PathwayNode {
-
     private PathwayHierarchy pathwayHierarchy;
 
     public PathwayRoot(PathwayHierarchy pathwayHierarchy, String stId, Long pathwayId, String name, boolean hasDiagram) {

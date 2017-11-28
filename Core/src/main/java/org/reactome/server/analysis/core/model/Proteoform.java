@@ -1,10 +1,7 @@
 package org.reactome.server.analysis.core.model;
 
 import org.reactome.server.analysis.core.util.MapList;
-import org.reactome.server.analysis.parser.ParserExtended;
-import org.reactome.server.analysis.parser.ParserProteoformNeo4j;
-import org.reactome.server.analysis.parser.ParserProteoformPRO;
-import org.reactome.server.analysis.parser.ParserProteoformSimple;
+import org.reactome.server.analysis.parser.*;
 
 public class Proteoform {
     private String UniProtAcc;          // The uniprot accession number including the optional isoform
@@ -54,7 +51,7 @@ public class Proteoform {
         this.PTMs = PTMs;
     }
 
-    public String toString(ParserExtended.ProteoformFormat format) {
+    public String toString(Parser.ProteoformFormat format) {
         switch (format) {
             case SIMPLE:
                 return ParserProteoformSimple.getString(this);

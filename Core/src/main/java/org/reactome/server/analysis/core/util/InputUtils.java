@@ -6,7 +6,6 @@ import org.apache.log4j.Logger;
 import org.reactome.server.analysis.core.model.AnalysisIdentifier;
 import org.reactome.server.analysis.core.model.UserData;
 import org.reactome.server.analysis.parser.Parser;
-import org.reactome.server.analysis.parser.ParserOriginal;
 import org.reactome.server.analysis.parser.exception.ParserException;
 import org.springframework.util.DigestUtils;
 
@@ -102,11 +101,8 @@ public abstract class InputUtils {
     */
 
     private static UserData processData(String data, String md5) throws IOException, ParserException {
-
         Parser parser = createParser(data);
         parser.parseData(data);
-
         return new UserData(parser.getHeaderColumnNames(), parser.getAnalysisIdentifierSet(), md5, parser.getWarningResponses());
     }
-
 }

@@ -15,12 +15,19 @@ public class PathwayHierarchy implements Serializable {
 
     private Set<PathwayRoot> children;
     private SpeciesNode species;
+
     private PathwayNodeData data;
 
     public PathwayHierarchy(SpeciesNode species) {
         this.species = species;
         this.children = new HashSet<PathwayRoot>();
         this.data = new PathwayNodeData();
+    }
+
+    public PathwayNode addFrontpageItem(String stId, Long pathwayId, String name, boolean hasDiagram){
+        PathwayRoot node = new PathwayRoot(this, stId, pathwayId, name, hasDiagram);
+        this.children.add(node);
+        return node;
     }
 
     public Set<PathwayRoot> getChildren() {
@@ -41,12 +48,6 @@ public class PathwayHierarchy implements Serializable {
             rtn.addAll(node.getHitNodes());
         }
         return rtn;
-    }
-
-    public PathwayNode addFrontpageItem(String stId, Long pathwayId, String name, boolean hasDiagram){
-        PathwayRoot node = new PathwayRoot(this, stId, pathwayId, name, hasDiagram);
-        this.children.add(node);
-        return node;
     }
 
     public void setCountersAndCleanUp(){

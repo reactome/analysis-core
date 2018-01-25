@@ -3,21 +3,18 @@
 # Analysis Core
 
 ## What is Reactome Analysis Core?
-Reactome Analysis Core is a project that can be directly executed to create the analysis data content or mapping files,
-but it's also used as part of the AnalysisService (as a dependency).
-The project is split into 'Builder' and 'Exporter':
-  * Builder: queries the MySql database and creates/populates the data structures needed for the analysis.
-  * Exporter: generates mapping files from different resources to reactome content.
+Reactome Analysis Core creates the analysis intermediate file and it is also used as part of the AnalysisService (as a dependency).
 
-## Builder Tool
+### Creating The Analysis Intermediate File
 
-Creates the intermediate binary file to be used for the analysis service and the exporters:
+To create the intermediate binary file, the command is as follows:
 
 ```console
-java -jar tools-jar-with-dependencies.jar build \
-      -d db \ 
-      -u user \
-      -p passwd \
+java -jar analysis-core-jar-with-dependencies.jar \
+      -h graph_db_host \
+      -p graph_db_port \
+      -u graph_db_user \
+      -p graph_db_passwd \
       -o pathTO/analysis_vXX.bin
 ```
 

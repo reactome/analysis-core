@@ -10,9 +10,9 @@ import org.reactome.server.analysis.core.util.FormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
@@ -21,11 +21,14 @@ import java.io.OutputStream;
 public class AnalysisDataUtils {
     private static Logger logger = LoggerFactory.getLogger("analysisDataLogger");
 
-    static DataContainer getDataContainer(InputStream file) {
-        logger.info(String.format("Loading %s file...", DataContainer.class.getSimpleName()));
+    static DataContainer getDataContainer(String fileName) throws Exception {
+        String clazz = DataContainer.class.getSimpleName();
+        logger.info(String.format("%s: Loading %s file...", clazz, fileName));
         long start = System.currentTimeMillis();
-        DataContainer container = (DataContainer) AnalysisDataUtils.read(file);
-        assert container != null;
+        DataContainer container = (DataContainer) AnalysisDataUtils.read(fileName);
+        if(container == null){
+            throw new Exception(String.format("%s: It was not possible to load %s", clazz, fileName));
+        }
         container.initialize();
         long end = System.currentTimeMillis();
         logger.info(String.format("Loading %s file >> Done (%s)", DataContainer.class.getSimpleName(), FormatUtils.getTimeFormatted(end - start)));
@@ -60,18 +63,22 @@ public class AnalysisDataUtils {
         }
     }
 
-    private static Object read(InputStream file) {
+    private static Object read(String fileName) {
+        Object rtn = null;
+        Input input = null;
         try {
             System.gc();
             Kryo kryo = new Kryo();
             kryo.setInstantiatorStrategy(new StdInstantiatorStrategy());
-            Input input = new Input(file);
-            Object obj = kryo.readClassAndObject(input);
-            input.close();
-            return obj;
+            input = new Input(new FileInputStream(fileName));
+            rtn = kryo.readClassAndObject(input);
         } catch (RuntimeException ex){
             logger.error(String.format("There was a problem loading the intermediate data file. %s", ex.getMessage()));
+        } catch (FileNotFoundException e) {
+            logger.error(String.format("%s has not been found. Please check the settings", fileName));
+        } finally {
+            if(input!=null) input.close();;
         }
-        return null;
+        return rtn;
     }
 }

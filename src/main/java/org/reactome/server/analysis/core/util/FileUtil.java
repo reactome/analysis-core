@@ -1,6 +1,7 @@
 package org.reactome.server.analysis.core.util;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -12,7 +13,7 @@ import java.nio.file.Paths;
  */
 public abstract class FileUtil {
 
-    private static Logger logger = Logger.getLogger(FileUtil.class.getName());
+    private static Logger logger = LoggerFactory.getLogger("importLogger");
 
     public static void checkFileName(String fileName){
         File file = new File(fileName);
@@ -20,7 +21,7 @@ public abstract class FileUtil {
         if(file.isDirectory()){
             String msg = fileName + " is a folder. Please specify a valid file name.";
             System.err.println(msg);
-            logger.fatal(msg);
+            logger.error(msg);
             System.exit( 1 );
         }
 
@@ -31,14 +32,14 @@ public abstract class FileUtil {
         if(!Files.exists(parent)){
             String msg = parent + " does not exist.";
             System.err.println(msg);
-            logger.fatal(msg);
+            logger.error(msg);
             System.exit( 1 );
         }
 
         if(!file.getParentFile().canWrite()){
             String msg = "No write access in " + file.getParentFile();
             System.err.println(msg);
-            logger.fatal(msg);
+            logger.error(msg);
             System.exit( 1 );
         }
 

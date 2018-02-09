@@ -12,11 +12,9 @@ import org.reactome.server.analysis.core.model.identifier.MainIdentifier;
 import org.reactome.server.analysis.core.util.FileUtil;
 import org.reactome.server.analysis.core.util.FormatUtils;
 import org.reactome.server.analysis.core.util.MapSet;
+import org.reactome.server.graph.service.InteractionsService;
 import org.reactome.server.graph.utils.ReactomeGraphCore;
-import org.reactome.server.interactors.database.InteractorsDatabase;
 
-import java.io.File;
-import java.sql.SQLException;
 import java.util.Set;
 
 /**
@@ -37,14 +35,9 @@ public class Main {
                         , new FlaggedOption("port", JSAP.STRING_PARSER, "7474", JSAP.NOT_REQUIRED, 'p', "port", "The neo4j port")
                         , new FlaggedOption("user", JSAP.STRING_PARSER, "neo4j", JSAP.NOT_REQUIRED, 'u', "user", "The neo4j user")
                         , new FlaggedOption("password", JSAP.STRING_PARSER, "neo4j", JSAP.REQUIRED, 'k', "password", "The neo4j password")
-                        , new FlaggedOption("output", JSAP.STRING_PARSER, JSAP.NO_DEFAULT, JSAP.REQUIRED, 'o', "output",
-                        "The file where the results are written to")
-                        , new FlaggedOption("interactors-database-path", JSAP.STRING_PARSER, null, JSAP.REQUIRED, 'g', "interactors-database-path",
-                        "Interactor Database Path")
-                        , new QualifiedSwitch("test", JSAP.BOOLEAN_PARSER, null, JSAP.NOT_REQUIRED, 't', "test",
-                        "Requests verbose output")
-                        , new QualifiedSwitch("verbose", JSAP.BOOLEAN_PARSER, null, JSAP.NOT_REQUIRED, 'v', "verbose",
-                        "Requests verbose output")
+                        , new FlaggedOption("output", JSAP.STRING_PARSER, JSAP.NO_DEFAULT, JSAP.REQUIRED, 'o', "output", "The file where the results are written to")
+                        , new QualifiedSwitch("test", JSAP.BOOLEAN_PARSER, null, JSAP.NOT_REQUIRED, 't', "test", "Test main species")
+                        , new QualifiedSwitch("verbose", JSAP.BOOLEAN_PARSER, null, JSAP.NOT_REQUIRED, 'v', "verbose",  "Requests verbose output")
                 }
         );
 
@@ -58,24 +51,12 @@ public class Main {
                 config.getString("password"),
                 ReactomeNeo4jConfig.class);
 
-        String database = config.getString("interactors-database-path");
-        File databaseFile = new File(database);
-        if (!databaseFile.exists()) {
-            throw new RuntimeException("Interactor database does not exist");
-        }
-
         TEST_MAIN_SPECIES = config.getBoolean("test");
         VERBOSE = config.getBoolean("verbose");
 
         String fileName = config.getString("output");
         FileUtil.checkFileName(fileName);
 
-        InteractorsDatabase interactorsDatabase = null;
-        try {
-            interactorsDatabase = new InteractorsDatabase(database);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
 
         Long start = System.currentTimeMillis();
         HierarchyBuilder hierarchyBuilder = new HierarchyBuilder();
@@ -85,8 +66,9 @@ public class Main {
         entitiesBuilder.build(hierarchyBuilder.getSpeciesMap());
         entitiesBuilder.setOrthologous();
 
+        InteractionsService interactionsService = ReactomeGraphCore.getService(InteractionsService.class);
         InteractorsBuilder interactorsBuilder = new InteractorsBuilder();
-        interactorsBuilder.build(hierarchyBuilder.getHierarchies().keySet(), entitiesBuilder.getEntitiesContainer(), interactorsDatabase);
+        interactorsBuilder.build(hierarchyBuilder.getHierarchies().keySet(), entitiesBuilder.getEntitiesContainer(), interactionsService);
 
         calculateNumbersInHierarchyNodesForMainResources(hierarchyBuilder, entitiesBuilder, interactorsBuilder);
         Long built = System.currentTimeMillis();

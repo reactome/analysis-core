@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
  */
+@SuppressWarnings("WeakerAccess")
 public class HierarchiesDataProducer {
 
     private static Logger logger = LoggerFactory.getLogger("analysisDataLogger");
@@ -16,7 +17,6 @@ public class HierarchiesDataProducer {
     private static HierarchiesDataProducer producer;
     private static Thread backgroundProducer;
 
-    private static boolean producing = false;
     private DataContainer data;
 
     private HierarchiesDataProducer(DataContainer data) {
@@ -24,8 +24,7 @@ public class HierarchiesDataProducer {
         if (HierarchiesDataContainer.POOL_SIZE > 1) {
             logger.trace("Initialising the background producer...");
             backgroundProducer = new Thread(new BackgroundProducer());
-            backgroundProducer.setName("background_producer");
-            producing = true;
+            backgroundProducer.setName(BackgroundProducer.class.getSimpleName());
             backgroundProducer.start();
             logger.info("Hierarchy content background producer initialised");
         } else {
@@ -41,18 +40,18 @@ public class HierarchiesDataProducer {
         }
     }
 
-    @SuppressWarnings("unused")
     public static void interruptProducer() {
         if (backgroundProducer != null) {
-            producing = false;
             backgroundProducer.interrupt();
-            logger.info("Background producer has been interrupted.");
         } else {
             logger.warn("The producer has not previously been initialized.");
         }
     }
 
     static HierarchiesData getHierarchiesData() {
+        if (producer != null) {
+            return producer.data.getHierarchiesData();
+        }
         synchronized (AnalysisData.LOADER_SEMAPHORE) {
             if (producer != null) {
                 return producer.data.getHierarchiesData();
@@ -72,19 +71,24 @@ public class HierarchiesDataProducer {
      * the data object by demand
      */
     class BackgroundProducer implements Runnable {
+        private boolean active = true;
+
         @Override
         public void run() {
-            while (producing) {
-                synchronized (EnrichmentAnalysis.ANALYSIS_SEMAPHORE) {
-                    if (HierarchiesDataContainer.isFull() || EnrichmentAnalysis.getAnalysisCount() > 0) {
-                        try {
+            logger.info(Thread.currentThread().getName() + " thread started");
+            while (active) {
+                try {
+                    synchronized (EnrichmentAnalysis.ANALYSIS_SEMAPHORE) {
+                        if (HierarchiesDataContainer.isFull() || EnrichmentAnalysis.getAnalysisCount() > 0) {
                             EnrichmentAnalysis.ANALYSIS_SEMAPHORE.wait();
-                        } catch (InterruptedException e) {
-                            logger.error(e.getMessage(), e);
                         }
                     }
+                    HierarchiesDataContainer.put(data.getHierarchiesData());
+                } catch (InterruptedException e) {
+                    active = false;
+                    data = null; System.gc();
+                    logger.info(Thread.currentThread().getName() + ": data has been cleaned up and thread interrupted");
                 }
-                HierarchiesDataContainer.put(data.getHierarchiesData());
             }
         }
     }

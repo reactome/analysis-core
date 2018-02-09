@@ -45,13 +45,6 @@
             <version>${reactome.graph.core}</version>
         </dependency>
 
-        <!-- Reactome Interactor-core -->
-        <!--<dependency>-->
-            <!--<groupId>org.reactome.server.interactors</groupId>-->
-            <!--<artifactId>interactor-core</artifactId>-->
-            <!--<version>1.0.7</version>-->
-        <!--</dependency>-->
-
         <!--JSAP console reader-->
         <dependency>
             <groupId>com.martiansoftware</groupId>

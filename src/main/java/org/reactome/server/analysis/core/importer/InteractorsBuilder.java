@@ -8,21 +8,18 @@ import org.reactome.server.analysis.core.model.resource.MainResource;
 import org.reactome.server.analysis.core.model.resource.Resource;
 import org.reactome.server.analysis.core.model.resource.ResourceFactory;
 import org.reactome.server.analysis.core.util.MapSet;
+import org.reactome.server.graph.domain.model.*;
 import org.reactome.server.graph.exception.CustomQueryException;
 import org.reactome.server.graph.service.AdvancedDatabaseObjectService;
+import org.reactome.server.graph.service.InteractionsService;
 import org.reactome.server.graph.utils.ReactomeGraphCore;
-import org.reactome.server.interactors.database.InteractorsDatabase;
-import org.reactome.server.interactors.exception.InvalidInteractionResourceException;
-import org.reactome.server.interactors.model.Interaction;
-import org.reactome.server.interactors.model.Interactor;
-import org.reactome.server.interactors.model.InteractorResource;
-import org.reactome.server.interactors.service.InteractionService;
-import org.reactome.server.interactors.service.InteractorResourceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.SQLException;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
@@ -31,11 +28,7 @@ public class InteractorsBuilder {
 
     private static Logger logger = LoggerFactory.getLogger("importLogger");
 
-    private static final String STATIC = "static";
-
     private AdvancedDatabaseObjectService ados = ReactomeGraphCore.getService(AdvancedDatabaseObjectService.class);
-
-    private InteractionService interactionService;
 
     //Will contain the RADIX-TREE with the map (identifiers -> [InteractorNode])
     private IdentifiersMap<InteractorNode> interactorsMap = new IdentifiersMap<>();
@@ -43,20 +36,8 @@ public class InteractorsBuilder {
     //Keeps track of the number of interactors that have been included
     private int n = 0;
 
-    public void build(Set<SpeciesNode> speciesNodes, EntitiesContainer entities, InteractorsDatabase interactorsDatabase) {
+    public void build(Set<SpeciesNode> speciesNodes, EntitiesContainer entities, InteractionsService interactionsService) {
         if (Main.VERBOSE) System.out.print("Starting creation of the interactors container...");
-
-        this.interactionService = new InteractionService(interactorsDatabase);
-        InteractorResourceService interactorResourceService = new InteractorResourceService(interactorsDatabase);
-
-        Map<Long, InteractorResource> resourceMap;
-        try {
-            resourceMap = interactorResourceService.getAllMappedById();
-        } catch (SQLException e) {
-            logger.error("Interactor Resource Map couldn't be loaded");
-            return;
-        }
-
 
         String query;
         Map<String, Object> paramsMap = new HashMap<>();
@@ -101,46 +82,46 @@ public class InteractorsBuilder {
 
             int i = 0, tot = compressedResult.keySet().size();
             for (MainIdentifier target : compressedResult.keySet()) {
-                if (Main.VERBOSE)
-                    System.out.print("\rRetrieving interactors for targets in " + speciesPrefix + " >> " + (++i) + "/" + tot);
+                if (Main.VERBOSE) System.out.print("\rRetrieving interactors for targets in " + speciesPrefix + " >> " + (++i) + "/" + tot);
                 String acc = target.getValue().getId();
-                for (Interactor interactor : getInteractors(acc)) {
-                    InteractorResource aux = resourceMap.get(interactor.getInteractorResourceId());
-                    Resource resource = ResourceFactory.getResource(aux.getName());
-                    InteractorNode interactorNode = getOrCreate(resource, interactor.getAcc());
+
+                for (Interaction interaction : interactionsService.getInteractions(acc)) {
+                    Resource resource = ResourceFactory.getResource(interaction.getDatabaseName());
+                    ReferenceEntity interactor;
+                    if (interaction instanceof UndirectedInteraction) {
+                        UndirectedInteraction ui = (UndirectedInteraction) interaction;
+                        interactor = ui.getInteractor().get(0);
+                    } else {
+                        DirectedInteraction di = (DirectedInteraction) interaction;
+                        interactor = di.getTarget();
+                    }
+
+                    InteractorNode interactorNode = getOrCreate(resource, interactor.getIdentifier());
                     for (MapSet<Long, AnalysisReaction> prs : compressedResult.getElements(target)) {
                         for (Long pathwayId : prs.keySet()) {
                             interactorNode.addInteractsWith(pathwayId, target);
                             interactorNode.addPathwayReactions(prs);
                         }
                     }
-                    interactorsMap.add(interactor.getAlias(), resource, interactorNode);
-                    interactorsMap.add(interactor.getAliasWithoutSpecies(false), resource, interactorNode);
-                    //for (String synonym : interactor.getSynonyms().split("\\$")) interactorsMap.add(synonym, resource, interactorNode);
+
+                    if (interactor instanceof ReferenceSequence) {
+                        ReferenceSequence rs = (ReferenceSequence) interactor;
+                        if (rs.getGeneName() != null) {
+                            for (String alias : rs.getGeneName()) {
+                                interactorsMap.add(alias, resource, interactorNode);
+                            }
+                        }
+                    }
                 }
             }
         }
-        if (Main.VERBOSE) System.out.println("\rInteractors container successfully created >> " + n + " interactors have been added to Reactome.");
+        if (Main.VERBOSE)
+            System.out.println("\rInteractors container successfully created >> " + n + " interactors have been added to Reactome.");
     }
 
     public IdentifiersMap<InteractorNode> getInteractorsMap() {
         return interactorsMap;
     }
-
-    private List<Interactor> getInteractors(String acc) {
-        List<Interactor> rtn = new ArrayList<>();
-        List<Interaction> interactions;
-        try {
-            interactions = interactionService.getInteractions(acc, STATIC);
-        } catch (InvalidInteractionResourceException | SQLException e) {
-            return rtn;
-        }
-        for (Interaction interaction : interactions) {
-            rtn.add(interaction.getInteractorB());
-        }
-        return rtn;
-    }
-
 
     private InteractorNode getOrCreate(Resource resource, String identifier) {
         MapSet<Resource, InteractorNode> map = interactorsMap.get(identifier);

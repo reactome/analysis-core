@@ -6,9 +6,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.Map;
 
 /**
@@ -36,6 +33,8 @@ public class AnalysisData {
     static final Object LOADER_SEMAPHORE = new Object();
 
     private static DataContainer container = null;
+
+    private IntermediateDataLoader intermediateDataLoader = null;
 
     private DataContainer getContainer() {
         if (container == null) {
@@ -87,23 +86,49 @@ public class AnalysisData {
     @SuppressWarnings("unused")
     public void setFileName(String fileName) {
         if (container == null) {
-            new Thread(() -> {
-                synchronized (LOADER_SEMAPHORE) {
-                    try {
-                        InputStream file = new FileInputStream(fileName);
-                        container = AnalysisDataUtils.getDataContainer(file);
-                        //Note: HierarchiesDataProducer.getHierarchiesData is also sync with LOADER_SEMAPHORE
-                        HierarchiesDataProducer.initializeProducer(container);
-                    } catch (FileNotFoundException e) {
-                        String msg = String.format("%s has not been found. Please check the settings", fileName);
-                        logger.error(msg, e);
-                    } finally {
-                        LOADER_SEMAPHORE.notifyAll();
-                    }
-                }
-            }).start();
+            intermediateDataLoader = new IntermediateDataLoader(fileName);
+            intermediateDataLoader.start();
         } else {
             logger.warn("Attempt to load the content file when previously loaded");
         }
     }
+
+    public void interrupt(){
+        if(intermediateDataLoader!=null && intermediateDataLoader.isAlive()){
+            intermediateDataLoader.interrupt();
+        }
+        HierarchiesDataProducer.interruptProducer();
+        container = null;
+        System.gc();
+    }
+
+    class IntermediateDataLoader extends Thread {
+
+        private String fileName;
+
+        IntermediateDataLoader(String fileName) {
+            super("IntermediateDataLoader");
+            this.fileName = fileName;
+        }
+
+        @Override
+        public void run() {
+            synchronized (LOADER_SEMAPHORE) {
+                try {
+                    container = AnalysisDataUtils.getDataContainer(fileName);
+                    //Note: HierarchiesDataProducer.getHierarchiesData is also sync with LOADER_SEMAPHORE
+                    HierarchiesDataProducer.initializeProducer(container);
+                } catch (InterruptedException e) {
+                    logger.warn("The thread has been interrupted");
+                } catch (Exception e){
+                    logger.error(e.getMessage());
+                } finally {
+                    LOADER_SEMAPHORE.notifyAll();
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
+    }
+
+
 }

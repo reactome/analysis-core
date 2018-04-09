@@ -4,7 +4,7 @@
 
     <groupId>org.reactome.server.tools</groupId>
     <artifactId>analysis-core</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
+    <version>3.1.0</version>
     <packaging>jar</packaging>
 
     <description>The Reactome analysis-cre extracts data from the graph-database to create the intermediate data format to be kept in memory and used for the analysis-service</description>
@@ -28,13 +28,21 @@
         <jdk.version>1.8</jdk.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <reactome.graph.core>1.1.5</reactome.graph.core>
+        <reactome.graph.core>1.1.6</reactome.graph.core>
 
         <jasp.version>2.1</jasp.version>
         <maven.compiler.version>3.5.1</maven.compiler.version>
         <maven.jar.version>2.6</maven.jar.version>
         <jdk.version>1.8</jdk.version>
         <junit.version>4.12</junit.version>
+
+        <joda.time.version>2.3</joda.time.version>
+        <spring.version>4.2.5.RELEASE</spring.version>
+        <commons.codec>1.11</commons.codec>
+        <fileupload.version>1.3</fileupload.version>
+        <servlet.api.version>2.5</servlet.api.version>
+        <xml.security.version>1.0.4</xml.security.version>
+        <reactome.utils.version>1.0.5</reactome.utils.version>
     </properties>
 
     <dependencies>
@@ -81,6 +89,44 @@
             <version>1.2.0</version>
         </dependency>
 
+
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>${joda.time.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>${fileupload.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>${commons.codec}</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>${servlet.api.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>xml-security</groupId>
+            <artifactId>xml-security</artifactId>
+            <version>${xml.security.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.reactome.server.utils</groupId>
+            <artifactId>reactome-utils</artifactId>
+            <version>${reactome.utils.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -126,6 +172,21 @@
                         <exclude>**/logback.xml</exclude>
                     </excludes>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>default-jar</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <excludes>
+                                <exclude>org/reactome/server/analysis/core/config/ReactomeNeo4jConfig.class</exclude>
+                                <exclude>**/logback.xml</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <!-- Generate jar with dependencies -->
@@ -148,6 +209,19 @@
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
                         </goals>
                     </execution>
                 </executions>

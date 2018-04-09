@@ -81,6 +81,8 @@ public class HierarchyBuilder {
                 PathwayNode aux = node.addChild(p);
                 this.pathwayLocation.add(p.getDbId(), aux);
                 this.fillBranch(aux, p);
+            } else {
+                node.setLowerLevelPathway(true);
             }
         }
     }

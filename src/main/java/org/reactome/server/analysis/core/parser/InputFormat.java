@@ -78,7 +78,7 @@ public class InputFormat {
             errorResponses.add(Response.getMessage(Response.EMPTY_FILE));
         } else {
             // Split lines
-            String[] lines = input.split("[\r\n]"); // Do not add + here. It will remove empty lines
+            String[] lines = input.split("\r?\n"); // Do not add + here. It will remove empty lines
 
             // check and parser whether one line file is present.
             boolean isOneLine = isOneLineFile(lines);

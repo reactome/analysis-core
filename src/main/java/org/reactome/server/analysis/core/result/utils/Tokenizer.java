@@ -56,12 +56,10 @@ public abstract class Tokenizer {
                 aux = URLDecoder.decode(token, "UTF-8");
             }
             return new String(Base64.decode(token));
-        } catch (Base64DecodingException e) {
-            //Nothing here
-        } catch (UnsupportedEncodingException e) {
-            //Nothing here
+        } catch (Base64DecodingException | UnsupportedEncodingException e) {
+            logger.warn("There was a problem with the token", e);
         } catch (NoClassDefFoundError e){
-            //Nothing here
+            logger.error(e.getMessage(), e);
         }
         throw new ResourceNotFoundException();
     }

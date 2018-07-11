@@ -279,42 +279,47 @@ public class AnalysisStoredResult {
         return rtn;
     }
 
-    public SpeciesFilteredResult filterBySpecies(Long speciesId, String resource){
-        if(resource!=null){
+    public SpeciesFilteredResult filterBySpecies(Long speciesId, String resource) {
+        return filterBySpecies(speciesId, resource, null, "ASC");
+    }
+
+    public SpeciesFilteredResult filterBySpecies(Long speciesId, String resource, String sortBy, String order){
+        if (resource != null) {
             Resource r = ResourceFactory.getResource(resource);
 
             this.filterPathwaysByResource(resource);
+            Collections.sort(this.pathways, getComparator(sortBy, order, resource));
             List<PathwayBase> rtn = new LinkedList<>();
-            Double min = null; Double max=null;
+            Double min = null, max = null;
 
             for (PathwayNodeSummary pathway : this.pathways) {
-                if(pathway.getSpecies().getSpeciesID().equals(speciesId)){
+                if (pathway.getSpecies().getSpeciesID().equals(speciesId)) {
                     PathwaySummary aux = new PathwaySummary(pathway, resource.toUpperCase(), summary.isInteractors());
                     rtn.add(new PathwayBase(aux));
 
                     List<Double> exps = new LinkedList<>();
-                    if(r instanceof MainResource) {
+                    if (r instanceof MainResource) {
                         exps = pathway.getData().getExpressionValuesAvg((MainResource) r);
-                    }else if (resource.equals("TOTAL")) {
+                    } else if (resource.equals("TOTAL")) {
                         exps = pathway.getData().getExpressionValuesAvg();
                     }
 
                     for (Double exp : exps) {
                         if (min == null || exp < min) {
                             min = exp;
-                        } else if (max==null || exp > max) {
+                        } else if (max == null || exp > max) {
                             max = exp;
                         }
                     }
                 }
             }
             ExpressionSummary summary;
-            if(this.expressionSummary==null){
+            if (this.expressionSummary == null) {
                 summary = null;
-            }else{
+            } else {
                 summary = new ExpressionSummary(this.expressionSummary.getColumnNames(), min, max);
             }
-            return new SpeciesFilteredResult(this.summary.getType(), summary,  rtn);
+            return new SpeciesFilteredResult(this.summary.getType(), summary, rtn);
         }
         throw new DataFormatException("Resource is null");
     }

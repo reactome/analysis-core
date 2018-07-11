@@ -63,7 +63,7 @@ public class InteractorsBuilder {
 
             Collection<InteractorsTargetQueryResult> its;
             try {
-                its = ados.customQueryForObjects(InteractorsTargetQueryResult.class, query, paramsMap);
+                its = ados.getCustomQueryResults(InteractorsTargetQueryResult.class, query, paramsMap);
             } catch (CustomQueryException e) {
                 throw new RuntimeException(e);
             }
@@ -109,6 +109,11 @@ public class InteractorsBuilder {
                         if (rs.getGeneName() != null) {
                             for (String alias : rs.getGeneName()) {
                                 interactorsMap.add(alias, resource, interactorNode);
+                            }
+                        }
+                        if (rs.getSecondaryIdentifier() != null){
+                            for (String si : rs.getSecondaryIdentifier()) {
+                                if(!si.contains(" ")) interactorsMap.add(si, resource, interactorNode);
                             }
                         }
                     }

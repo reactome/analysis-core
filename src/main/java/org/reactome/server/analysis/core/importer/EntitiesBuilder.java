@@ -66,7 +66,7 @@ public class EntitiesBuilder {
 
             Map<Long, ReferenceEntityIdentifiers> xrefMap = new HashMap<>();
             try {
-                for (ReferenceEntityIdentifiers aux : ados.customQueryForObjects(ReferenceEntityIdentifiers.class, query, paramsMap)) {
+                for (ReferenceEntityIdentifiers aux : ados.getCustomQueryResults(ReferenceEntityIdentifiers.class, query, paramsMap)) {
                     xrefMap.put(aux.getReferenceEntity(), aux);
                 }
             } catch (CustomQueryException e) {
@@ -89,7 +89,7 @@ public class EntitiesBuilder {
 
             Collection<EntitiesQueryResult> result;
             try {
-                result = ados.customQueryForObjects(EntitiesQueryResult.class, query, paramsMap);
+                result = ados.getCustomQueryResults(EntitiesQueryResult.class, query, paramsMap);
             } catch (CustomQueryException e) {
                 throw new RuntimeException(e);
             }
@@ -156,7 +156,7 @@ public class EntitiesBuilder {
 
         Collection<OrthologyResult> orthologyResults;
         try {
-            orthologyResults = ados.customQueryForObjects(OrthologyResult.class, query, paramsMap);
+            orthologyResults = ados.getCustomQueryResults(OrthologyResult.class, query, paramsMap);
         } catch (CustomQueryException e) {
             e.printStackTrace();
             return;

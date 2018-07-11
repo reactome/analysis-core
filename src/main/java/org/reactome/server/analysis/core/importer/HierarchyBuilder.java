@@ -13,6 +13,8 @@ import org.reactome.server.graph.domain.model.TopLevelPathway;
 import org.reactome.server.graph.service.SpeciesService;
 import org.reactome.server.graph.service.TopLevelPathwayService;
 import org.reactome.server.graph.utils.ReactomeGraphCore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +24,8 @@ import java.util.Map;
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
  */
 public class HierarchyBuilder {
+
+    private static Logger logger = LoggerFactory.getLogger("importLogger");
 
     private Map<SpeciesNode, PathwayHierarchy> hierarchies = new HashMap<>();
     private MapSet<Long, PathwayNode> pathwayLocation = new MapSet<>();
@@ -45,12 +49,14 @@ public class HierarchyBuilder {
             PathwayHierarchy pathwayHierarchy = new PathwayHierarchy(speciesNode);
             this.hierarchies.put(speciesNode, pathwayHierarchy);
 
-            for (TopLevelPathway tlp : tlpService.getTopLevelPathways(species.getTaxId())) {
-                PathwayNode node = pathwayHierarchy.addTopLevelPathway(tlp);
-                this.pathwayLocation.add(tlp.getDbId(), node);
-                this.fillBranch(node, tlp);
-                if (Main.VERBOSE) {
-                    System.out.print("."); // Indicates progress
+            if (species.getTaxId() == null || species.getTaxId().isEmpty()) {
+                logger.error("The species: " + species.getDisplayName() + " is missing the taxonomy id");
+            } else {
+                for (TopLevelPathway tlp : tlpService.getTopLevelPathways(species.getTaxId())) {
+                    PathwayNode node = pathwayHierarchy.addTopLevelPathway(tlp);
+                    this.pathwayLocation.add(tlp.getDbId(), node);
+                    this.fillBranch(node, tlp);
+                    if (Main.VERBOSE) System.out.print("."); // Indicates progress
                 }
             }
         }

@@ -48,6 +48,15 @@ public class AnalysisData {
     }
 
     /**
+     * Returns the object containing the database information
+     * 
+     * @return the object containing the database information
+     */
+    public DatabaseInfo getDatabaseInfo() {
+        return this.getContainer().getDatabaseInfo();
+    }
+
+    /**
      * Returns the physical entity container with all the complexes, sets and proteins in Reactome
      *
      * @return the physical entity container with all the complexes, sets and proteins in Reactome

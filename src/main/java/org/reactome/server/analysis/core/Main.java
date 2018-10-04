@@ -12,6 +12,7 @@ import org.reactome.server.analysis.core.model.identifier.MainIdentifier;
 import org.reactome.server.analysis.core.util.FileUtil;
 import org.reactome.server.analysis.core.util.FormatUtils;
 import org.reactome.server.analysis.core.util.MapSet;
+import org.reactome.server.graph.service.GeneralService;
 import org.reactome.server.graph.service.InteractionsService;
 import org.reactome.server.graph.utils.ReactomeGraphCore;
 
@@ -73,7 +74,11 @@ public class Main {
         calculateNumbersInHierarchyNodesForMainResources(hierarchyBuilder, entitiesBuilder, interactorsBuilder);
         Long built = System.currentTimeMillis();
 
-        DataContainer container = new DataContainer(hierarchyBuilder.getHierarchies(),
+        GeneralService generalService = ReactomeGraphCore.getService(GeneralService.class);
+        DatabaseInfo databaseInfo = new DatabaseInfo(generalService.getDBName(), generalService.getDBVersion(), generalService.getDBChecksum());
+
+        DataContainer container = new DataContainer(databaseInfo,
+                hierarchyBuilder.getHierarchies(),
                 hierarchyBuilder.getPathwayLocation(),
                 entitiesBuilder.getEntitiesContainer(),
                 entitiesBuilder.getEntitiesMap(),

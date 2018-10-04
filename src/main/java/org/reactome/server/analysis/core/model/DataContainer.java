@@ -22,6 +22,9 @@ import java.util.Map;
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
  */
 public class DataContainer implements Serializable {
+
+    DatabaseInfo databaseInfo;
+
     //A double link hierarchy tree with the pathways for each species
     Map<SpeciesNode, PathwayHierarchy> pathwayHierarchies;
     //A map between pathways identifier and their locations in the pathway hierarchy
@@ -35,16 +38,22 @@ public class DataContainer implements Serializable {
     //A double link graph with the representation of the physical entities
     EntitiesContainer entitiesContainer;
 
-    public DataContainer(Map<SpeciesNode, PathwayHierarchy> pathwayHierarchies,
+    public DataContainer(DatabaseInfo databaseInfo,
+                         Map<SpeciesNode, PathwayHierarchy> pathwayHierarchies,
                          MapSet<Long, PathwayNode> pathwayLocation,
                          EntitiesContainer entitiesContainer,
                          IdentifiersMap<EntityNode> entitiesMap,
                          IdentifiersMap<InteractorNode> interactorsMap) {
+        this.databaseInfo = databaseInfo;
         this.pathwayHierarchies = pathwayHierarchies;
         this.entitiesContainer = entitiesContainer;
         this.pathwayLocation = pathwayLocation;
         this.entitiesMap = entitiesMap;
         this.interactorsMap = interactorsMap;
+    }
+
+    public DatabaseInfo getDatabaseInfo() {
+        return databaseInfo;
     }
 
     /**

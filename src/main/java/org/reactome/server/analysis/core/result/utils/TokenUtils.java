@@ -35,12 +35,12 @@ public class TokenUtils {
 
     public AnalysisStoredResult getFromToken(String token) {
         String fileName = getFileName(token);
-        if(fileName!=null){
+        if (fileName != null) {
             try {
                 return ResultDataUtils.getAnalysisResult(fileName);
             } catch (FileNotFoundException e) {
                 //should be alive is only true when the token follows the rule and the resulting date is in the last 7 days
-                if(Tokenizer.shouldBeAlive(token)){
+                if (Tokenizer.shouldBeAlive(token)) {
                     throw new ResourceGoneException();
                 }
             }
@@ -48,28 +48,26 @@ public class TokenUtils {
         throw new ResourceNotFoundException();
     }
 
-    public AnalysisSummary getAnalysisSummary(String token, Boolean projection, Boolean interactors, String sampleName, AnalysisType type, String userFileName){
-        if(userFileName!=null && !userFileName.isEmpty()){
-            return new AnalysisSummary(token, projection, interactors, sampleName, type, userFileName);
-        }else{
-            return new AnalysisSummary(token, projection, interactors, sampleName, type, true);
+    public AnalysisSummary getAnalysisSummary(String token, Boolean projection, Boolean interactors, String sampleName, AnalysisType type, String userFileName, String serverName) {
+        if (userFileName != null && !userFileName.isEmpty()) {
+            return new AnalysisSummary(token, projection, interactors, sampleName, type, userFileName, serverName);
+        } else {
+            return new AnalysisSummary(token, projection, interactors, sampleName, type, true, serverName);
         }
     }
 
-    public String getFakedMD5(SpeciesNode speciesFrom, SpeciesNode speciesTo){
+    public String getFakedMD5(SpeciesNode speciesFrom, SpeciesNode speciesTo) {
         return AnalysisType.SPECIES_COMPARISON.toString() + speciesFrom.getSpeciesID() + "-" + speciesTo.getSpeciesID();
     }
 
-    public String getFileName(String token){
+    public String getFileName(String token) {
         String name = Tokenizer.getName(token);
         return String.format("%s/res_%s.bin", this.pathDirectory, name);
     }
 
-    public void saveResult(final AnalysisStoredResult result){
+    public void saveResult(final AnalysisStoredResult result) {
         String fileName = getFileName(result.getSummary().getToken());
         ResultDataUtils.kryoSerialisation(result, fileName);
     }
-
-
 
 }

@@ -1,5 +1,6 @@
 package org.reactome.server.analysis.core.result.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.reactome.server.analysis.core.model.AnalysisType;
 
 /**
@@ -14,27 +15,29 @@ public class AnalysisSummary {
     private Long species;
     private boolean text = false;
     private String fileName;
+    private String server;
 
-    AnalysisSummary(String token, Boolean projection, Boolean interactors, String sampleName, AnalysisType type) {
+    AnalysisSummary(String token, Boolean projection, Boolean interactors, String sampleName, AnalysisType type, String server) {
         this.token = token;
         this.type = type.toString();
         this.sampleName = sampleName;
         this.projection = projection;
         this.interactors = interactors;
+        this.server = server;
     }
 
-    public AnalysisSummary(String token, Boolean projection, Boolean interactors, String sampleName, AnalysisType type, String fileName) {
-        this(token, projection, interactors, sampleName, type);
+    public AnalysisSummary(String token, Boolean projection, Boolean interactors, String sampleName, AnalysisType type, String fileName, String server) {
+        this(token, projection, interactors, sampleName, type, server);
         this.fileName = fileName;
     }
 
-    public AnalysisSummary(String token, Boolean projection, Boolean interactors, String sampleName, AnalysisType type, Long species) {
-        this(token, projection, interactors, sampleName, type);
+    public AnalysisSummary(String token, Boolean projection, Boolean interactors, String sampleName, AnalysisType type, Long species, String server) {
+        this(token, projection, interactors, sampleName, type, server);
         this.species = species;
     }
 
-    public AnalysisSummary(String token, Boolean projection, Boolean interactors, String sampleName, AnalysisType type, boolean text) {
-        this(token, projection, interactors, sampleName, type);
+    public AnalysisSummary(String token, Boolean projection, Boolean interactors, String sampleName, AnalysisType type, boolean text, String server) {
+        this(token, projection, interactors, sampleName, type, server);
         this.text = text;
     }
 
@@ -68,5 +71,10 @@ public class AnalysisSummary {
 
     public boolean isText() {
         return text;
+    }
+
+    @JsonIgnore
+    public String getServer() {
+        return server;
     }
 }

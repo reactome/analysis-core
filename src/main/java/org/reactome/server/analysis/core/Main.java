@@ -12,6 +12,7 @@ import org.reactome.server.analysis.core.model.identifier.MainIdentifier;
 import org.reactome.server.analysis.core.util.FileUtil;
 import org.reactome.server.analysis.core.util.FormatUtils;
 import org.reactome.server.analysis.core.util.MapSet;
+import org.reactome.server.graph.domain.model.DBInfo;
 import org.reactome.server.graph.service.GeneralService;
 import org.reactome.server.graph.service.InteractionsService;
 import org.reactome.server.graph.utils.ReactomeGraphCore;
@@ -75,7 +76,8 @@ public class Main {
         Long built = System.currentTimeMillis();
 
         GeneralService generalService = ReactomeGraphCore.getService(GeneralService.class);
-        DatabaseInfo databaseInfo = new DatabaseInfo(generalService.getDBName(), generalService.getDBVersion(), generalService.getDBChecksum());
+        DBInfo dbInfo = generalService.getDBInfo();
+        DatabaseInfo databaseInfo = new DatabaseInfo(dbInfo.getName(), dbInfo.getVersion(), dbInfo.getChecksum());
 
         DataContainer container = new DataContainer(databaseInfo,
                 hierarchyBuilder.getHierarchies(),

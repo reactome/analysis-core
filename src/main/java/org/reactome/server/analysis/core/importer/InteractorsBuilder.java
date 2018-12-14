@@ -71,13 +71,17 @@ public class InteractorsBuilder {
             if (Main.VERBOSE) System.out.print("\rInteractors retrieved for " + speciesPrefix + " >> aggregating results by entity identifier...");
             MapSet<MainIdentifier, MapSet<Long, AnalysisReaction>> compressedResult = new MapSet<>();
             for (InteractorsTargetQueryResult it : its) {
-                MainResource mr = (MainResource) ResourceFactory.getResource(it.getDatabaseName());
-                AnalysisIdentifier ai = new AnalysisIdentifier(it.getIdentifier());
+                Resource resource = ResourceFactory.getResource(it.getDatabaseName());
+                if(resource instanceof MainResource) {
+                    MainResource mr = (MainResource) resource;
+                    AnalysisIdentifier ai = new AnalysisIdentifier(it.getIdentifier());
 
-                MainIdentifier interactsWith = new MainIdentifier(mr, ai);
-                if (entities.getNodes(interactsWith).isEmpty()) logger.error(interactsWith + " hasn't been previously created for '" + species.getName() + "'.");
+                    MainIdentifier interactsWith = new MainIdentifier(mr, ai);
+                    if (entities.getNodes(interactsWith).isEmpty())
+                        logger.error(interactsWith + " hasn't been previously created for '" + species.getName() + "'.");
 
-                compressedResult.add(interactsWith, it.getPathwayReactions());
+                    compressedResult.add(interactsWith, it.getPathwayReactions());
+                }
             }
 
             int i = 0, tot = compressedResult.keySet().size();

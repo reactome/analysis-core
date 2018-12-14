@@ -52,10 +52,12 @@ public class EntitiesBuilder {
             if (Main.VERBOSE) System.out.print(msgPrefix + speciesPrefix + " >> retrieving xrefs...");
 
             query = "MATCH (:Species{taxId:{taxId}})<-[:species]-(:Pathway)-[:hasEvent]->(rle:ReactionLikeEvent), " +
-                    "      (rle)-[:input|output|catalystActivity|entityFunctionalStatus|physicalEntity|regulatedBy|regulator|hasComponent|hasMember|hasCandidate|repeatedUnit|referenceEntity*]->(re:ReferenceEntity) " +
-                    "WITH DISTINCT re " +
-                    "OPTIONAL MATCH (re)-[:crossReference]->(dbi:DatabaseIdentifier) " +
-                    "WITH DISTINCT re, COLLECT(DISTINCT {databaseName: dbi.databaseName, identifier: dbi.identifier}) AS dbis, COUNT(DISTINCT dbi) AS n " +
+                    "      (rle)-[:input|output|catalystActivity|entityFunctionalStatus|physicalEntity|regulatedBy|regulator|hasComponent|hasMember|hasCandidate|repeatedUnit*]->(pe:PhysicalEntity) " +
+                    "WHERE (pe)-[:referenceEntity]->() " +
+                    "WITH DISTINCT pe " +
+                    "MATCH (pe)-[:referenceEntity]->(re:ReferenceEntity) " +
+                    "OPTIONAL MATCH (pe)-[:referenceEntity|crossReference*]->(dbi:DatabaseIdentifier) " +
+                    "WITH DISTINCT re, COLLECT(DISTINCT CASE dbi WHEN NULL THEN NULL ELSE {databaseName: dbi.databaseName, identifier: dbi.identifier} END) AS dbis, COUNT(DISTINCT dbi) AS n " +
                     "RETURN re.dbId AS referenceEntity, " +
                     "       re.secondaryIdentifier AS  secondaryIdentifiers, " +
                     "       re.geneName AS geneNames, " +

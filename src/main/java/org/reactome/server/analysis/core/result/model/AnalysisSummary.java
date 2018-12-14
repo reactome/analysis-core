@@ -29,6 +29,7 @@ public class AnalysisSummary {
     public AnalysisSummary(String token, Boolean projection, Boolean interactors, String sampleName, AnalysisType type, String fileName, String server) {
         this(token, projection, interactors, sampleName, type, server);
         this.fileName = fileName;
+        if(this.fileName!=null) this.fileName = this.fileName.split("\\?")[0];
     }
 
     public AnalysisSummary(String token, Boolean projection, Boolean interactors, String sampleName, AnalysisType type, Long species, String server) {

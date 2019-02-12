@@ -90,17 +90,22 @@ public class InteractorsBuilder {
                 String acc = target.getValue().getId();
 
                 for (Interaction interaction : interactionsService.getInteractions(acc)) {
-                    Resource resource = ResourceFactory.getResource(interaction.getDatabaseName());
                     ReferenceEntity interactor;
+                    ReferenceEntity interactsWith;
                     if (interaction instanceof UndirectedInteraction) {
                         UndirectedInteraction ui = (UndirectedInteraction) interaction;
                         interactor = ui.getInteractor().get(0);
+                        interactsWith = ui.getInteractor().size() == 1 ? interactor : ui.getInteractor().get(1);
                     } else {
                         DirectedInteraction di = (DirectedInteraction) interaction;
                         interactor = di.getTarget();
+                        interactsWith = di.getSource();
                     }
 
-                    InteractorNode interactorNode = getOrCreate(resource, interactor.getIdentifier());
+                    Resource resource = ResourceFactory.getResource(interactsWith.getDatabaseName());
+                    String variantIdentifier = interactor.fetchSingleValue("getVariantIdentifier");
+                    String identifier = variantIdentifier != null ? variantIdentifier : interactor.getIdentifier();
+                    InteractorNode interactorNode = getOrCreate(resource, identifier);
                     for (MapSet<Long, AnalysisReaction> prs : compressedResult.getElements(target)) {
                         for (Long pathwayId : prs.keySet()) {
                             interactorNode.addInteractsWith(pathwayId, target);

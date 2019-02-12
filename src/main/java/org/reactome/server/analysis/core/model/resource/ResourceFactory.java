@@ -15,7 +15,7 @@ public abstract class ResourceFactory {
 
     //Some resources use the same identifiers than other resources so in these cases we do not take into account
     //the equivalents. To do so we convert the equivalent ones to the main resource in the 'getResource' method
-    private static Map<String, String> equivalences = new HashMap<String, String>();
+    private static Map<String, String> equivalences = new HashMap<>();
     static {
         equivalences.put("UNIPROTKB", MAIN.UNIPROT.name());
         equivalences.put("GENECARDS", MAIN.UNIPROT.name());
@@ -30,7 +30,7 @@ public abstract class ResourceFactory {
     }
 
     //Cache containing the previously created resource for a given name
-    private static Map<String, Resource> resourceMap = new HashMap<String, Resource>();
+    private static Map<String, Resource> resourceMap = new HashMap<>();
 
     public static Resource getResource(String name){
         name = name.toUpperCase().replaceAll("\\s", "_").trim();

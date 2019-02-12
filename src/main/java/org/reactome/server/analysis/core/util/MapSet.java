@@ -36,12 +36,7 @@ public class MapSet<S,T> implements Serializable {
     }
 
     private Set<T> getOrCreate(S identifier){
-        Set<T> set = map.get(identifier);
-        if(set==null){
-            set = new HashSet<T>();
-            map.put(identifier, set);
-        }
-        return set;
+        return map.computeIfAbsent(identifier, k -> new HashSet<>());
     }
 
     public boolean isEmpty(){

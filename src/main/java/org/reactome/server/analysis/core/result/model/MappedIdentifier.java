@@ -51,11 +51,12 @@ public class MappedIdentifier {
         if (o == null || getClass() != o.getClass()) return false;
         MappedIdentifier that = (MappedIdentifier) o;
         return Objects.equals(resource, that.resource) &&
-                Objects.equals(identifier, that.identifier);
+                Objects.equals(identifier, that.identifier) &&
+                Objects.equals(interactsWith, that.interactsWith);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(resource, identifier);
+        return Objects.hash(resource, identifier, interactsWith);
     }
 }

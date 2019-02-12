@@ -35,6 +35,10 @@ public class InteractorNode {
         return accession;
     }
 
+    public Set<MainIdentifier> getInteractsWith() {
+        return interactsWith.values();
+    }
+
     public Set<MainIdentifier> getInteractsWith(Long pathway) {
         return interactsWith.getElements(pathway);
     }

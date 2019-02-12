@@ -4,6 +4,8 @@ import org.reactome.server.analysis.core.model.AnalysisIdentifier;
 import org.reactome.server.analysis.core.model.resource.MainResource;
 import org.reactome.server.analysis.core.model.resource.ResourceFactory;
 
+import java.util.List;
+
 /**
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
  */
@@ -11,6 +13,10 @@ public class MainIdentifier extends Identifier<MainResource> {
 
     public MainIdentifier(MainResource resource, AnalysisIdentifier identifier) {
         super(resource, identifier);
+    }
+
+    public MainIdentifier(MainResource resource, String identifier, List<Double> exp){
+        super(resource, new AnalysisIdentifier(identifier, exp));
     }
 
     //Creates a clone

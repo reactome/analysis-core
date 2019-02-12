@@ -53,7 +53,7 @@ public class EnrichmentAnalysis {
     }
 
     private void analyse(HierarchiesData hierarchies, Set<AnalysisIdentifier> identifiers, SpeciesNode speciesNode, boolean includeInteractors) {
-        Integer originalSampleSize = identifiers.size();
+        final int originalSampleSize = identifiers.size();
         IdentifiersMap<EntityNode> entitiesMap = analysisData.getEntitiesMap();
         IdentifiersMap<InteractorNode> interactorsMap = analysisData.getInteractorsMap();
 
@@ -98,7 +98,7 @@ public class EnrichmentAnalysis {
                         for (Long pathwayId : pathwayReactions.keySet()) {
                             for (MainIdentifier mainIdentifier : interactor.getInteractsWith(pathwayId)) {
                                 found = true;
-                                newSample.add(mainIdentifier);
+                                newSample.add(new MainIdentifier(mainIdentifier.getResource(), interactor.getAccession(), identifier.getExp()));
                                 Set<AnalysisReaction> reactions = pathwayReactions.getElements(pathwayId);
                                 Set<PathwayNode> pNodes = hierarchies.getPathwayLocation().getElements(pathwayId);
                                 for (PathwayNode pNode : pNodes) {
@@ -116,7 +116,7 @@ public class EnrichmentAnalysis {
         }
         //IMPORTANT: For the statistics the sample is the projection we find (newSample) plus the not found identifiers
         //           in the original sample
-        Integer finalSampleSize = newSample.size() + hierarchies.getNotFound().size();
+        final int finalSampleSize = newSample.size() + hierarchies.getNotFound().size();
         Map<MainResource, Integer> sampleSizePerResource = new HashMap<>();
         for (MainIdentifier mainIdentifier : newSample) {
             Integer aux = sampleSizePerResource.get(mainIdentifier.getResource());

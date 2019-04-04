@@ -1,5 +1,10 @@
 package org.reactome.server.analysis.core.model;
 
+import org.reactome.server.graph.domain.model.Species;
+
+import java.util.List;
+import java.util.Objects;
+
 /**
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
  */
@@ -30,6 +35,17 @@ public class SpeciesNode {
         return this.speciesID.equals(SpeciesNodeFactory.HUMAN_DB_ID);
     }
 
+    public boolean isA(Species species){
+        return Objects.equals(species.getDbId(), speciesID) || Objects.equals(species.getTaxId(), taxID);
+    }
+
+    public boolean isIn(List<Species> speciesList){
+        for (Species species : speciesList) {
+            if (isA(species)) return true;
+        }
+        return false;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -37,9 +53,7 @@ public class SpeciesNode {
 
         SpeciesNode that = (SpeciesNode) o;
 
-        if (speciesID != null ? !speciesID.equals(that.speciesID) : that.speciesID != null) return false;
-
-        return true;
+        return Objects.equals(speciesID, that.speciesID);
     }
 
     @Override

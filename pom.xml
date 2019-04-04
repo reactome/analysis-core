@@ -4,10 +4,10 @@
 
     <groupId>org.reactome.server.tools</groupId>
     <artifactId>analysis-core</artifactId>
-    <version>3.2.1</version>
+    <version>3.2.3-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <description>The Reactome analysis-cre extracts data from the graph-database to create the intermediate data format to be kept in memory and used for the analysis-service</description>
+    <description>The Reactome analysis-core extracts data from the graph-database to create the intermediate data format to be kept in memory and used for the analysis-service</description>
     <name>analysis-core</name>
 
     <organization>
@@ -28,7 +28,7 @@
         <jdk.version>1.8</jdk.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <reactome.graph.core>1.1.18-SNAPSHOT</reactome.graph.core>
+        <reactome.graph.core>1.1.19</reactome.graph.core>
 
         <jasp.version>2.1</jasp.version>
         <maven.compiler.version>3.5.1</maven.compiler.version>
@@ -37,12 +37,10 @@
         <junit.version>4.12</junit.version>
 
         <joda.time.version>2.3</joda.time.version>
-        <spring.version>4.2.5.RELEASE</spring.version>
+        <spring.version>4.3.10.RELEASE</spring.version>
         <commons.codec>1.11</commons.codec>
         <fileupload.version>1.3</fileupload.version>
-        <servlet.api.version>2.5</servlet.api.version>
         <xml.security.version>1.0.4</xml.security.version>
-        <reactome.utils.version>1.0.5</reactome.utils.version>
     </properties>
 
     <dependencies>
@@ -112,20 +110,9 @@
             <version>${commons.codec}</version>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>${servlet.api.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>xml-security</groupId>
             <artifactId>xml-security</artifactId>
             <version>${xml.security.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.reactome.server.utils</groupId>
-            <artifactId>reactome-utils</artifactId>
-            <version>${reactome.utils.version}</version>
         </dependency>
     </dependencies>
 
@@ -183,6 +170,7 @@
                             <excludes>
                                 <exclude>org/reactome/server/analysis/core/config/ReactomeNeo4jConfig.class</exclude>
                                 <exclude>**/logback.xml</exclude>
+                                <exclude>org/reactome/server/analysis/core/result/external/Test.class</exclude>
                             </excludes>
                         </configuration>
                     </execution>

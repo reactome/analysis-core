@@ -57,11 +57,11 @@ public abstract class ResourceFactory {
         return resource;
     }
 
-    public static MAIN getMainResource(String name){
+    public static MainResource getMainResource(String name){
         name = name.toUpperCase().replaceAll("\\s", "_").trim();
         for (MAIN main : MAIN.values()) {
             if(main.toString().equals(name)){
-                return main;
+                return new MainResource(main.name());
             }
         }
         return null;

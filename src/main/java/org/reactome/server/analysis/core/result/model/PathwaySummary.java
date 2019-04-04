@@ -7,26 +7,15 @@ import org.reactome.server.analysis.core.result.PathwayNodeSummary;
 /**
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
  */
-//@ApiModel(value = "PathwaySummary", description = "Contains general information about a certain pathway")
 public class PathwaySummary {
-//    @ApiModelProperty(value = "The pathway stable identifier", notes = "", required = true )
+
     private String stId;
-//    @ApiModelProperty(value = "The pathway database identifier", notes = "", required = true )
     private Long dbId;
-//    @ApiModelProperty(value = "The pathway name", notes = "", required = true )
     private String name;
-//    @ApiModelProperty(value = "The pathway species", notes = "", required = true )
     private SpeciesSummary species;
-//    @ApiModelProperty(value = "Whether it is a lower level pathway or not", notes = "", required = true )
     private boolean llp; //lower level pathway
 
-//    private Long speciesDbId;
-
-//    private String species;
-
-//    @ApiModelProperty(value = "Statistics for the found entities in this pathway", notes = "", required = true )
     private EntityStatistics entities;
-//    @ApiModelProperty(value = "Statistics for the found reactions in this pathway", notes = "", required = true )
     private ReactionStatistics reactions;
 
     public PathwaySummary(PathwayNodeSummary node, String resource, boolean interactors) {

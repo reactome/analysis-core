@@ -8,9 +8,10 @@ import java.util.List;
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
  */
 public class ExpressionSummary {
-    List<String> columnNames;
-    Double min;
-    Double max;
+
+    private List<String> columnNames;
+    private Double min;
+    private Double max;
 
     public ExpressionSummary(List<String> columnNames, Double min, Double max) {
         this.columnNames = columnNames;

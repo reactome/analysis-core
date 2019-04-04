@@ -20,28 +20,30 @@ public class PathwayNode implements Serializable, Comparable<PathwayNode> {
     private String name;
     private boolean hasDiagram;
     private boolean isLowerLevelPathway = false;
+    private boolean inDisease;
 
     private PathwayNode parent;
     private Set<PathwayNode> children;
 
     private PathwayNodeData data;
 
-    public PathwayNode(String stId, Long pathwayId, String name, boolean hasDiagram) {
-        this(null, stId, pathwayId, name, hasDiagram);
+    public PathwayNode(String stId, Long pathwayId, String name, boolean hasDiagram, boolean inDisease) {
+        this(null, stId, pathwayId, name, hasDiagram, inDisease);
     }
 
-    protected PathwayNode(PathwayNode parent, String stID, Long pathwayId, String name, boolean hasDiagram) {
+    protected PathwayNode(PathwayNode parent, String stID, Long pathwayId, String name, boolean hasDiagram, boolean inDisease) {
         this.parent = parent;
         this.stId = stID;
         this.pathwayId = pathwayId;
         this.name = name;
         this.hasDiagram = hasDiagram;
+        this.inDisease = inDisease;
         this.children = new HashSet<>();
         this.data = new PathwayNodeData();
     }
 
     public PathwayNode addChild(Pathway p){
-        PathwayNode node = new PathwayNode(this, p.getStId(), p.getDbId(), p.getDisplayName(), p.getHasDiagram());
+        PathwayNode node = new PathwayNode(this, p.getStId(), p.getDbId(), p.getDisplayName(), p.getHasDiagram(), p.getIsInDisease());
         this.children.add(node);
         return node;
     }
@@ -62,6 +64,10 @@ public class PathwayNode implements Serializable, Comparable<PathwayNode> {
             return parent.getDiagram();
         }
         return null;
+    }
+
+    public boolean isInDisease() {
+        return inDisease;
     }
 
     protected Set<PathwayNode> getHitNodes(){

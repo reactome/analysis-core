@@ -25,7 +25,7 @@ public class PathwayHierarchy implements Serializable {
     }
 
     public PathwayNode addTopLevelPathway(TopLevelPathway tlp){
-        PathwayRoot node = new PathwayRoot(this, tlp.getStId(), tlp.getDbId(), tlp.getDisplayName(), tlp.getHasDiagram());
+        PathwayRoot node = new PathwayRoot(this, tlp.getStId(), tlp.getDbId(), tlp.getDisplayName(), tlp.getHasDiagram(), tlp.getIsInDisease());
         this.children.add(node);
         return node;
     }

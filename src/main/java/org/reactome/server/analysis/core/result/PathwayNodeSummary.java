@@ -18,6 +18,7 @@ public class PathwayNodeSummary {
     private String name;
     private SpeciesNode species;
     private boolean llp;
+    private boolean isInDisease;
     private PathwayNodeData data;
 
 
@@ -27,6 +28,7 @@ public class PathwayNodeSummary {
         this.name = node.getName();
         this.species = node.getSpecies();
         this.llp = node.isLowerLevelPathway();
+        this.isInDisease = node.isInDisease();
         this.data = node.getPathwayNodeData();
     }
 
@@ -52,6 +54,10 @@ public class PathwayNodeSummary {
 
     public boolean isLlp() {
         return llp;
+    }
+
+    public boolean isInDisease() {
+        return isInDisease;
     }
 
     public boolean is(String identifier){

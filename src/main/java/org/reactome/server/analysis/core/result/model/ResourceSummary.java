@@ -6,10 +6,12 @@ package org.reactome.server.analysis.core.result.model;
 public class ResourceSummary implements Comparable<ResourceSummary> {
     String resource;
     Integer pathways;
+    Integer filtered;
 
     public ResourceSummary(String resource, Integer pathways) {
         this.resource = resource;
         this.pathways = pathways;
+        this.filtered = pathways;
     }
 
     public String getResource() {
@@ -18,6 +20,14 @@ public class ResourceSummary implements Comparable<ResourceSummary> {
 
     public Integer getPathways() {
         return pathways;
+    }
+
+    public Integer getFiltered() {
+        return filtered;
+    }
+
+    public void setFiltered(Integer filtered) {
+        this.filtered = filtered;
     }
 
     @Override

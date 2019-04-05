@@ -3,6 +3,8 @@ package org.reactome.server.analysis.core.result;
 import org.reactome.server.analysis.core.model.PathwayNode;
 import org.reactome.server.analysis.core.model.PathwayNodeData;
 import org.reactome.server.analysis.core.model.SpeciesNode;
+import org.reactome.server.analysis.core.model.SpeciesNodeFactory;
+import org.reactome.server.analysis.core.result.external.ExternalPathwayNodeSummary;
 
 import java.util.Collection;
 
@@ -30,6 +32,16 @@ public class PathwayNodeSummary {
         this.llp = node.isLowerLevelPathway();
         this.isInDisease = node.isInDisease();
         this.data = node.getPathwayNodeData();
+    }
+
+    public PathwayNodeSummary(ExternalPathwayNodeSummary epns) {
+        this.stId = epns.getStId();
+        this.pathwayId = epns.getDbId();
+        this.name = epns.getName();
+        this.species = SpeciesNodeFactory.getSpeciesNode(epns.getSpecies());
+        this.llp = epns.isLlp();
+        this.isInDisease = epns.isInDisease();
+        this.data = new PathwayNodeData(epns.getData());
     }
 
     public String getStId() {

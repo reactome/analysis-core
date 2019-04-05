@@ -3,6 +3,7 @@ package org.reactome.server.analysis.core.result.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.reactome.server.analysis.core.model.SpeciesNode;
 import org.reactome.server.analysis.core.model.SpeciesNodeFactory;
+import org.reactome.server.analysis.core.result.external.ExternalSpeciesNode;
 
 import java.util.Objects;
 
@@ -17,6 +18,12 @@ public class SpeciesSummary implements Comparable<SpeciesSummary> {
     private Integer filtered;
 
     public SpeciesSummary(SpeciesNode species) {
+        this.dbId = species.getSpeciesID();
+        this.taxId = species.getTaxID();
+        this.name = species.getName();
+    }
+
+    public SpeciesSummary(ExternalSpeciesNode species) {
         this.dbId = species.getSpeciesID();
         this.taxId = species.getTaxID();
         this.name = species.getName();

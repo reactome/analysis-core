@@ -3,7 +3,10 @@ package org.reactome.server.analysis.core.model;
 import org.reactome.server.analysis.core.model.identifier.Identifier;
 import org.reactome.server.analysis.core.model.identifier.InteractorIdentifier;
 import org.reactome.server.analysis.core.model.identifier.MainIdentifier;
+import org.reactome.server.analysis.core.model.identifier.OtherIdentifier;
 import org.reactome.server.analysis.core.model.resource.MainResource;
+import org.reactome.server.analysis.core.model.resource.ResourceFactory;
+import org.reactome.server.analysis.core.result.external.*;
 import org.reactome.server.analysis.core.util.MapSet;
 import org.reactome.server.analysis.core.util.MathUtilities;
 
@@ -20,6 +23,27 @@ import java.util.*;
 public class PathwayNodeData {
     //Please note that counter is used for each main identifier and for the combinedResult
     class Counter {
+
+        Counter() { }
+
+        Counter(ExternalStatistics counter){
+            this.totalEntities = counter.getEntitiesCount();
+            this.foundEntities = counter.getEntitiesFound();
+            this.entitiesRatio = counter.getEntitiesRatio();
+            this.entitiesPValue = counter.getEntitiesPValue();
+            this.entitiesFDR = counter.getEntitiesFDR();
+
+            this.totalInteractors = counter.getInteractorsCount();
+            this.foundInteractors = counter.getInteractorsFound();
+            this.interactorsRatio = counter.getInteractorsRatio();
+
+            this.totalFound = counter.getEntitiesAndInteractorsCount();
+
+            this.totalReactions = counter.getReactionsCount();
+            this.foundReactions = counter.getReactionsFound();
+            this.reactionsRatio = counter.getReactionsRatio();
+        }
+
         Integer totalEntities = 0; //Pre-calculated in setCounters method
         Integer foundEntities = 0;
         Double entitiesRatio;
@@ -67,6 +91,50 @@ public class PathwayNodeData {
     private Counter combinedResult = new Counter();  //All main identifiers combined in one result
 
     public PathwayNodeData() {
+    }
+
+    public PathwayNodeData(ExternalPathwayNodeData data) {
+        //statistics
+        for (ExternalStatistics statistics : data.getStatistics()) {
+            if ("TOTAL".equals(statistics.getResource())) {
+                this.combinedResult = new Counter(statistics);
+            } else {
+                MainResource mr = ResourceFactory.getMainResource(statistics.getResource());
+                this.entitiesResult.put(mr, new Counter(statistics));
+            }
+        }
+
+        //entities
+        for (ExternalIdentifier entity : data.getEntities()) {
+            AnalysisIdentifier ai = new AnalysisIdentifier(entity);
+            for (ExternalMainIdentifier emi : entity.getMapsTo()) {
+                MainIdentifier mi = new MainIdentifier(emi, entity.getExp());
+                OtherIdentifier otherIdentifier = new OtherIdentifier(mi.getResource(), ai);
+                addEntity(otherIdentifier, mi);
+            }
+        }
+
+        //interactors
+        if (data.getInteractors() != null) {
+            for (ExternalInteractor interactor : data.getInteractors()) {
+                AnalysisIdentifier ai = new AnalysisIdentifier(interactor.getId(), interactor.getExp());
+                for (ExternalInteraction interaction : interactor.getMapsTo()) {
+                    for (ExternalMainIdentifier emi : interaction.getInteractsWith()) {
+                        MainIdentifier mi = new MainIdentifier(emi, interactor.getExp());
+                        InteractorIdentifier ii = new InteractorIdentifier(ai, interaction.getId());
+                        addInteractors(mi, ii);
+                    }
+                }
+            }
+        }
+
+        //reactions
+        for (ExternalAnalysisReaction reaction : data.getReactions()) {
+            for (String resource : reaction.getResources()) {
+                MainResource mr = ResourceFactory.getMainResource(resource);
+                this.reactions.add(mr, new AnalysisReaction(reaction));
+            }
+        }
     }
 
     public void addEntity(Identifier identifier, MainIdentifier mainIdentifier) {
@@ -117,6 +185,20 @@ public class PathwayNodeData {
             for (MainIdentifier mainIdentifier : this.entities.getElements(identifier)) {
                 rtn.add(mainIdentifier.getValue());
             }
+        }
+        return rtn;
+    }
+
+    public List<ExternalIdentifier> getExternalEntities(){
+        List<ExternalIdentifier> rtn = new ArrayList<>();
+
+        for (Identifier identifier : entities.keySet()) {
+            ExternalIdentifier ei =  new ExternalIdentifier(identifier.getValue());
+            for (MainIdentifier mainIdentifier : entities.getElements(identifier)) {
+                ExternalMainIdentifier emi = new ExternalMainIdentifier(mainIdentifier);
+                ei.addMapsTo(emi);
+            }
+            rtn.add(ei);
         }
         return rtn;
     }
@@ -350,6 +432,27 @@ public class PathwayNodeData {
         return mapsTo.size();
     }
 
+    public List<ExternalInteractor> getExternalInteractors() {
+        Map<String, ExternalInteractor> identifierMap = new HashMap<>();
+        Map<String, ExternalInteraction> interactionMap = new HashMap<>();
+        for (MainIdentifier mi : interactors.keySet()) {
+            ExternalMainIdentifier emi = new ExternalMainIdentifier(mi);
+            for (InteractorIdentifier interactor : interactors.getElements(mi)) {
+                String id = interactor.getId();
+                ExternalInteractor ei = identifierMap.getOrDefault(id, new ExternalInteractor(interactor));
+                identifierMap.put(id, ei);
+
+                String mapsTo = interactor.getMapsTo();
+                ExternalInteraction ein = interactionMap.getOrDefault(mapsTo, new ExternalInteraction(mapsTo));
+                interactionMap.put(mapsTo, ein);
+
+                ein.addExternalMainIdentifier(emi);
+                ei.addMapsTo(ein);
+            }
+        }
+        return new ArrayList<>(identifierMap.values());
+    }
+
 
     // REACTIONS Result
 
@@ -363,6 +466,18 @@ public class PathwayNodeData {
             rtn = new HashSet<>();
         }
         return rtn;
+    }
+
+    public List<ExternalAnalysisReaction> getExternalReactions() {
+        Map<Long, ExternalAnalysisReaction> map = new HashMap<>();
+        for (MainResource mr : reactions.keySet()) {
+            for (AnalysisReaction rxn : reactions.getElements(mr)) {
+                ExternalAnalysisReaction erxn = map.getOrDefault(rxn.getDbId(), new ExternalAnalysisReaction(rxn));
+                map.put(rxn.getDbId(), erxn);
+                erxn.add(mr.getName());
+            }
+        }
+        return new ArrayList<>(map.values());
     }
 
     public Integer getReactionsCount() {
@@ -427,7 +542,7 @@ public class PathwayNodeData {
     }
 
     //This is only called in build time
-    protected void setCounters(PathwayNodeData speciesData){
+    void setCounters(PathwayNodeData speciesData){
         Set<AnalysisReaction> totalReactions = new HashSet<>();
         for (MainResource mainResource : reactions.keySet()) {
             Counter counter = getOrCreateCounter(mainResource);
@@ -495,7 +610,7 @@ public class PathwayNodeData {
                 found = counter.foundEntities;
             }
             if (found > 0) {
-                Integer sampleSize = sampleSizePerResource.get(mainResource) + notFound;
+                int sampleSize = sampleSizePerResource.get(mainResource) + notFound;
                 double ratio = includeInteractors ? counter.interactorsRatio : counter.entitiesRatio;
                 counter.entitiesPValue = MathUtilities.calculatePValue(ratio, sampleSize, found);
             }
@@ -530,8 +645,8 @@ public class PathwayNodeData {
     }
 
     private Double getScore(Counter counter){
-        Double entitiesPercentage = counter.foundEntities / counter.totalEntities.doubleValue();
-        Double reactionsPercentage = counter.foundReactions / counter.totalReactions.doubleValue();
+        double entitiesPercentage = counter.foundEntities / counter.totalEntities.doubleValue();
+        double reactionsPercentage = counter.foundReactions / counter.totalReactions.doubleValue();
         return (0.75 * (reactionsPercentage)) + (0.25 * (entitiesPercentage));
     }
 

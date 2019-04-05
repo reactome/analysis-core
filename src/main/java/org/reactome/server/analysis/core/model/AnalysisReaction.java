@@ -1,5 +1,7 @@
 package org.reactome.server.analysis.core.model;
 
+import org.reactome.server.analysis.core.result.external.ExternalAnalysisReaction;
+
 /**
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
  */
@@ -12,6 +14,11 @@ public class AnalysisReaction {
     public AnalysisReaction(Long dbId, String stId) {
         this.dbId = dbId;
         this.stId = stId;
+    }
+
+    public AnalysisReaction(ExternalAnalysisReaction reaction){
+        this.dbId = reaction.getDbId();
+        this.stId = reaction.getStId();
     }
 
     public Long getDbId() {

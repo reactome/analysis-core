@@ -1,5 +1,7 @@
 package org.reactome.server.analysis.core.model;
 
+import org.reactome.server.analysis.core.result.external.ExternalIdentifier;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -26,6 +28,11 @@ public class AnalysisIdentifier implements Comparable<AnalysisIdentifier> {
     public AnalysisIdentifier(String id, List<Double> exp) {
         this.id = id;
         this.exp = exp;
+    }
+
+    public AnalysisIdentifier(ExternalIdentifier identifier){
+        this.id = identifier.getId();
+        this.exp = identifier.getExp();
     }
 
     public boolean add(Double value){

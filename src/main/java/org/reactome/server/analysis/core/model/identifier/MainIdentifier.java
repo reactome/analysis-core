@@ -3,6 +3,7 @@ package org.reactome.server.analysis.core.model.identifier;
 import org.reactome.server.analysis.core.model.AnalysisIdentifier;
 import org.reactome.server.analysis.core.model.resource.MainResource;
 import org.reactome.server.analysis.core.model.resource.ResourceFactory;
+import org.reactome.server.analysis.core.result.external.ExternalMainIdentifier;
 
 import java.util.List;
 
@@ -22,6 +23,10 @@ public class MainIdentifier extends Identifier<MainResource> {
     //Creates a clone
     public MainIdentifier(MainIdentifier mainIdentifier){
         super(mainIdentifier.resource, new AnalysisIdentifier(mainIdentifier.value));
+    }
+
+    public MainIdentifier(ExternalMainIdentifier mainIdentifier, List<Double> exp){
+        super(ResourceFactory.getMainResource(mainIdentifier.getResource()), new AnalysisIdentifier(mainIdentifier.getId(), exp));
     }
 
     public boolean is(ResourceFactory.MAIN type){

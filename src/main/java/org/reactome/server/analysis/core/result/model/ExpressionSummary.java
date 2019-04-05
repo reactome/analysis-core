@@ -1,6 +1,7 @@
 package org.reactome.server.analysis.core.result.model;
 
 import org.reactome.server.analysis.core.model.UserData;
+import org.reactome.server.analysis.core.result.external.ExternalExpressionSummary;
 
 import java.util.List;
 
@@ -23,6 +24,12 @@ public class ExpressionSummary {
         this.columnNames = storedResult.getExpressionColumnNames();
         this.min = storedResult.getExpressionBoundaries().getMin();
         this.max = storedResult.getExpressionBoundaries().getMax();
+    }
+
+    public ExpressionSummary(ExternalExpressionSummary summary){
+        this.columnNames = summary.getColumnNames();
+        this.min = summary.getMin();
+        this.max = summary.getMax();
     }
 
     public List<String> getColumnNames() {

@@ -8,6 +8,8 @@ import org.reactome.server.analysis.core.model.resource.MainResource;
 import org.reactome.server.analysis.core.model.resource.Resource;
 import org.reactome.server.analysis.core.model.resource.ResourceFactory;
 import org.reactome.server.analysis.core.result.exception.DataFormatException;
+import org.reactome.server.analysis.core.result.external.ExternalAnalysisResult;
+import org.reactome.server.analysis.core.result.external.ExternalPathwayNodeSummary;
 import org.reactome.server.analysis.core.result.model.*;
 import org.reactome.server.analysis.core.util.MapSet;
 import org.reactome.server.graph.domain.model.Species;
@@ -33,6 +35,39 @@ public class AnalysisStoredResult {
         this.notFound = data.getNotFound();
         this.pathways = new LinkedList<>();
         this.expressionSummary = new ExpressionSummary(userData);
+    }
+
+    public AnalysisStoredResult(String token, ExternalAnalysisResult result) {
+        this.summary  = new AnalysisSummary(token, result.getSummary());
+        this.expressionSummary = new ExpressionSummary(result.getExpressionSummary());
+        this.pathways = new ArrayList<>();
+        this.warnings = result.getWarnings();
+
+        if (result.getNotFound() != null) {
+            this.notFound = new HashSet<>();
+            result.getNotFound().forEach(nf -> this.notFound.add(new AnalysisIdentifier(nf)));
+        }
+
+        Map<String, Integer> resourceHits = new HashMap<>();
+        Map<SpeciesNode, Integer> speciesHits = new HashMap<>();
+        int total = 0;
+        if (result.getPathways() != null) {
+            total = result.getPathways().size();
+            for (ExternalPathwayNodeSummary epns : result.getPathways()) {
+                PathwayNodeSummary pns = new PathwayNodeSummary(epns);
+                for (String mr : epns.getData().getResources()) {
+                    int n = resourceHits.getOrDefault(mr, 0);
+                    resourceHits.put(mr, n + 1);
+                }
+
+                int n = speciesHits.getOrDefault(pns.getSpecies(), 0);
+                speciesHits.put(pns.getSpecies(), n + 1);
+                this.pathways.add(pns);
+            }
+        }
+
+        setResourceSummary(resourceHits, total);
+        setSpeciesSummary(speciesHits);
     }
 
     public void setHitPathways(List<PathwayNode> pathwayNodes) {
@@ -449,7 +484,7 @@ public class AnalysisStoredResult {
         AnalysisSortType sortType = AnalysisSortType.getSortType(sortBy);
         if (resource != null) {
             Resource r = ResourceFactory.getResource(resource);
-            if (r != null && r instanceof MainResource) {
+            if (r instanceof MainResource) {
                 MainResource mr = (MainResource) r;
                 if (order != null && order.toUpperCase().equals("DESC")) {
                     return Collections.reverseOrder(ComparatorFactory.getComparator(sortType, mr));

@@ -1,5 +1,6 @@
 package org.reactome.server.analysis.core.model;
 
+import org.reactome.server.analysis.core.result.external.ExternalSpeciesNode;
 import org.reactome.server.graph.domain.model.Species;
 
 import java.util.HashMap;
@@ -36,6 +37,10 @@ public abstract class SpeciesNodeFactory {
             }
         }
         return speciesNode;
+    }
+
+    public static SpeciesNode getSpeciesNode(ExternalSpeciesNode species) {
+        return getSpeciesNode(species.getSpeciesID(), species.getTaxID(), species.getName());
     }
 
     public static SpeciesNode getHumanNode() {

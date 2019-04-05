@@ -2,11 +2,13 @@ package org.reactome.server.analysis.core.result.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.reactome.server.analysis.core.model.AnalysisType;
+import org.reactome.server.analysis.core.result.external.ExternalAnalysisSummary;
 
 /**
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
  */
 public class AnalysisSummary {
+
     private String token;
     private Boolean projection;
     private Boolean interactors;
@@ -40,6 +42,10 @@ public class AnalysisSummary {
     public AnalysisSummary(String token, Boolean projection, Boolean interactors, String sampleName, AnalysisType type, boolean text, String server) {
         this(token, projection, interactors, sampleName, type, server);
         this.text = text;
+    }
+
+    public AnalysisSummary(String token, ExternalAnalysisSummary summary) {
+        this(token, summary.getProjection(), summary.getInteractors(), summary.getSampleName(), summary.getType(), summary.getServer());
     }
 
     public String getToken() {

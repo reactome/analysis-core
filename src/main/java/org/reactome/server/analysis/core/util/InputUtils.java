@@ -1,11 +1,13 @@
 package org.reactome.server.analysis.core.util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.reactome.server.analysis.core.model.AnalysisIdentifier;
 import org.reactome.server.analysis.core.model.UserData;
 import org.reactome.server.analysis.core.parser.InputFormat;
 import org.reactome.server.analysis.core.parser.exception.ParserException;
+import org.reactome.server.analysis.core.result.external.ExternalAnalysisResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.DigestUtils;
@@ -20,30 +22,28 @@ import java.util.List;
  *
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
  */
+@SuppressWarnings("Duplicates")
 public abstract class InputUtils {
+
     private static Logger logger = LoggerFactory.getLogger("importLogger");
 
-    @SuppressWarnings("UnusedDeclaration")
+    private static final ObjectMapper mapper = new ObjectMapper();
+
     public static UserData getUserData(String input) throws IOException, ParserException {
-        logger.trace("Loading identifiers...");
-        long start = System.currentTimeMillis();
         String md5 = DigestUtils.md5DigestAsHex(input.getBytes());
-        UserData ud = processData(input, md5);
-        long end = System.currentTimeMillis();
-        logger.trace(String.format("%d loaded in %d ms", ud.getIdentifiers().size(), end-start));
-        return ud;
+        return processData(input, md5);
     }
 
     public static UserData getUserData(InputStream is) throws IOException, ParserException {
-        logger.trace("Loading identifiers...");
-        long start = System.currentTimeMillis();
-        String input = IOUtils.toString(is);
-        String md5 = DigestUtils.md5DigestAsHex(input.getBytes());
-        //UserData ud = InputUtils.processData(input, md5);
-        UserData ud = processData(input, md5);
-        long end = System.currentTimeMillis();
-        logger.trace(String.format("%d loaded in %d ms", ud.getIdentifiers().size(), end-start));
-        return ud;
+        return getUserData(IOUtils.toString(is));
+    }
+
+    public static ExternalAnalysisResult getExternalAnalysisResult(String input) throws IOException {
+        return mapper.readValue(input, ExternalAnalysisResult.class);
+    }
+
+    public static ExternalAnalysisResult getExternalAnalysisResult(InputStream is) throws IOException {
+        return getExternalAnalysisResult(IOUtils.toString(is));
     }
 
     private static boolean isComment(String line){

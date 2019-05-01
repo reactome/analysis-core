@@ -42,6 +42,9 @@ public class PathwayNodeData {
             this.totalReactions = counter.getReactionsCount();
             this.foundReactions = counter.getReactionsFound();
             this.reactionsRatio = counter.getReactionsRatio();
+
+            //Only used for external results
+            this.exp = counter.getExp();
         }
 
         Integer totalEntities = 0; //Pre-calculated in setCounters method
@@ -61,6 +64,8 @@ public class PathwayNodeData {
         Integer totalReactions = 0; //Pre-calculated in setCounters method
         Integer foundReactions = 0;
         Double reactionsRatio;
+
+        List<Double> exp;
     }
 
     private MapSet<MainResource, String> foundTotal = new MapSet<>();
@@ -283,9 +288,7 @@ public class PathwayNodeData {
     private List<InteractorIdentifier> getInteractorsDuplication() {
         List<InteractorIdentifier> rtn = new LinkedList<>();
         for (MainIdentifier mainIdentifier : interactors.keySet()) {
-            for (InteractorIdentifier identifier : interactors.getElements(mainIdentifier)) {
-                rtn.add(identifier);
-            }
+            rtn.addAll(interactors.getElements(mainIdentifier));
         }
         return rtn;
     }
@@ -294,19 +297,20 @@ public class PathwayNodeData {
         List<InteractorIdentifier> rtn = new LinkedList<>();
         for (MainIdentifier mainIdentifier : interactors.keySet()) {
             if (mainIdentifier.getResource().equals(resource)) {
-                for (InteractorIdentifier identifier : interactors.getElements(mainIdentifier)) {
-                    rtn.add(identifier);
-                }
+                rtn.addAll(interactors.getElements(mainIdentifier));
             }
         }
         return rtn;
     }
 
     public List<Double> getExpressionValuesAvg() {
+        if (combinedResult.exp != null && !combinedResult.exp.isEmpty()) return combinedResult.exp;
         return calculateAverage(groupEntitiesExpressionValues(getEntitiesDuplication(), getInteractorsDuplication()));
     }
 
     public List<Double> getExpressionValuesAvg(MainResource resource) {
+        final Counter counter = entitiesResult.get(resource);
+        if(counter!=null && counter.exp!=null && !counter.exp.isEmpty()) return counter.exp;
         return calculateAverage(groupEntitiesExpressionValues(getEntitiesDuplication(resource), getInteractorsDuplication(resource)));
     }
 

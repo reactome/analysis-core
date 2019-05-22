@@ -147,12 +147,12 @@ public class AnalysisStoredResult {
         return rtn;
     }
 
-    public FoundEntities getFoundEntities(String pathway) {
+    public FoundEntities getFoundEntities(String pathway, String resource) {
         FoundEntities pi = null;
         PathwayNodeSummary aux = getPathway(pathway);
         if (aux != null) {
             List<String> columnNames = getExpressionSummary().getColumnNames();
-            pi = (new FoundEntities(aux, columnNames));
+            pi = (new FoundEntities(aux, columnNames)).filter(resource);
         }
         return pi;
     }

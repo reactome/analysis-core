@@ -14,6 +14,7 @@ public class PathwaySummary {
     private String name;
     private SpeciesSummary species;
     private boolean llp; //lower level pathway
+    private boolean isInDisease;
 
     private EntityStatistics entities;
     private ReactionStatistics reactions;
@@ -25,6 +26,8 @@ public class PathwaySummary {
         this.name = node.getName();
         this.species = new SpeciesSummary(node.getSpecies());
         this.llp = node.isLlp();
+        this.isInDisease = node.isInDisease();
+
         initialize(node.getData(), resource, interactors);
     }
 
@@ -61,6 +64,10 @@ public class PathwaySummary {
 
     public boolean isLlp() {
         return llp;
+    }
+
+    public boolean isInDisease() {
+        return isInDisease;
     }
 
     public EntityStatistics getEntities() {

@@ -51,6 +51,6 @@ public abstract class AnalysisReport {
     }
 
     private static void report(AnalysisAction action, ReportParameters parameters){
-        logger.info(action.toString() + " " + parameters);
+        logger.debug(action.toString() + " " + parameters);
     }
 }

@@ -9,6 +9,9 @@ Reactome Analysis Core creates the analysis intermediate file and it is also use
 
 To create the intermediate binary file, the command is as follows:
 
+:warning:
+Before creating the intermediate file, make sure this query ```MATCH (n:DBInfo) RETURN n``` returns ```reactome```
+
 ```console
 java -jar analysis-core-jar-with-dependencies.jar \
       -h graph_db_host \

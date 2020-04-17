@@ -48,11 +48,11 @@ public class TokenUtils {
         throw new ResourceNotFoundException();
     }
 
-    public AnalysisSummary getAnalysisSummary(String token, Boolean projection, Boolean interactors, String sampleName, AnalysisType type, String userFileName, String serverName) {
+    public AnalysisSummary getAnalysisSummary(String token, Boolean projection, Boolean interactors, String sampleName, AnalysisType type, String userFileName, String serverName, boolean includeDisease) {
         if (userFileName != null && !userFileName.isEmpty()) {
-            return new AnalysisSummary(token, projection, interactors, sampleName, type, userFileName, serverName);
+            return new AnalysisSummary(token, projection, interactors, sampleName, type, userFileName, serverName, includeDisease);
         } else {
-            return new AnalysisSummary(token, projection, interactors, sampleName, type, true, serverName);
+            return new AnalysisSummary(token, projection, interactors, sampleName, type, true, serverName, includeDisease);
         }
     }
 

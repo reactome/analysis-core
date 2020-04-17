@@ -15,6 +15,7 @@ public class ExternalAnalysisSummary {
     private String type;
     private String sampleName;
     private String server;
+    private Boolean includeDisease;
 
     public ExternalAnalysisSummary() {
     }
@@ -27,6 +28,7 @@ public class ExternalAnalysisSummary {
         this.type = summary.getType();
         this.sampleName = summary.getSampleName();
         this.server = summary.getServer();
+        this.includeDisease = summary.isIncludeDisease();
     }
 
 
@@ -64,5 +66,13 @@ public class ExternalAnalysisSummary {
 
     public void setServer(String server) {
         this.server = server;
+    }
+
+    public Boolean getIncludeDisease() {
+        return includeDisease;
+    }
+
+    public void setIncludeDisease(Boolean includeDisease) {
+        this.includeDisease = includeDisease;
     }
 }

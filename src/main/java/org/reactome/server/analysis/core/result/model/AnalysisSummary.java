@@ -55,11 +55,11 @@ public class AnalysisSummary {
     }
 
     public Boolean isProjection() {
-        return projection;
+        return projection == null ? false : projection;
     }
 
     public Boolean isInteractors() {
-        return interactors;
+        return interactors == null ? false : interactors;
     }
 
     public String getType() {

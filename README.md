@@ -17,7 +17,7 @@ java -jar analysis-core-jar-with-dependencies.jar \
       -h graph_db_host \
       -p graph_db_port \
       -u graph_db_user \
-      -p graph_db_passwd \
+      -k graph_db_passwd \
       -o pathTO/analysis_vXX.bin
 ```
 

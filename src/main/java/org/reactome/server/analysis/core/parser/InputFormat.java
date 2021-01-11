@@ -1,6 +1,5 @@
 package org.reactome.server.analysis.core.parser;
 
-
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.reactome.server.analysis.core.model.AnalysisIdentifier;
@@ -9,7 +8,6 @@ import org.reactome.server.analysis.core.parser.response.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -20,44 +18,36 @@ import java.util.regex.Pattern;
  */
 public class InputFormat {
 
-    private static Logger logger = LoggerFactory.getLogger("importLogger");
+    private static final Logger logger = LoggerFactory.getLogger("importLogger");
 
-    /**
-     * This is the default header for oneline file and multiple line file
-     * Changing here will propagate in both.
-     */
+    // This is the default header for oneline file and multiple line file. Changing here will propagate in both.
     private static final String DEFAULT_IDENTIFIER_HEADER = "";
     private static final String DEFAULT_EXPRESSION_HEADER = "col";
 
-    /** Pride is using colon, we decided to remove it from the parser **/
+    // Pride is using colon, we decided to remove it from the parser
     private static final String HEADER_SPLIT_REGEX = "[\\t,;]+";
 
-    /** Regex for parsing the content when we do not have the header, trying to build a default one **/
+    // Regex for parsing the content when we do not have the header, trying to build a default one
     private static final String NO_HEADER_DEFAULT_REGEX = "[\\s,;]+";
 
-    /** Regex used to split the content of a single line file **/
+    // Regex used to split the content of a single line file
+    // Note: using + instead of * avoids replacing empty Strings therefore may speed up the process.
     private static final String ONE_LINE_CONTENT_SPLIT_REGEX = "[\\s,;]+";
 
-    /** Regex used to split the content of a multiple line file **/
+    // Regex used to split the content of a multiple line file
     private static final String MULTI_LINE_CONTENT_SPLIT_REGEX = "[\\s,;]+";
 
     private List<String> headerColumnNames = new LinkedList<>();
-    private Set<AnalysisIdentifier> analysisIdentifierSet = new LinkedHashSet<>();
+    private final Set<AnalysisIdentifier> analysisIdentifierSet = new LinkedHashSet<>();
     private boolean hasHeader = false;
 
-    /**
-     * Threshold number for columns, based on the first line we count columns.
-     * All the following lines must match this threshold.
-     */
+    // Threshold number for columns, based on the first line we count columns. All the following lines must match this threshold.
     private int thresholdColumn = 0;
 
-    private List<String> errorResponses = new LinkedList<>();
-    private List<String> warningResponses = new LinkedList<>();
+    private final List<String> errorResponses = new LinkedList<>();
+    private final List<String> warningResponses = new LinkedList<>();
 
-    /**
-     * Ignoring the initial blank lines and start parsing from the
-     * first valid line.
-     */
+    // Ignoring the initial blank lines and start parsing from the first valid line.
     private int startOnLine = 0;
 
     /**
@@ -67,9 +57,8 @@ public class InputFormat {
      * ParserException is thrown only when there are errors.
      *
      * @param input file already converted into a String.
-     * @throws IOException, ParserException
      */
-    public void parseData(String input) throws IOException, ParserException {
+    public void parseData(String input) throws ParserException {
         long start = System.currentTimeMillis();
 
         String clean = input.trim();
@@ -104,7 +93,7 @@ public class InputFormat {
 
     /**
      * ---- FOR VERY SPECIFIC CASES, BUT VERY USEFUL FOR REACTOME ----
-     * There're cases where the user inputs a file with one single line to be analysed
+     * There are cases where the user inputs a file with one single line to be analysed
      * This method performs a quick view into the file and count the lines. It stops if file has more than one line.
      * p.s empty lines are always ignored
      * To avoid many iteration to the same file, during counting lines the main attributes are being set and used in the
@@ -115,18 +104,17 @@ public class InputFormat {
      * @return true if file has one line, false otherwise.
      */
     private boolean isOneLineFile(String[] input) {
-
         int countNonEmptyLines = 0;
         String validLine = "";
 
-        for (int i = 0; i < input.length; i++) {
+        for (String s : input) {
             // Cleaning the line in other to eliminate blank or spaces spread in the file
-            String cleanLine = input[i].trim();
+            String cleanLine = s.trim();
             if (StringUtils.isNotEmpty(cleanLine) || StringUtils.isNotBlank(cleanLine)) {
                 countNonEmptyLines++;
 
                 // Line without parsing - otherwise we can't eliminate blank space and tabs spread in the file.
-                validLine = input[i];
+                validLine = s;
 
                 // We don't need to keep counting...
                 if (countNonEmptyLines > 1) {
@@ -152,10 +140,7 @@ public class InputFormat {
     private void analyseOneLineFile(String line) {
         long start = System.nanoTime();
 
-        /** Note also that using + instead of * avoids replacing empty strings and therefore might also speed up the process. **/
-        String regexp = ONE_LINE_CONTENT_SPLIT_REGEX;
-
-        Pattern p = Pattern.compile(regexp);
+        Pattern p = Pattern.compile(ONE_LINE_CONTENT_SPLIT_REGEX);
 
         // Line cannot start with # or //
         if (hasHeaderLine(line)) {
@@ -163,10 +148,10 @@ public class InputFormat {
             return;
         }
 
-        /** Note that using String.replaceAll() will compile the regular expression each time you call it. **/
+        // Note that using String.replaceAll() will compile the regular expression each time you call it.
         line = p.matcher(line).replaceAll(" ");
 
-        /** StringTokenizer has more performance to offer than String.slit. **/
+        // StringTokenizer has more performance to offer than String.slit
         StringTokenizer st = new StringTokenizer(line); //space is default delimiter.
 
         int tokens = st.countTokens();
@@ -191,11 +176,9 @@ public class InputFormat {
     private void analyseHeaderColumns(String[] data) {
         long start = System.currentTimeMillis();
 
-        /**
-         * Verify in which line the file content starts. Some cases, file has a bunch of blank line in the firsts lines.
-         * StartOnLine will be important in the content analysis. Having this attribute we don't to iterate and ignore
-         * blank lines in the beginning.
-         */
+        // Verify in which line the file content starts. Some cases, file has a bunch of blank line in the firsts lines.
+        // StartOnLine will be important in the content analysis. Having this attribute we don't to iterate and ignore
+        // blank lines in the beginning.
         String headerLine = "";
         for (int i = 0; i < data.length; i++) {
             if (StringUtils.isNotEmpty(data[i])) {
@@ -219,7 +202,7 @@ public class InputFormat {
     }
 
     /**
-     * There're files which may have a header line but malformed.
+     * There are files which may have a header line but malformed.
      * This method analyse the first line and if the columns are not number
      * a potential header is present and the user will be notified
      *
@@ -232,17 +215,14 @@ public class InputFormat {
 
         firstLine = firstLine.replaceAll("^(#|//)", "");
 
-        /**
-         * We cannot use the HEADER REGEX for parsing the header and prepare the default
-         * Why? Tab is a delimiter for header, but space isn't. Colon is a delimiter fo the content
-         * but not for the header.
-         **/
+        // We cannot use the HEADER REGEX for parsing the header and prepare the default
+        // Why? Tab is a delimiter for header, but space isn't. Colon is a delimiter for the content but not for the header.
         String[] data = firstLine.split(NO_HEADER_DEFAULT_REGEX);
 
         if (data.length > 0) {
             for (String col : data) {
                 columnNames.add(col.trim());
-                if(!isNumeric(col.trim())){
+                if (parseValue(col.trim()) == null){
                     errorInARow++;
                 }
             }
@@ -265,8 +245,6 @@ public class InputFormat {
 
     /**
      * The default header will be built based on the first line.
-     *
-     * @param colsLength
      */
     private void buildDefaultHeader(Integer colsLength) {
         thresholdColumn = colsLength;
@@ -285,14 +263,9 @@ public class InputFormat {
      */
     private void analyseContent(String[] content) {
         long start = System.nanoTime();
-        if (hasHeader) {
-            startOnLine += 1;
-        }
+        if (hasHeader) startOnLine += 1;
 
-        /** Note also that using + instead of * avoids replacing empty strings and therefore might also speed up the process. **/
-        String regexp = MULTI_LINE_CONTENT_SPLIT_REGEX;
-
-        Pattern p = Pattern.compile(regexp);
+        Pattern p = Pattern.compile(MULTI_LINE_CONTENT_SPLIT_REGEX);
 
         for (int i = startOnLine; i < content.length; ++i) {
             String line = content[i].trim();
@@ -301,32 +274,32 @@ public class InputFormat {
                 continue;
             }
 
-            /** Note that using String.replaceAll() will compile the regular expression each time you call it. **/
-            line = p.matcher(line).replaceAll(" "); // slow slow slow
+            // Note: that using String.replaceAll() will compile the regular expression each time you call it.
+            line = p.matcher(line).replaceAll(" ");
 
             // StringTokenizer has more performance to offer than String.slit.
             StringTokenizer st = new StringTokenizer(line); //space is default delimiter.
 
             int tokens = st.countTokens();
             if (tokens > 0) {
-                /**
-                 * analyse if each line has the same amount of columns as the threshold based on first line, otherwise
-                 * an error will be reported.
-                 */
+                // analyse if each line has the same amount of columns as the threshold based on first line, otherwise an error will be reported.
                 if (thresholdColumn == tokens) {
                     String first = st.nextToken();
                     AnalysisIdentifier rtn = new AnalysisIdentifier(first);
                     int j = 1;
+                    boolean validLine = true;
                     while (st.hasMoreTokens()) {
                         String token = st.nextToken().trim();
-                        if(isNumeric(token)){
-                            rtn.add(Double.valueOf(token));
-                        }else {
+                        Double parsedValue = parseValue(token);
+                        if (parsedValue != null) {
+                            rtn.add(parsedValue);
+                        } else {
                             warningResponses.add(Response.getMessage(Response.INLINE_PROBLEM, i + 1, j + 1));
+                            validLine = false;
                         }
                         j++;
                     }
-                    analysisIdentifierSet.add(rtn);
+                    if(validLine) analysisIdentifierSet.add(rtn);
                 } else {
                     errorResponses.add(Response.getMessage(Response.COLUMN_MISMATCH, i + 1, thresholdColumn, tokens));
                 }
@@ -397,20 +370,17 @@ public class InputFormat {
     }
 
     /**
-     * Instead of calling the Double.valueOf(...) in a try-catch statement and many of the checks to fail due to
-     * not being a number then performance of this mechanism will not be great, since you're relying upon
-     * exceptions being thrown for each failure, which is a fairly expensive operation.
-     * <p>
-     * An alternative approach may be to use a regular expression to check for validity of being a number:
-     *
-     * @param str
-     * @return true if is Number
+     * @param str to be parsed into double
+     * @return a double or null if couldn't parse it.
      */
-    public boolean isNumeric(String str) {
-        if (str == null) {
-            return false;
+    public Double parseValue(String str) {
+        Double ret = null;
+        if (str == null) return ret;
+        try {
+            ret = Double.valueOf(str);
+        } catch (NumberFormatException e) {
+            ret = null;
         }
-
-        return str.matches("-?\\d+(\\.\\d+)?");  //match a number with optional '-' and decimal.
+        return ret;
     }
 }

@@ -56,12 +56,15 @@ public class EntitiesBuilder {
                     "WHERE (pe)-[:referenceEntity]->() " +
                     "WITH DISTINCT pe " +
                     "MATCH (pe)-[:referenceEntity]->(re:ReferenceEntity) " +
+                    "OPTIONAL MATCH (re)-[:referenceGene]->(re2:ReferenceEntity)-[:referenceDatabase]->(rd:ReferenceDatabase) " +
                     "OPTIONAL MATCH (pe)-[:referenceEntity|crossReference*]->(dbi:DatabaseIdentifier) " +
-                    "WITH DISTINCT re, COLLECT(DISTINCT CASE dbi WHEN NULL THEN NULL ELSE {databaseName: dbi.databaseName, identifier: dbi.identifier} END) AS dbis, COUNT(DISTINCT dbi) AS n " +
+                    "WITH DISTINCT re, " +
+                    "COLLECT(DISTINCT rd.displayName + \":\" + re2.identifier) AS reIdentifiers, " +
+                    "COLLECT(DISTINCT CASE dbi WHEN NULL THEN NULL ELSE {databaseName: dbi.databaseName, identifier: dbi.identifier} END) AS dbis, COUNT(DISTINCT dbi) AS n " +
                     "RETURN re.dbId AS referenceEntity, " +
                     "       re.secondaryIdentifier AS  secondaryIdentifiers, " +
                     "       re.geneName AS geneNames, " +
-                    "       re.otherIdentifier AS otherIdentifiers, " +
+                    "       reIdentifiers + re.otherIdentifier AS otherIdentifiers, " +
                     "       [{databaseName: re.databaseName, " +
                     "         identifier: CASE WHEN re.variantIdentifier IS NOT NULL THEN re.variantIdentifier ELSE re.identifier END " +
                     "         }] + CASE WHEN n = 0 THEN [] ELSE dbis END AS xrefs";

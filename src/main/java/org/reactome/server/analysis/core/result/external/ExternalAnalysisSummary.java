@@ -16,6 +16,8 @@ public class ExternalAnalysisSummary {
     private String sampleName;
     private String server;
     private Boolean includeDisease;
+    private String gsaToken;
+    private String gsaMethod;
 
     public ExternalAnalysisSummary() {
     }
@@ -29,6 +31,8 @@ public class ExternalAnalysisSummary {
         this.sampleName = summary.getSampleName();
         this.server = summary.getServer();
         this.includeDisease = summary.isIncludeDisease();
+        this.gsaToken = summary.getGsaToken();
+        this.gsaMethod = summary.getGsaMethod();
     }
 
 
@@ -74,5 +78,21 @@ public class ExternalAnalysisSummary {
 
     public void setIncludeDisease(Boolean includeDisease) {
         this.includeDisease = includeDisease;
+    }
+
+    public String getGsaToken() {
+        return gsaToken;
+    }
+
+    public void setGsaToken(String gsaToken) {
+        this.gsaToken = gsaToken;
+    }
+
+    public String getGsaMethod() {
+        return gsaMethod;
+    }
+
+    public void setGsaMethod(String gsaMethod) {
+        this.gsaMethod = gsaMethod;
     }
 }

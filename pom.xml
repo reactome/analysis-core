@@ -4,7 +4,7 @@
 
     <groupId>org.reactome.server.tools</groupId>
     <artifactId>analysis-core</artifactId>
-    <version>3.3.5-SNAPSHOT</version>
+    <version>3.3.7-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <description>The Reactome analysis-core extracts data from the graph-database to create the intermediate data format to be kept in memory and used for the analysis-service</description>
@@ -31,7 +31,7 @@
         <jdk.version>1.8</jdk.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <reactome.graph.core>1.1.22</reactome.graph.core>
+        <reactome.graph.core>1.1.23</reactome.graph.core>
 
         <jasp.version>2.1</jasp.version>
         <maven.compiler.version>3.5.1</maven.compiler.version>

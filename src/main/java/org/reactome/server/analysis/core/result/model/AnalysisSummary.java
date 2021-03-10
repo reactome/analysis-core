@@ -19,8 +19,10 @@ public class AnalysisSummary {
     private boolean includeDisease = true;
     private String fileName;
     private String server;
+    private String gsaToken;
+    private String gsaMethod;
 
-    AnalysisSummary(String token, Boolean projection, Boolean interactors, String sampleName, AnalysisType type, String server, Boolean includeDisease) {
+    AnalysisSummary(String token, Boolean projection, Boolean interactors, String sampleName, AnalysisType type, String server, Boolean includeDisease, String gsaToken, String gsaMethod) {
         this.token = token;
         this.type = type.toString();
         this.sampleName = sampleName;
@@ -28,26 +30,28 @@ public class AnalysisSummary {
         this.interactors = interactors;
         this.server = server;
         this.includeDisease = includeDisease;
+        this.gsaToken = gsaToken;
+        this.gsaMethod = gsaMethod;
     }
 
     public AnalysisSummary(String token, Boolean projection, Boolean interactors, String sampleName, AnalysisType type, String fileName, String server, Boolean includeDisease) {
-        this(token, projection, interactors, sampleName, type, server, includeDisease);
+        this(token, projection, interactors, sampleName, type, server, includeDisease, null, null);
         this.fileName = fileName;
         if(this.fileName!=null) this.fileName = this.fileName.split("\\?")[0];
     }
 
     public AnalysisSummary(String token, Boolean projection, Boolean interactors, String sampleName, AnalysisType type, Long species, String server, Boolean includeDisease) {
-        this(token, projection, interactors, sampleName, type, server, includeDisease);
+        this(token, projection, interactors, sampleName, type, server, includeDisease, null, null);
         this.species = species;
     }
 
     public AnalysisSummary(String token, Boolean projection, Boolean interactors, String sampleName, AnalysisType type, boolean text, String server, Boolean includeDisease) {
-        this(token, projection, interactors, sampleName, type, server, includeDisease);
+        this(token, projection, interactors, sampleName, type, server, includeDisease, null, null);
         this.text = text;
     }
 
     public AnalysisSummary(String token, ExternalAnalysisSummary summary) {
-        this(token, summary.getProjection(), summary.getInteractors(), summary.getSampleName(), summary.getType(), summary.getServer(), summary.getIncludeDisease());
+        this(token, summary.getProjection(), summary.getInteractors(), summary.getSampleName(), summary.getType(), summary.getServer(), summary.getIncludeDisease(), summary.getGsaToken(), summary.getGsaMethod());
     }
 
     public String getToken() {
@@ -93,5 +97,21 @@ public class AnalysisSummary {
 
     public void setIncludeDisease(boolean includeDisease) {
         this.includeDisease = includeDisease;
+    }
+
+    public String getGsaToken() {
+        return gsaToken;
+    }
+
+    public void setGsaToken(String gsaToken) {
+        this.gsaToken = gsaToken;
+    }
+
+    public String getGsaMethod() {
+        return gsaMethod;
+    }
+
+    public void setGsaMethod(String gsaMethod) {
+        this.gsaMethod = gsaMethod;
     }
 }

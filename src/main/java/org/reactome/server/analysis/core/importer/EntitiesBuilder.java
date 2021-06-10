@@ -51,7 +51,7 @@ public class EntitiesBuilder {
             String speciesPrefix = "for '" + species.getName() + "' (" + (++s) + "/" + st + ")";
             if (Main.VERBOSE) System.out.print(msgPrefix + speciesPrefix + " >> retrieving xrefs...");
 
-            query = "MATCH (:Species{taxId:{taxId}})<-[:species]-(:Pathway)-[:hasEvent]->(rle:ReactionLikeEvent), " +
+            query = "MATCH (:Species{taxId:$taxId})<-[:species]-(:Pathway)-[:hasEvent]->(rle:ReactionLikeEvent), " +
                     "      (rle)-[:input|output|catalystActivity|physicalEntity|entityFunctionalStatus|diseaseEntity|regulatedBy|regulator|hasComponent|hasMember|hasCandidate|repeatedUnit*]->(pe:PhysicalEntity) " +
                     "WHERE (pe)-[:referenceEntity]->() " +
                     "WITH DISTINCT pe " +
@@ -80,7 +80,7 @@ public class EntitiesBuilder {
 
             if (Main.VERBOSE) System.out.print(msgPrefix + speciesPrefix + " >> retrieving participants...");
 
-            query = "MATCH (:Species{taxId:{taxId}})<-[:species]-(p:Pathway)-[:hasEvent]->(rle:ReactionLikeEvent), " +
+            query = "MATCH (:Species{taxId:$taxId})<-[:species]-(p:Pathway)-[:hasEvent]->(rle:ReactionLikeEvent), " +
                     "      (rle)-[:input|output|catalystActivity|physicalEntity|entityFunctionalStatus|diseaseEntity|regulatedBy|regulator|hasComponent|hasMember|hasCandidate|repeatedUnit*]->(pe:PhysicalEntity)-[:referenceEntity]->(re:ReferenceEntity) " +
                     "WITH DISTINCT p, pe, re, COLLECT(DISTINCT {dbId: rle.dbId, stId: rle.stId}) AS rles " +
                     "OPTIONAL MATCH (pe)-[:hasModifiedResidue]->(tm:TranslationalModification)-[:psiMod]->(mod:PsiMod) " +

@@ -1,9 +1,12 @@
 package org.reactome.server.analysis.core.importer.query;
 
+import org.neo4j.driver.Record;
+import org.reactome.server.graph.domain.result.CustomQuery;
+
 /**
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
  */
-public class OrthologyResult {
+public class OrthologyResult implements CustomQuery {
 
     private String originDatabaseName;
     private String originIdentifier;
@@ -42,5 +45,15 @@ public class OrthologyResult {
 
     public void setInferredToIdentifier(String inferredToIdentifier) {
         this.inferredToIdentifier = inferredToIdentifier;
+    }
+
+    @Override
+    public CustomQuery build(Record r) {
+        OrthologyResult or = new OrthologyResult();
+        or.setInferredToDatabaseName(r.get("inferredToDatabaseName").asString(null));
+        or.setInferredToIdentifier(r.get("inferredToIdentifier").asString(null));
+        or.setOriginDatabaseName(r.get("originDatabaseName").asString(null));
+        or.setOriginIdentifier(r.get("originIdentifier").asString(null));
+        return or;
     }
 }

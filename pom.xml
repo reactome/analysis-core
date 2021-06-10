@@ -31,7 +31,7 @@
         <jdk.version>11</jdk.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <reactome.graph.core>1.1.25-SNAPSHOT</reactome.graph.core>
+        <reactome.graph.core>2.0.0-SNAPSHOT</reactome.graph.core>
 
         <jasp.version>2.1</jasp.version>
         <junit.version>4.13.2</junit.version>
@@ -50,6 +50,8 @@
         <maven.compiler.version>3.8.1</maven.compiler.version>
         <maven.jar.version>3.2.0</maven.jar.version>
 
+        <jackson-databind.version>2.12.3</jackson-databind.version>
+        <commons-text.version>1.9</commons-text.version>
     </properties>
 
     <dependencies>
@@ -80,6 +82,27 @@
             <groupId>com.esotericsoftware</groupId>
             <artifactId>kryo</artifactId>
             <version>${kryo.version}</version>
+        </dependency>
+
+        <!-- Jackson Databind -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson-databind.version}</version>
+        </dependency>
+
+        <!-- Apache HTTPComponents -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.13</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>${commons-text.version}</version>
         </dependency>
 
         <!-- Used for RadixTree implementation -->

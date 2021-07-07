@@ -1,6 +1,7 @@
 package org.reactome.server.analysis.core;
 
 import com.martiansoftware.jsap.*;
+import org.reactome.server.analysis.core.config.AnalysisCoreNeo4jConfig;
 import org.reactome.server.analysis.core.data.AnalysisDataUtils;
 import org.reactome.server.analysis.core.importer.EntitiesBuilder;
 import org.reactome.server.analysis.core.importer.HierarchyBuilder;
@@ -45,7 +46,7 @@ public class Main {
         if (jsap.messagePrinted()) System.exit(1);
 
         //Initialising ReactomeCore Neo4j configuration
-        ReactomeGraphCore.initialise(config.getString("host"), config.getString("user"), config.getString("password"));
+        ReactomeGraphCore.initialise(config.getString("host"), config.getString("user"), config.getString("password"), AnalysisCoreNeo4jConfig.class);
 
         TEST_MAIN_SPECIES = config.getBoolean("test");
         VERBOSE = config.getBoolean("verbose");

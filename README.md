@@ -13,7 +13,7 @@ To create the intermediate binary file, the command is as follows:
 Before creating the intermediate file, make sure this query ```MATCH (n:DBInfo) RETURN n``` returns ```reactome```
 
 ```console
-java -jar analysis-core-jar-with-dependencies.jar \
+java -jar analysis-core-exec.jar \
       -h graph_db_host \
       -p graph_db_port \
       -u graph_db_user \

@@ -59,4 +59,8 @@ public class MapSet<S,T> implements Serializable {
         }
         return rtn;
     }
+
+    public int elementsCount() {
+        return map.values().stream().mapToInt(Set::size).sum();
+    }
 }

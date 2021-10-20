@@ -1,5 +1,7 @@
 package org.reactome.server.analysis.core.result.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,6 +30,11 @@ public class FoundEntity extends IdentifierSummary {
 
     public Set<IdentifierMap> getMapsTo() {
         return mapsTo;
+    }
+
+    @JsonIgnore
+    public int getMatchingEntitiesCount() {
+        return this.mapsTo.stream().mapToInt(IdentifierMap::getMappingEntitiesCount).sum();
     }
 
     protected void merge(Set<IdentifierMap> mapsTo){

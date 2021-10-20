@@ -1,7 +1,7 @@
 package org.reactome.server.analysis.core;
 
 import com.martiansoftware.jsap.*;
-import org.reactome.server.analysis.core.config.ReactomeNeo4jConfig;
+import org.reactome.server.analysis.core.config.AnalysisCoreNeo4jConfig;
 import org.reactome.server.analysis.core.data.AnalysisDataUtils;
 import org.reactome.server.analysis.core.importer.EntitiesBuilder;
 import org.reactome.server.analysis.core.importer.HierarchyBuilder;
@@ -33,10 +33,9 @@ public class Main {
         // Program Arguments -h, -p, -u, -k
         SimpleJSAP jsap = new SimpleJSAP(Main.class.getName(), "Connect to Reactome Graph Database",
                 new Parameter[]{
-                        new FlaggedOption("host", JSAP.STRING_PARSER, "localhost", JSAP.NOT_REQUIRED, 'h', "host", "The neo4j host")
-                        , new FlaggedOption("port", JSAP.STRING_PARSER, "7474", JSAP.NOT_REQUIRED, 'p', "port", "The neo4j port")
+                        new FlaggedOption("host", JSAP.STRING_PARSER, "bolt://localhost:7687", JSAP.NOT_REQUIRED, 'h', "host", "The neo4j host")
                         , new FlaggedOption("user", JSAP.STRING_PARSER, "neo4j", JSAP.NOT_REQUIRED, 'u', "user", "The neo4j user")
-                        , new FlaggedOption("password", JSAP.STRING_PARSER, "neo4j", JSAP.REQUIRED, 'k', "password", "The neo4j password")
+                        , new FlaggedOption("password", JSAP.STRING_PARSER, "neo4jj", JSAP.REQUIRED, 'k', "password", "The neo4j password")
                         , new FlaggedOption("output", JSAP.STRING_PARSER, JSAP.NO_DEFAULT, JSAP.REQUIRED, 'o', "output", "The file where the results are written to")
                         , new QualifiedSwitch("test", JSAP.BOOLEAN_PARSER, null, JSAP.NOT_REQUIRED, 't', "test", "Test main species")
                         , new QualifiedSwitch("verbose", JSAP.BOOLEAN_PARSER, null, JSAP.NOT_REQUIRED, 'v', "verbose",  "Requests verbose output")
@@ -47,11 +46,7 @@ public class Main {
         if (jsap.messagePrinted()) System.exit(1);
 
         //Initialising ReactomeCore Neo4j configuration
-        ReactomeGraphCore.initialise(config.getString("host"),
-                config.getString("port"),
-                config.getString("user"),
-                config.getString("password"),
-                ReactomeNeo4jConfig.class);
+        ReactomeGraphCore.initialise(config.getString("host"), config.getString("user"), config.getString("password"), AnalysisCoreNeo4jConfig.class);
 
         TEST_MAIN_SPECIES = config.getBoolean("test");
         VERBOSE = config.getBoolean("verbose");

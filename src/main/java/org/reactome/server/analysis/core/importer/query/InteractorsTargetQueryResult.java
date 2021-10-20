@@ -1,18 +1,19 @@
 package org.reactome.server.analysis.core.importer.query;
 
+import org.neo4j.driver.Record;
 import org.reactome.server.analysis.core.model.AnalysisReaction;
 import org.reactome.server.analysis.core.util.MapSet;
+import org.reactome.server.graph.domain.result.CustomQuery;
 
 import java.util.List;
 
 /**
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
  */
-public class InteractorsTargetQueryResult {
+public class InteractorsTargetQueryResult implements CustomQuery {
 
     private String databaseName;
     private String identifier;
-
     private Long pathway;
     private List<AnalysisReaction> reactions;
 
@@ -54,5 +55,15 @@ public class InteractorsTargetQueryResult {
         MapSet<Long, AnalysisReaction> rtn = new MapSet<>();
         rtn.add(getPathway(), reactions);
         return rtn;
+    }
+
+    @Override
+    public CustomQuery build(Record r) {
+        InteractorsTargetQueryResult itqr = new InteractorsTargetQueryResult();
+        itqr.setDatabaseName(r.get("databaseName").asString(null));
+        itqr.setIdentifier(r.get("identifier").asString(null));
+        itqr.setPathway(r.get("pathway").asLong(0));
+        itqr.setReactions(r.get("reactions").asList(AnalysisReaction::build));
+        return itqr;
     }
 }

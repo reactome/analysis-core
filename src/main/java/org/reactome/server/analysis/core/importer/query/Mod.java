@@ -1,6 +1,7 @@
 package org.reactome.server.analysis.core.importer.query;
 
-import javax.annotation.Nonnull;
+import org.neo4j.driver.Value;
+import org.springframework.lang.NonNull;
 
 /**
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
@@ -28,7 +29,11 @@ public class Mod {
         return mod;
     }
 
-    public void setMod(@Nonnull String mod) {
+    public void setMod(@NonNull String mod) {
         this.mod = mod;
+    }
+
+    public static Mod build(Value value) {
+        return new Mod(value.get("coordinate").asLong(0), value.get("mod").asString(null));
     }
 }

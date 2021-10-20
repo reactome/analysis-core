@@ -1,12 +1,15 @@
 package org.reactome.server.analysis.core.importer.query;
 
+import org.neo4j.driver.Record;
+import org.reactome.server.graph.domain.result.CustomQuery;
+
 import java.util.Collections;
 import java.util.List;
 
 /**
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
  */
-public class ReferenceEntityIdentifiers {
+public class ReferenceEntityIdentifiers implements CustomQuery {
 
     private Long referenceEntity;
     private List<String> secondaryIdentifiers;
@@ -54,5 +57,16 @@ public class ReferenceEntityIdentifiers {
 
     public void setXrefs(List<XRef> xrefs) {
         this.xrefs = xrefs;
+    }
+
+    @Override
+    public CustomQuery build(Record r) {
+        ReferenceEntityIdentifiers rei = new ReferenceEntityIdentifiers();
+        rei.setReferenceEntity(r.get("referenceEntity").asLong());
+        rei.setSecondaryIdentifiers(r.get("secondaryIdentifiers").asList(v -> v.asString(null), null));
+        rei.setOtherIdentifiers(r.get("otherIdentifiers").asList(v -> v.asString(null), null));
+        rei.setGeneNames(r.get("geneNames").asList(v -> v.asString(null), null));
+        rei.setXrefs(r.get("xrefs").asList(XRef::build));
+        return rei;
     }
 }

@@ -39,6 +39,7 @@
     <properties>
         <jdk.version>11</jdk.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <start.class>org.reactome.server.analysis.core.Main</start.class>
 
         <reactome.graph.core>2.0.0</reactome.graph.core>
 

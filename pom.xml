@@ -31,7 +31,7 @@
     </developers>
 
     <parent>
-        <groupId>org.reactome.server</groupId>
+        <groupId>org.reactome.maven</groupId>
         <artifactId>reactome-parent</artifactId>
         <version>1.0.0</version>
     </parent>

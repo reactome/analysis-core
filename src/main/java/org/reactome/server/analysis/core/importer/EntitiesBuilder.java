@@ -51,8 +51,9 @@ public class EntitiesBuilder {
             String speciesPrefix = "for '" + species.getName() + "' (" + (++s) + "/" + st + ")";
             if (Main.VERBOSE) System.out.print(msgPrefix + speciesPrefix + " >> retrieving xrefs...");
 
+            //language=Cypher
             query = "MATCH (:Species{taxId:$taxId})<-[:species]-(:Pathway)-[:hasEvent]->(rle:ReactionLikeEvent), " +
-                    "      (rle)-[:input|output|catalystActivity|physicalEntity|entityFunctionalStatus|diseaseEntity|regulatedBy|regulator|hasComponent|hasMember|hasCandidate|repeatedUnit*]->(pe:PhysicalEntity) " +
+                    "      (rle)-[:input|output|catalystActivity|physicalEntity|entityFunctionalStatus|diseaseEntity|regulatedBy|regulator|hasComponent|hasMember|hasCandidate|repeatedUnit|proteinMarker|RNAMarker*]->(pe:PhysicalEntity) " +
                     "WHERE (pe)-[:referenceEntity]->() " +
                     "WITH DISTINCT pe " +
                     "MATCH (pe)-[:referenceEntity]->(re:ReferenceEntity) " +
@@ -80,8 +81,9 @@ public class EntitiesBuilder {
 
             if (Main.VERBOSE) System.out.print(msgPrefix + speciesPrefix + " >> retrieving participants...");
 
+            //language=Cypher
             query = "MATCH (:Species{taxId:$taxId})<-[:species]-(p:Pathway)-[:hasEvent]->(rle:ReactionLikeEvent), " +
-                    "      (rle)-[:input|output|catalystActivity|physicalEntity|entityFunctionalStatus|diseaseEntity|regulatedBy|regulator|hasComponent|hasMember|hasCandidate|repeatedUnit*]->(pe:PhysicalEntity)-[:referenceEntity]->(re:ReferenceEntity) " +
+                    "      (rle)-[:input|output|catalystActivity|physicalEntity|entityFunctionalStatus|diseaseEntity|regulatedBy|regulator|hasComponent|hasMember|hasCandidate|repeatedUnit|proteinMarker|RNAMarker*]->(pe:PhysicalEntity)-[:referenceEntity]->(re:ReferenceEntity) " +
                     "WITH DISTINCT p, pe, re, COLLECT(DISTINCT {dbId: rle.dbId, stId: rle.stId}) AS rles " +
                     "OPTIONAL MATCH (pe)-[:hasModifiedResidue]->(tm:TranslationalModification)-[:psiMod]->(mod:PsiMod) " +
                     "WITH DISTINCT p, pe, re, rles, COLLECT(DISTINCT {coordinate: tm.coordinate, mod: mod.identifier}) AS tmods, COUNT(DISTINCT mod) AS n " +

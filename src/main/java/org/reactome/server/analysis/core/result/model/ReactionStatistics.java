@@ -9,8 +9,8 @@ import org.reactome.server.analysis.core.model.resource.MainResource;
 //@ApiModel(value = "ReactionStatistics", description = "Statistics for a reaction type")
 public class ReactionStatistics extends Statistics {
 
-    public ReactionStatistics(PathwayNodeData d) {
-        super("TOTAL", d.getReactionsCount(), d.getReactionsFound(), d.getReactionsRatio());
+    public ReactionStatistics(PathwayNodeData d, boolean importableOnly) {
+        super("TOTAL", d.getReactionsCount(importableOnly), d.getReactionsFound(importableOnly), d.getReactionsRatio(importableOnly));
     }
 
     public ReactionStatistics(MainResource mainResource, PathwayNodeData d) {

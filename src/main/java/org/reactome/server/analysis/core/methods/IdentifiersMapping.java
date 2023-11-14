@@ -10,6 +10,7 @@ import org.reactome.server.analysis.core.model.identifier.MainIdentifier;
 import org.reactome.server.analysis.core.model.resource.Resource;
 import org.reactome.server.analysis.core.result.model.MappedEntity;
 import org.reactome.server.analysis.core.result.model.MappedIdentifier;
+import org.reactome.server.analysis.core.result.utils.ExternalAnalysisResultCheck;
 import org.reactome.server.analysis.core.util.MapSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,9 +40,9 @@ public class IdentifiersMapping {
         this.analysisData = analysisData;
     }
 
-    public List<MappedEntity> run(Set<String> identifiers, SpeciesNode speciesNode, boolean includeInteractors) {
+    public List<MappedEntity> run(Set<String> identifiers, SpeciesNode speciesNode, boolean includeInteractors, boolean importableOnly) {
         this.increaseCounter();
-        MapSet<String, MappedIdentifier> mapping = getMapping(identifiers, speciesNode, includeInteractors);
+        MapSet<String, MappedIdentifier> mapping = getMapping(identifiers, speciesNode, includeInteractors, importableOnly);
         this.decreaseCounter();
         List<MappedEntity> rtn = new ArrayList<>();
         for (String identifier : mapping.keySet()) {
@@ -54,7 +55,7 @@ public class IdentifiersMapping {
         return MAPPING_COUNT;
     }
 
-    private MapSet<String, MappedIdentifier> getMapping(Set<String> identifiers, SpeciesNode speciesNode, boolean includeInteractors) {
+    private MapSet<String, MappedIdentifier> getMapping(Set<String> identifiers, SpeciesNode speciesNode, boolean includeInteractors, boolean importableOnly) {
         MapSet<String, MappedIdentifier> rtn = new MapSet<>();
 
         final int originalSampleSize = identifiers.size();
@@ -67,9 +68,11 @@ public class IdentifiersMapping {
 
             MapSet<Resource, EntityNode> resourceEntities = entitiesMap.get(identifier);
             for (Resource resource : resourceEntities.keySet()) {
-                for (EntityNode node : resourceEntities.getElements(resource)) {
-                    if (speciesNode != null) node = node.getProjection(speciesNode);
-                    if (node != null) rtn.add(identifier, new MappedIdentifier(node.getIdentifier()));
+                if (!importableOnly ||  ExternalAnalysisResultCheck.isValidResource(resource.getName())) {
+                    for (EntityNode node : resourceEntities.getElements(resource)) {
+                        if (speciesNode != null) node = node.getProjection(speciesNode);
+                        if (node != null) rtn.add(identifier, new MappedIdentifier(node.getIdentifier()));
+                    }
                 }
             }
 

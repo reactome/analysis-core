@@ -372,7 +372,7 @@ public class ExternalAnalysisResultCheck {
 
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    private boolean isValidResource(String resource) {
+    public static boolean isValidResource(String resource) {
         if (resource.equals("TOTAL")) return true;
         return ResourceFactory.getMainResource(resource) != null;
     }

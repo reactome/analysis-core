@@ -1,0 +1,36 @@
+ARG REPO_DIR=/opt/analysis-core
+
+
+# ===== stage 1 =====
+FROM maven:3.9.6-eclipse-temurin-11-focal AS setup-env
+
+ARG REPO_DIR
+
+WORKDIR ${REPO_DIR}
+
+COPY . .
+
+SHELL ["/bin/bash", "-c"]
+
+# run lint if container started
+ENTRYPOINT []
+
+CMD mvn -B -q checkstyle:check | grep -i --color=never '\.java\|failed to execute goal' > lint.log
+
+
+# ===== stage 2 =====
+FROM setup-env AS build-jar
+
+RUN mvn clean package
+
+
+# ===== stage 3 =====
+FROM eclipse-temurin:11-jre-focal
+
+ARG REPO_DIR
+
+ARG JAR_FILE=target/analysis-core-exec.jar
+
+WORKDIR ${REPO_DIR}
+
+COPY --from=build-jar ${REPO_DIR}/${JAR_FILE} ./target/

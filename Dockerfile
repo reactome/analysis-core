@@ -15,7 +15,10 @@ SHELL ["/bin/bash", "-c"]
 # run lint if container started
 ENTRYPOINT []
 
-CMD mvn -B -q checkstyle:check | grep -i --color=never '\.java\|failed to execute goal' > lint.log
+CMD mvn -B -q checkstyle:check | \
+    grep -i --color=never '\.java\|failed to execute goal' > lint.log && \
+    exit 1 || \
+    exit 0
 
 
 # ===== stage 2 =====

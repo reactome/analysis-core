@@ -23,19 +23,20 @@ jobs:
     lint:
         if: ${{ github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch' }}
         runs-on: ubuntu-latest
+        env:
+            REPO_DIR : /opt/analysis-core
         steps:
             - uses: actions/checkout@v4
 
-            - env:
-                REPO_DIR : /opt/analysis-core
+            - name: Run lint
               run: |
                 docker build --build-arg REPO_DIR="$REPO_DIR" --target setup-env -t lint-image .
                 docker run --name lint-container lint-image
-                docker cp lint-container:"$REPO_DIR"/lint.log .
-                echo "MSG_COUNT=$(wc -l lint.log | awk '{print $1}')" >> "$GITHUB_ENV"
             
-            - if: ${{ env.MSG_COUNT != 0 }}
+            - name: Display lint errors
+              if: failure()
               run: |
+                docker cp lint-container:"$REPO_DIR"/lint.log .
                 while IFS= read -r LINT_MSG; do echo "::warning::${LINT_MSG}"; done < lint.log
                 exit 1
 

@@ -85,7 +85,8 @@ public class ExternalAnalysisResultCheck {
         }
     }
 
-    private void checkPathways(List<ExternalPathwayNodeSummary> pathways, ExternalExpressionSummary expressionSummary, final List<String> messages) {
+    private void checkPathways(List<ExternalPathwayNodeSummary> pathways,
+                               ExternalExpressionSummary expressionSummary, final List<String> messages) {
         if (pathways == null) return;
 
         for (int i = 1; i <= pathways.size(); i++) {
@@ -107,7 +108,8 @@ public class ExternalAnalysisResultCheck {
         }
     }
 
-    private void checkPathwayNodeData(ExternalPathwayNodeData data, ExternalExpressionSummary expressionSummary, final int i, final List<String> messages) {
+    private void checkPathwayNodeData(ExternalPathwayNodeData data, ExternalExpressionSummary expressionSummary,
+                                      final int i, final List<String> messages) {
         //Statistics check
         if (data.getStatistics() == null || data.getStatistics().isEmpty()) {
             messages.add(String.format("'statistics' not found for pathway %d", i));
@@ -148,7 +150,8 @@ public class ExternalAnalysisResultCheck {
                     } else {
                         int aux = (exp == null) ? 0 : exp.size();
                         if (aux != expValues) {
-                            messages.add(String.format("'exp' field contains %d values but it must contain %d values in the entity %d for pathway %d", aux, expValues, j, i));
+                            messages.add(String.format("'exp' field contains %d values but it must contain %d" + 
+                                                       " values in the entity %d for pathway %d", aux, expValues, j, i));
                         } else {
                             for (int k = 1; j <= exp.size(); j++) {
                                 final Double value = exp.get(k - 1);
@@ -156,7 +159,8 @@ public class ExternalAnalysisResultCheck {
                                     messages.add(String.format("The value in position %d in 'exp' field is null in entity %d for pathway %d",
                                             k, j, i));
                                 } else if (!expressionSummary.isValid(value)) {
-                                    messages.add(String.format("The value in position %d in 'exp' field is not between the specified boundaries in of entity %d for pathway %d",
+                                    messages.add(String.format("The value in position %d in 'exp' field is not between the specified" +
+                                                               " boundaries in of entity %d for pathway %d",
                                             k, j, i));
                                 }
                             }
@@ -197,7 +201,8 @@ public class ExternalAnalysisResultCheck {
                     } else {
                         int aux = (exp == null) ? 0 : exp.size();
                         if (aux != expValues) {
-                            messages.add(String.format("'exp' field contains %d values but it must contain %d values in the interactor %d for pathway %d", aux, expValues, j, i));
+                            messages.add(String.format("'exp' field contains %d values but it must contain %d" +
+                                                       " values in the interactor %d for pathway %d", aux, expValues, j, i));
                         } else {
                             for (int k = 1; j <= exp.size(); j++) {
                                 final Double value = exp.get(k - 1);
@@ -205,7 +210,8 @@ public class ExternalAnalysisResultCheck {
                                     messages.add(String.format("The value in position %d in 'exp' field is null in interactor %d for pathway %d",
                                             k, j, i));
                                 } else if (!expressionSummary.isValid(value)) {
-                                    messages.add(String.format("The value in position %d in 'exp' field is not between the specified boundaries in of interactor %d for pathway %d",
+                                    messages.add(String.format("The value in position %d in 'exp' field is not between the specified" +
+                                                               " boundaries in of interactor %d for pathway %d",
                                             k, j, i));
                                 }
                             }
@@ -221,15 +227,18 @@ public class ExternalAnalysisResultCheck {
                                 messages.add(String.format("Identifier 'null' for the mapping %d of interactor %d for pathway %d", k, j, i));
                             }
                             if (in.getInteractsWith() == null || in.getInteractsWith().isEmpty()) {
-                                messages.add(String.format("No interacts with provided for mapping %d in the interactor %d for pathway %d", k, j, i));
+                                messages.add(String.format("No interacts with provided for mapping %d" +
+                                                           " in the interactor %d for pathway %d", k, j, i));
                             } else {
                                 for (int l = 1; l <= in.getInteractsWith().size(); l++) {
                                     ExternalMainIdentifier mi = in.getInteractsWith().get(l - 1);
                                     if (mi.getId() == null || mi.getId().isEmpty()) {
-                                        messages.add(String.format("Identifier 'null' for the interactsWith %d of the maps to %d of entity %d for pathway %d", l, k, j, i));
+                                        messages.add(String.format("Identifier 'null' for the interactsWith %d of the maps to %d " +
+                                                                   "of entity %d for pathway %d", l, k, j, i));
                                     }
                                     if (!isValidResource(mi.getResource())) {
-                                        messages.add(String.format("'%s' for the interactsWith %d of the maps to %d of interactor %d for pathway %d is not a valid MainResource", mi.getResource(), l, k, j, i));
+                                        messages.add(String.format("'%s' for the interactsWith %d of the maps to %d of interactor %d " +
+                                                                   "for pathway %d is not a valid MainResource", mi.getResource(), l, k, j, i));
                                     }
                                 }
                             }
@@ -312,7 +321,8 @@ public class ExternalAnalysisResultCheck {
                         messages.add(String.format("The value in position %d in 'exp' field is null in the statics (resource:%s) for pathway %d",
                                 j, statistic.getResource(), i));
                     } else if (!expressionSummary.isValid(value)) {
-                        messages.add(String.format("The value in position %d in 'exp' field is not between the specified boundaries in the statics (resource:%s) for pathway %d",
+                        messages.add(String.format("The value in position %d in 'exp' field is not between the specified " +
+                                                   "boundaries in the statics (resource:%s) for pathway %d",
                                 j, statistic.getResource(), i));
                     }
                 }
@@ -362,7 +372,8 @@ public class ExternalAnalysisResultCheck {
                         if (value == null) {
                             messages.add(String.format("The value in position %d in 'exp' field is null in not found entity %d", j, i));
                         } else if (!expressionSummary.isValid(value)) {
-                            messages.add(String.format("The value in position %d in 'exp' field is not between the specified boundaries in the not found entity %d", j, i));
+                            messages.add(String.format("The value in position %d in 'exp' field is not between " +
+                                                       "the specified boundaries in the not found entity %d", j, i));
                         }
                     }
                 }

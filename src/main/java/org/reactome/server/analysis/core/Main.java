@@ -32,14 +32,15 @@ public class Main {
 
         // Program Arguments -h, -p, -u, -k
         SimpleJSAP jsap = new SimpleJSAP(Main.class.getName(), "Connect to Reactome Graph Database",
-                new Parameter[]{
-                        new FlaggedOption("host", JSAP.STRING_PARSER, "bolt://localhost:7687", JSAP.NOT_REQUIRED, 'h', "host", "The neo4j host")
-                        , new FlaggedOption("user", JSAP.STRING_PARSER, "neo4j", JSAP.NOT_REQUIRED, 'u', "user", "The neo4j user")
-                        , new FlaggedOption("password", JSAP.STRING_PARSER, "neo4jj", JSAP.REQUIRED, 'k', "password", "The neo4j password")
-                        , new FlaggedOption("output", JSAP.STRING_PARSER, JSAP.NO_DEFAULT, JSAP.REQUIRED, 'o', "output", "The file where the results are written to")
-                        , new QualifiedSwitch("test", JSAP.BOOLEAN_PARSER, null, JSAP.NOT_REQUIRED, 't', "test", "Test main species")
-                        , new QualifiedSwitch("verbose", JSAP.BOOLEAN_PARSER, null, JSAP.NOT_REQUIRED, 'v', "verbose",  "Requests verbose output")
-                }
+            new Parameter[]{
+                new FlaggedOption("host", JSAP.STRING_PARSER, "bolt://localhost:7687", JSAP.NOT_REQUIRED, 'h', "host", "The neo4j host")
+                , new FlaggedOption("user", JSAP.STRING_PARSER, "neo4j", JSAP.NOT_REQUIRED, 'u', "user", "The neo4j user")
+                , new FlaggedOption("password", JSAP.STRING_PARSER, "neo4jj", JSAP.REQUIRED, 'k', "password", "The neo4j password")
+                , new FlaggedOption("output", JSAP.STRING_PARSER, JSAP.NO_DEFAULT,
+                                    JSAP.REQUIRED, 'o', "output", "The file where the results are written to")
+                , new QualifiedSwitch("test", JSAP.BOOLEAN_PARSER, null, JSAP.NOT_REQUIRED, 't', "test", "Test main species")
+                , new QualifiedSwitch("verbose", JSAP.BOOLEAN_PARSER, null, JSAP.NOT_REQUIRED, 'v', "verbose",  "Requests verbose output")
+            }
         );
 
         JSAPResult config = jsap.parse(args);

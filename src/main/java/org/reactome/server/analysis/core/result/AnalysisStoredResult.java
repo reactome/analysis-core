@@ -307,7 +307,8 @@ public class AnalysisStoredResult {
         return filterPathways(null, resource, pValue, includeDisease, min, max);
     }
 
-    public AnalysisStoredResult filterPathways(List<Species> species, String resource, Double pValue, boolean includeDisease, Integer min, Integer max) {
+    public AnalysisStoredResult filterPathways(List<Species> species, String resource, Double pValue,
+		                               boolean includeDisease, Integer min, Integer max) {
         final boolean includeInteractors = summary.isInteractors();
         MainResource mr = ResourceFactory.getMainResource(resource);
         List<PathwayNodeSummary> pathways = new LinkedList<>();

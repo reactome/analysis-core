@@ -50,7 +50,10 @@ public class FoundInteractors {
 
         for (Resource resource : summaries.keySet()) {
             for (IdentifierSummary identifier : summaries.getElements(resource)) {
-                identifiers.add(new FoundInteractor(identifier, mapsTo.getElements(identifier), new IdentifierMap(resource.getName(), interactsWith.getElements(identifier))));
+                identifiers.add(new FoundInteractor(identifier,
+                                mapsTo.getElements(identifier),
+                                new IdentifierMap(resource.getName(),
+                                interactsWith.getElements(identifier))));
             }
         }
 

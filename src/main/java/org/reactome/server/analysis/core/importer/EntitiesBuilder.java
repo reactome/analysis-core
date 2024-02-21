@@ -52,22 +52,25 @@ public class EntitiesBuilder {
             if (Main.VERBOSE) System.out.print(msgPrefix + speciesPrefix + " >> retrieving xrefs...");
 
             //language=Cypher
-            query = "MATCH (:Species{taxId:$taxId})<-[:species]-(:Pathway)-[:hasEvent]->(rle:ReactionLikeEvent), " +
-                    "      (rle)-[:input|output|catalystActivity|physicalEntity|entityFunctionalStatus|diseaseEntity|regulatedBy|regulator|hasComponent|hasMember|hasCandidate|repeatedUnit|proteinMarker|RNAMarker*]->(pe:PhysicalEntity) " +
-                    "WHERE (pe)-[:referenceEntity]->() " +
-                    "WITH DISTINCT pe " +
-                    "MATCH (pe)-[:referenceEntity]->(re:ReferenceEntity) " +
-                    "OPTIONAL MATCH (re)-[:referenceGene]->(re2:ReferenceEntity)-[:referenceDatabase]->(rd:ReferenceDatabase) " +
-                    "OPTIONAL MATCH (pe)-[:referenceEntity|crossReference*]->(dbi:DatabaseIdentifier) " +
-                    "WITH DISTINCT re, " +
-                    "COLLECT(DISTINCT rd.displayName + \":\" + re2.identifier) AS reIdentifiers, " +
-                    "COLLECT(DISTINCT CASE dbi WHEN NULL THEN NULL ELSE {databaseName: dbi.databaseName, identifier: dbi.identifier} END) AS dbis, COUNT(DISTINCT dbi) AS n " +
-                    "RETURN re.dbId AS referenceEntity, " +
-                    "       re.secondaryIdentifier AS  secondaryIdentifiers, " +
-                    "       re.geneName AS geneNames, " +
-                    "       reIdentifiers + re.otherIdentifier AS otherIdentifiers, " +
-                    "       [{databaseName: re.databaseName, " +
-                    "         identifier: CASE WHEN re.variantIdentifier IS NOT NULL THEN re.variantIdentifier ELSE re.identifier END " +
+            query = "" +
+              "MATCH (:Species{taxId:$taxId})<-[:species]-(:Pathway)-[:hasEvent]->(rle:ReactionLikeEvent), " +
+              "      (rle)-[:input|output|catalystActivity|physicalEntity|entityFunctionalStatus|" +
+              "diseaseEntity|regulatedBy|regulator|hasComponent|hasMember|hasCandidate|repeatedUnit|proteinMarker|RNAMarker*]->(pe:PhysicalEntity) " +
+              "WHERE (pe)-[:referenceEntity]->() " +
+              "WITH DISTINCT pe " +
+              "MATCH (pe)-[:referenceEntity]->(re:ReferenceEntity) " +
+              "OPTIONAL MATCH (re)-[:referenceGene]->(re2:ReferenceEntity)-[:referenceDatabase]->(rd:ReferenceDatabase) " +
+              "OPTIONAL MATCH (pe)-[:referenceEntity|crossReference*]->(dbi:DatabaseIdentifier) " +
+              "WITH DISTINCT re, " +
+              "COLLECT(DISTINCT rd.displayName + \":\" + re2.identifier) AS reIdentifiers, " +
+              "COLLECT(DISTINCT CASE dbi WHEN NULL THEN NULL ELSE {databaseName: dbi.databaseName, identifier: dbi.identifier} END) AS dbis, " +
+              "COUNT(DISTINCT dbi) AS n " +
+              "RETURN re.dbId AS referenceEntity, " +
+              "       re.secondaryIdentifier AS  secondaryIdentifiers, " +
+              "       re.geneName AS geneNames, " +
+              "       reIdentifiers + re.otherIdentifier AS otherIdentifiers, " +
+              "       [{databaseName: re.databaseName, " +
+              "         identifier: CASE WHEN re.variantIdentifier IS NOT NULL THEN re.variantIdentifier ELSE re.identifier END " +
                     "         }] + CASE WHEN n = 0 THEN [] ELSE dbis END AS xrefs";
 
             Map<Long, ReferenceEntityIdentifiers> xrefMap = new HashMap<>();
@@ -82,17 +85,21 @@ public class EntitiesBuilder {
             if (Main.VERBOSE) System.out.print(msgPrefix + speciesPrefix + " >> retrieving participants...");
 
             //language=Cypher
-            query = "MATCH (:Species{taxId:$taxId})<-[:species]-(p:Pathway)-[:hasEvent]->(rle:ReactionLikeEvent), " +
-                    "      (rle)-[:input|output|catalystActivity|physicalEntity|entityFunctionalStatus|diseaseEntity|regulatedBy|regulator|hasComponent|hasMember|hasCandidate|repeatedUnit|proteinMarker|RNAMarker*]->(pe:PhysicalEntity)-[:referenceEntity]->(re:ReferenceEntity) " +
-                    "WITH DISTINCT p, pe, re, COLLECT(DISTINCT {dbId: rle.dbId, stId: rle.stId}) AS rles " +
-                    "OPTIONAL MATCH (pe)-[:hasModifiedResidue]->(tm:TranslationalModification)-[:psiMod]->(mod:PsiMod) " +
-                    "WITH DISTINCT p, pe, re, rles, COLLECT(DISTINCT {coordinate: tm.coordinate, mod: mod.identifier}) AS tmods, COUNT(DISTINCT mod) AS n " +
-                    "RETURN p.dbId AS pathway, " +
-                    "       pe.dbId AS physicalEntity, " +
-                    "       pe.speciesName AS speciesName, " +
-                    "       re.dbId as referenceEntity, " +
-                    "       rles AS reactions, " +
-                    "       CASE WHEN n = 0 THEN [] ELSE tmods END AS mods";
+            query = "" +
+              "MATCH (:Species{taxId:$taxId})<-[:species]-(p:Pathway)-[:hasEvent]->(rle:ReactionLikeEvent), " +
+              "      (rle)-[:input|output|catalystActivity|physicalEntity|entityFunctionalStatus|diseaseEntity|" +
+              "regulatedBy|regulator|hasComponent|hasMember|hasCandidate|repeatedUnit|proteinMarker|RNAMarker*]" +
+              "->(pe:PhysicalEntity)-[:referenceEntity]->(re:ReferenceEntity) " +
+              "WITH DISTINCT p, pe, re, COLLECT(DISTINCT {dbId: rle.dbId, stId: rle.stId}) AS rles " +
+              "OPTIONAL MATCH (pe)-[:hasModifiedResidue]->(tm:TranslationalModification)-[:psiMod]->(mod:PsiMod) " +
+              "WITH DISTINCT p, pe, re, rles, " +
+              "       COLLECT(DISTINCT {coordinate: tm.coordinate, mod: mod.identifier}) AS tmods, COUNT(DISTINCT mod) AS n " +
+              "RETURN p.dbId AS pathway, " +
+              "       pe.dbId AS physicalEntity, " +
+              "       pe.speciesName AS speciesName, " +
+              "       re.dbId as referenceEntity, " +
+              "       rles AS reactions, " +
+              "       CASE WHEN n = 0 THEN [] ELSE tmods END AS mods";
 
             Collection<EntitiesQueryResult> result;
             try {
@@ -157,8 +164,12 @@ public class EntitiesBuilder {
         if (Main.VERBOSE) System.out.print(msgPrefix + " retrieving relationships...");
 
         String query = "" +
-                "MATCH (re1:ReferenceEntity)<-[:referenceEntity]-(:PhysicalEntity)-[:inferredTo]->(:PhysicalEntity)-[:referenceEntity]->(re2:ReferenceEntity) " +
-                "RETURN DISTINCT re1.databaseName AS originDatabaseName, re1.identifier AS originIdentifier, re2.databaseName AS inferredToDatabaseName, re2.identifier AS inferredToIdentifier";
+          "MATCH (re1:ReferenceEntity)<-[:referenceEntity]-(:PhysicalEntity)" +
+                "-[:inferredTo]->(:PhysicalEntity)-[:referenceEntity]->(re2:ReferenceEntity) " +
+          "RETURN DISTINCT re1.databaseName AS originDatabaseName, " +
+          "re1.identifier AS originIdentifier, " +
+          "re2.databaseName AS inferredToDatabaseName, "+
+          "re2.identifier AS inferredToIdentifier";
         Map<String, Object> paramsMap = new HashMap<>();
 
         Collection<OrthologyResult> orthologyResults;

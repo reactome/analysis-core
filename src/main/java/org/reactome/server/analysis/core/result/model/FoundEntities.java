@@ -20,7 +20,8 @@ public class FoundEntities {
     private Integer totalEntitiesCount;
     private Map<String, Integer> resourceToMappedEntitiesCount;
 
-    private FoundEntities(List<FoundEntity> identifiers, Set<String> resources, List<String> expNames, Integer found, Integer totalEntitiesCount, Map<String, Integer> resourceToMappedEntitiesCount) {
+    private FoundEntities(List<FoundEntity> identifiers, Set<String> resources, List<String> expNames,
+                          Integer found, Integer totalEntitiesCount, Map<String, Integer> resourceToMappedEntitiesCount) {
         this.identifiers = identifiers;
         this.resources = resources;
         this.expNames = expNames;
@@ -91,8 +92,16 @@ public class FoundEntities {
     public Map<String, Integer> getResourceToMappedEntitiesCount() {
         if (resourceToMappedEntitiesCount == null) {
             Map<String, Set<String>> resourceToIds = new HashMap<>();
-            identifiers.forEach(foundEntity -> foundEntity.getMapsTo().forEach(identifierMap -> resourceToIds.computeIfAbsent(identifierMap.getResource(), s -> new HashSet<>()).addAll(identifierMap.getIds())));
-            resourceToMappedEntitiesCount = resourceToIds.keySet().stream().collect(Collectors.toMap(resource -> resource, resource -> resourceToIds.get(resource).size()));
+            identifiers.forEach(foundEntity ->
+                foundEntity.getMapsTo().forEach(identifierMap ->
+                    resourceToIds.computeIfAbsent(identifierMap.getResource(), s -> new HashSet<>())
+                        .addAll(identifierMap.getIds())));
+            resourceToMappedEntitiesCount = resourceToIds.keySet().stream()
+                    .collect(Collectors.toMap(
+                            resource -> resource,
+                            resource -> resourceToIds.get(resource).size()
+                    ));
+
         }
         return resourceToMappedEntitiesCount;
     }
@@ -116,7 +125,12 @@ public class FoundEntities {
         } else {
             identifiers = filterByResource(resource.toUpperCase());
         }
-        return new FoundEntities(identifiers, resources, expNames, identifiers.size(), this.getTotalEntitiesCount(), this.getResourceToMappedEntitiesCount());
+        return new FoundEntities(identifiers,
+                   resources,
+                   expNames,
+                   identifiers.size(),
+                   this.getTotalEntitiesCount(),
+                   this.getResourceToMappedEntitiesCount());
     }
 
     public FoundEntities filter(String resource, Integer pageSize, Integer page) {
@@ -140,7 +154,12 @@ public class FoundEntities {
             int to = from + pageSize;
             to = to > identifiers.size() ? identifiers.size() : to;
             Set<String> resources = resource.equals("TOTAL") ? this.resources : new HashSet<>(Arrays.asList(resource));
-            return new FoundEntities(identifiers.subList(from, to), resources, this.expNames, identifiers.size(), this.getTotalEntitiesCount(), this.getResourceToMappedEntitiesCount());
+            return new FoundEntities(identifiers.subList(from, to),
+                                     resources,
+                                     this.expNames,
+                                     identifiers.size(),
+                                     this.getTotalEntitiesCount(),
+                                     this.getResourceToMappedEntitiesCount());
         } else {
             return null;
         }

@@ -36,7 +36,7 @@ public class HierarchiesDataProducer {
         if (producer == null) {
             producer = new HierarchiesDataProducer(data);
         } else {
-            logger.warn("Already initialized. Please ensure you do not use two data containers or you do not initialise this object with the same twice.");
+	    logger.warn("Already initialized. Ensure you do not use two data containers or you do not initialise this object with the same twice.");
         }
     }
 

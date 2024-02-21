@@ -49,17 +49,20 @@ public class InteractorsBuilder {
             paramsMap.put("taxId", species.getTaxID());
 
             String speciesPrefix = "'" + species.getName() + "' (" + (++s) + "/" + st + ")";
-            if (Main.VERBOSE) System.out.print("\rCreating the interactors container for " + speciesPrefix + " >> retrieving targets for interactors...");
+            if (Main.VERBOSE) System.out.print("\rCreating interactors container for " + speciesPrefix + " >> retrieving targets...");
 
-            query = "MATCH (:Species{taxId:$taxId})<-[:species]-(p:Pathway)-[:hasEvent]->(rle:ReactionLikeEvent), " +
-                    "      (rle)-[:input|output|catalystActivity|physicalEntity|entityFunctionalStatus|diseaseEntity|regulatedBy|regulator*]->(pe:PhysicalEntity)-[:referenceEntity]->(re:ReferenceEntity) " +
-                    "WHERE (p:TopLevelPathway) OR (:TopLevelPathway)-[:hasEvent*]->(p) " +
-                    //"     AND NOT (pe)-[:hasModifiedResidue]->(:TranslationalModification) " +
-                    "WITH DISTINCT p, re, COLLECT(DISTINCT {dbId: rle.dbId, stId: rle.stId}) AS rles " +
-                    "RETURN DISTINCT re.databaseName AS databaseName, " +
-                    "                CASE WHEN re.variantIdentifier IS NOT NULL THEN re.variantIdentifier ELSE re.identifier END AS identifier, " +
-                    "                p.dbId AS pathway, " +
-                    "                rles AS reactions";
+
+            query = "" +
+              "MATCH (:Species{taxId:$taxId})<-[:species]-(p:Pathway)-[:hasEvent]->(rle:ReactionLikeEvent), " +
+              "      (rle)-[:input|output|catalystActivity|physicalEntity|entityFunctionalStatus|diseaseEntity|" +
+              "regulatedBy|regulator*]->(pe:PhysicalEntity)-[:referenceEntity]->(re:ReferenceEntity) " +
+              "WHERE (p:TopLevelPathway) OR (:TopLevelPathway)-[:hasEvent*]->(p) " +
+              //"     AND NOT (pe)-[:hasModifiedResidue]->(:TranslationalModification) " +
+              "WITH DISTINCT p, re, COLLECT(DISTINCT {dbId: rle.dbId, stId: rle.stId}) AS rles " +
+              "RETURN DISTINCT re.databaseName AS databaseName, " +
+              "                CASE WHEN re.variantIdentifier IS NOT NULL THEN re.variantIdentifier ELSE re.identifier END AS identifier, " +
+              "                p.dbId AS pathway, " +
+              "                rles AS reactions";
 
             Collection<InteractorsTargetQueryResult> its;
             try {
@@ -148,7 +151,7 @@ public class InteractorsBuilder {
         } else {
             //Using IdentifiersMap causes this "oddity" here, but is a minor inconvenient
             if (interactors.size() > 1)
-                logger.error("Interactors duplication. There should not be more than one interactor for " + identifier + " [" + resource.getName() + "]");
+                   logger.error("Duplicate interactors found for " + identifier + " [" + resource.getName() + "]");
             return interactors.iterator().next();
         }
     }

@@ -220,7 +220,9 @@ public class PathwayNodeData {
         return rtn;
     }
 
-    private List<List<Double>> groupEntitiesExpressionValues(Collection<AnalysisIdentifier> identifiers, Collection<InteractorIdentifier> interactors) {
+    private List<List<Double>> groupEntitiesExpressionValues(
+		    Collection<AnalysisIdentifier> identifiers,
+		    Collection<InteractorIdentifier> interactors) {
         List<List<Double>> evss = new LinkedList<>();
         Collection<AnalysisIdentifier> aggregation = new HashSet<>();
         aggregation.addAll(identifiers);

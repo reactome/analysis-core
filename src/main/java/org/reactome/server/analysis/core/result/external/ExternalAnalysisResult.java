@@ -35,7 +35,10 @@ public class ExternalAnalysisResult {
             this.notFound.add(new ExternalIdentifier(ai));
         }
 
-        this.warnings = new ArrayList<>(result.getWarnings());
+        if (result.getWarnings() != null) {
+            this.warnings = new ArrayList<>(result.getWarnings());
+        }
+
     }
 
     public ExternalAnalysisSummary getSummary() {

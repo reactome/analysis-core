@@ -68,8 +68,8 @@ public class IdentifiersMapping {
 
             MapSet<Resource, EntityNode> resourceEntities = entitiesMap.get(identifier);
             for (Resource resource : resourceEntities.keySet()) {
-                if (!importableOnly ||  ExternalAnalysisResultCheck.isValidResource(resource.getName())) {
-                    for (EntityNode node : resourceEntities.getElements(resource)) {
+                for (EntityNode node : resourceEntities.getElements(resource)) {
+                    if (!importableOnly || ExternalAnalysisResultCheck.isValidResource(node.getIdentifier().getResource().getName())) {
                         if (speciesNode != null) node = node.getProjection(speciesNode);
                         if (node != null) rtn.add(identifier, new MappedIdentifier(node.getIdentifier()));
                     }

@@ -208,18 +208,26 @@ public class PathwayNodeData {
     }
 
     public List<ExternalIdentifier> getExternalEntities() {
+        return getExternalEntities(false);
+    }
+
+    public List<ExternalIdentifier> getExternalEntities(boolean importableOnly) {
+
         List<ExternalIdentifier> rtn = new ArrayList<>();
 
         for (Identifier identifier : entities.keySet()) {
             ExternalIdentifier ei = new ExternalIdentifier(identifier.getValue());
             for (MainIdentifier mainIdentifier : entities.getElements(identifier)) {
-                ExternalMainIdentifier emi = new ExternalMainIdentifier(mainIdentifier);
-                ei.addMapsTo(emi);
+                if (!importableOnly || !mainIdentifier.getResource().isAuxMainResource()) {
+                    ExternalMainIdentifier emi = new ExternalMainIdentifier(mainIdentifier);
+                    ei.addMapsTo(emi);
+                }
             }
-            rtn.add(ei);
+            if (ei.getMapsTo() != null) rtn.add(ei);
         }
         return rtn;
     }
+
 
     public Set<AnalysisIdentifier> getFoundEntities(boolean importableOnly) {
         Stream<MainIdentifier> identifiers = importableOnly ?
@@ -534,22 +542,24 @@ public class PathwayNodeData {
         return mapsTo.size();
     }
 
-    public List<ExternalInteractor> getExternalInteractors() {
+    public List<ExternalInteractor> getExternalInteractors(boolean importableOnly) {
         Map<String, ExternalInteractor> identifierMap = new HashMap<>();
         Map<String, ExternalInteraction> interactionMap = new HashMap<>();
         for (MainIdentifier mi : interactors.keySet()) {
-            ExternalMainIdentifier emi = new ExternalMainIdentifier(mi);
-            for (InteractorIdentifier interactor : interactors.getElements(mi)) {
-                String id = interactor.getId();
-                ExternalInteractor ei = identifierMap.getOrDefault(id, new ExternalInteractor(interactor));
-                identifierMap.put(id, ei);
+            if (!importableOnly || !mi.getResource().isAuxMainResource()) {
+                ExternalMainIdentifier emi = new ExternalMainIdentifier(mi);
+                for (InteractorIdentifier interactor : interactors.getElements(mi)) {
+                    String id = interactor.getId();
+                    ExternalInteractor ei = identifierMap.getOrDefault(id, new ExternalInteractor(interactor));
+                    identifierMap.put(id, ei);
 
-                String mapsTo = interactor.getMapsTo();
-                ExternalInteraction ein = interactionMap.getOrDefault(mapsTo, new ExternalInteraction(mapsTo));
-                interactionMap.put(mapsTo, ein);
+                    String mapsTo = interactor.getMapsTo();
+                    ExternalInteraction ein = interactionMap.getOrDefault(mapsTo, new ExternalInteraction(mapsTo));
+                    interactionMap.put(mapsTo, ein);
 
-                ein.addExternalMainIdentifier(emi);
-                ei.addMapsTo(ein);
+                    ein.addExternalMainIdentifier(emi);
+                    ei.addMapsTo(ein);
+                }
             }
         }
         return new ArrayList<>(identifierMap.values());
@@ -579,14 +589,17 @@ public class PathwayNodeData {
         return rtn;
     }
 
-    public List<ExternalAnalysisReaction> getExternalReactions() {
+    public List<ExternalAnalysisReaction> getExternalReactions(boolean importableOnly) {
         Map<Long, ExternalAnalysisReaction> map = new HashMap<>();
         for (MainResource mr : reactions.keySet()) {
-            for (AnalysisReaction rxn : reactions.getElements(mr)) {
-                ExternalAnalysisReaction erxn = map.getOrDefault(rxn.getDbId(), new ExternalAnalysisReaction(rxn));
-                map.put(rxn.getDbId(), erxn);
-                erxn.add(mr.getName());
+            if (!importableOnly || !mr.isAuxMainResource()) {
+                for (AnalysisReaction rxn : reactions.getElements(mr)) {
+                    ExternalAnalysisReaction erxn = map.getOrDefault(rxn.getDbId(), new ExternalAnalysisReaction(rxn));
+                    map.put(rxn.getDbId(), erxn);
+                    erxn.add(mr.getName());
+                }
             }
+
         }
         return new ArrayList<>(map.values());
     }

@@ -39,7 +39,7 @@ public class Main {
                         , new FlaggedOption("password", JSAP.STRING_PARSER, "neo4jj", JSAP.REQUIRED, 'k', "password", "The neo4j password")
                         , new FlaggedOption("output", JSAP.STRING_PARSER, JSAP.NO_DEFAULT, JSAP.REQUIRED, 'o', "output", "The file where the results are written to")
                         , new QualifiedSwitch("test", JSAP.BOOLEAN_PARSER, null, JSAP.NOT_REQUIRED, 't', "test", "Test main species")
-                        , new QualifiedSwitch("verbose", JSAP.BOOLEAN_PARSER, null, JSAP.NOT_REQUIRED, 'v', "verbose",  "Requests verbose output")
+                        , new QualifiedSwitch("verbose", JSAP.BOOLEAN_PARSER, null, JSAP.NOT_REQUIRED, 'v', "verbose", "Requests verbose output")
                 }
         );
 
@@ -84,11 +84,11 @@ public class Main {
         AnalysisDataUtils.kryoSerialisation(container, fileName);
         Long end = System.currentTimeMillis();
 
-        if(VERBOSE){
+        if (VERBOSE) {
             System.out.println("Process summary:");
-            System.out.println("\tIntermediate data structure built in " + FormatUtils.getTimeFormatted(built-start));
-            System.out.println("\tIntermediate data structure stored in " + FormatUtils.getTimeFormatted(end-built));
-            System.out.println("\tTotal time: " + FormatUtils.getTimeFormatted(end-start));
+            System.out.println("\tIntermediate data structure built in " + FormatUtils.getTimeFormatted(built - start));
+            System.out.println("\tIntermediate data structure stored in " + FormatUtils.getTimeFormatted(end - built));
+            System.out.println("\tTotal time: " + FormatUtils.getTimeFormatted(end - start));
         }
     }
 

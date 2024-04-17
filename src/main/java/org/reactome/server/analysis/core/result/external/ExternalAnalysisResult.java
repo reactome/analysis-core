@@ -52,7 +52,10 @@ public class ExternalAnalysisResult {
             this.notFound.addAll(filteredIdentifiers);
         }
 
-        this.warnings = new ArrayList<>(result.getWarnings());
+        if (result.getWarnings() != null) {
+            this.warnings = new ArrayList<>(result.getWarnings());
+        }
+
     }
 
     public ExternalAnalysisSummary getSummary() {

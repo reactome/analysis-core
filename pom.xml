@@ -5,12 +5,12 @@
     <parent>
         <groupId>org.reactome.maven</groupId>
         <artifactId>reactome-parent</artifactId>
-        <version>1.0.5-SNAPSHOT</version>
+        <version>1.0.4</version>
     </parent>
 
     <groupId>org.reactome.server.tools</groupId>
     <artifactId>analysis-core</artifactId>
-    <version>3.4.8-SNAPSHOT</version>
+    <version>3.4.8</version>
     <packaging>jar</packaging>
 
     <description>The Reactome analysis-core extracts data from the graph-database to create the intermediate data format

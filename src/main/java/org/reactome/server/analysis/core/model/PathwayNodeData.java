@@ -11,6 +11,9 @@ import org.reactome.server.analysis.core.util.MapSet;
 import org.reactome.server.analysis.core.util.MathUtilities;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * For each pathway, this class contains the result of the analysis. There are three main parts in
@@ -24,9 +27,10 @@ public class PathwayNodeData {
     //Please note that counter is used for each main identifier and for the combinedResult
     class Counter {
 
-        Counter() { }
+        Counter() {
+        }
 
-        Counter(ExternalStatistics counter){
+        Counter(ExternalStatistics counter) {
             this.totalEntities = counter.getEntitiesCount();
             this.foundEntities = counter.getEntitiesFound();
             this.entitiesRatio = counter.getEntitiesRatio();
@@ -94,6 +98,7 @@ public class PathwayNodeData {
     //Analysis result containers
     private Map<MainResource, Counter> entitiesResult = new HashMap<>();
     private Counter combinedResult = new Counter();  //All main identifiers combined in one result
+    private Counter importableResult = new Counter();  //All importable identifiers combined in one result
 
     public PathwayNodeData() {
     }
@@ -103,6 +108,7 @@ public class PathwayNodeData {
         for (ExternalStatistics statistics : data.getStatistics()) {
             if ("TOTAL".equals(statistics.getResource())) {
                 this.combinedResult = new Counter(statistics);
+                this.importableResult = new Counter(statistics);
             } else {
                 MainResource mr = ResourceFactory.getMainResource(statistics.getResource());
                 this.entitiesResult.put(mr, new Counter(statistics));
@@ -157,11 +163,15 @@ public class PathwayNodeData {
     }
 
 
-    public Integer getEntitiesAndInteractorsCount(){
-        return combinedResult.totalFound;
+    public Integer getEntitiesAndInteractorsCount() {
+        return this.getEntitiesAndInteractorsCount(false);
     }
 
-    public Integer getEntitiesAndInteractorsCount(MainResource resource){
+    public Integer getEntitiesAndInteractorsCount(boolean importableOnly) {
+        return !importableOnly ? combinedResult.totalFound : importableResult.totalFound;
+    }
+
+    public Integer getEntitiesAndInteractorsCount(MainResource resource) {
         Counter counter = this.entitiesResult.get(resource);
         if (counter != null) {
             return counter.totalFound;
@@ -170,11 +180,14 @@ public class PathwayNodeData {
     }
 
     public Integer getEntitiesAndInteractorsFound() {
-        int total = 0;
-        for (MainResource resource : foundTotal.keySet()) {
-            total += foundTotal.getElements(resource).size();
-        }
-        return total;
+        return foundTotal.stream().mapToInt(entry -> entry.getValue().size()).sum();
+    }
+
+    public Integer getEntitiesAndInteractorsFound(boolean importableOnly) {
+        var stream = !importableOnly ?
+                foundTotal.stream() :
+                foundTotal.stream().filter(entry -> !entry.getKey().isAuxMainResource());
+        return stream.mapToInt(entry -> entry.getValue().size()).sum();
     }
 
     public Integer getEntitiesAndInteractorsFound(MainResource resource) {
@@ -194,18 +207,33 @@ public class PathwayNodeData {
         return rtn;
     }
 
-    public List<ExternalIdentifier> getExternalEntities(){
+    public List<ExternalIdentifier> getExternalEntities() {
+        return getExternalEntities(false);
+    }
+
+    public List<ExternalIdentifier> getExternalEntities(boolean importableOnly) {
+
         List<ExternalIdentifier> rtn = new ArrayList<>();
 
         for (Identifier identifier : entities.keySet()) {
-            ExternalIdentifier ei =  new ExternalIdentifier(identifier.getValue());
+            ExternalIdentifier ei = new ExternalIdentifier(identifier.getValue());
             for (MainIdentifier mainIdentifier : entities.getElements(identifier)) {
-                ExternalMainIdentifier emi = new ExternalMainIdentifier(mainIdentifier);
-                ei.addMapsTo(emi);
+                if (!importableOnly || !mainIdentifier.getResource().isAuxMainResource()) {
+                    ExternalMainIdentifier emi = new ExternalMainIdentifier(mainIdentifier);
+                    ei.addMapsTo(emi);
+                }
             }
-            rtn.add(ei);
+            if (ei.getMapsTo() != null) rtn.add(ei);
         }
         return rtn;
+    }
+
+
+    public Set<AnalysisIdentifier> getFoundEntities(boolean importableOnly) {
+        Stream<MainIdentifier> identifiers = importableOnly ?
+                entities.values().stream().filter(id -> !id.getResource().isAuxMainResource()) :
+                entities.values().stream();
+        return identifiers.map(Identifier::getValue).collect(Collectors.toSet());
     }
 
     public Set<AnalysisIdentifier> getFoundEntities(MainResource resource) {
@@ -275,6 +303,19 @@ public class PathwayNodeData {
         return rtn;
     }
 
+    private List<AnalysisIdentifier> getEntitiesDuplication(boolean importableOnly) {
+        return !importableOnly ?
+                entities.stream()
+                        .flatMap(entry -> entry.getValue().stream().map(MainIdentifier::getValue))
+                        .collect(Collectors.toCollection(LinkedList::new)) :
+
+                entities.stream()
+                        .flatMap(entry -> entry.getValue().stream())
+                        .filter(id -> !id.getResource().isAuxMainResource())
+                        .map(MainIdentifier::getValue)
+                        .collect(Collectors.toCollection(LinkedList::new));
+    }
+
     private List<AnalysisIdentifier> getEntitiesDuplication(MainResource resource) {
         List<AnalysisIdentifier> rtn = new LinkedList<>();
         for (Identifier identifier : entities.keySet()) {
@@ -295,6 +336,18 @@ public class PathwayNodeData {
         return rtn;
     }
 
+    private List<InteractorIdentifier> getInteractorsDuplication(boolean importableOnly) {
+        return !importableOnly ?
+                interactors.stream()
+                        .flatMap(entry -> entry.getValue().stream())
+                        .collect(Collectors.toCollection(LinkedList::new)) :
+
+                interactors.stream()
+                        .filter(entry -> !entry.getKey().getResource().isAuxMainResource())
+                        .flatMap(entry -> entry.getValue().stream())
+                        .collect(Collectors.toCollection(LinkedList::new));
+    }
+
     private List<InteractorIdentifier> getInteractorsDuplication(MainResource resource) {
         List<InteractorIdentifier> rtn = new LinkedList<>();
         for (MainIdentifier mainIdentifier : interactors.keySet()) {
@@ -310,14 +363,24 @@ public class PathwayNodeData {
         return calculateAverage(groupEntitiesExpressionValues(getEntitiesDuplication(), getInteractorsDuplication()));
     }
 
+    public List<Double> getExpressionValuesAvg(boolean importableOnly) {
+        if (!importableOnly) return this.getExpressionValuesAvg();
+        if (importableResult.exp != null && !importableResult.exp.isEmpty()) return importableResult.exp;
+        return calculateAverage(groupEntitiesExpressionValues(getEntitiesDuplication(true), getInteractorsDuplication(true)));
+    }
+
     public List<Double> getExpressionValuesAvg(MainResource resource) {
         final Counter counter = entitiesResult.get(resource);
-        if(counter!=null && counter.exp!=null && !counter.exp.isEmpty()) return counter.exp;
+        if (counter != null && counter.exp != null && !counter.exp.isEmpty()) return counter.exp;
         return calculateAverage(groupEntitiesExpressionValues(getEntitiesDuplication(resource), getInteractorsDuplication(resource)));
     }
 
     public Integer getEntitiesCount() {
         return this.combinedResult.totalEntities;
+    }
+
+    public Integer getEntitiesCount(boolean importableOnly) {
+        return !importableOnly ? this.combinedResult.totalEntities : this.importableResult.totalEntities;
     }
 
     public Integer getEntitiesCount(MainResource resource) {
@@ -332,12 +395,20 @@ public class PathwayNodeData {
         return getFoundEntities().size();
     }
 
+    public Integer getEntitiesFound(boolean importableOnly) {
+        return getFoundEntities(importableOnly).size();
+    }
+
     public Integer getEntitiesFound(MainResource resource) {
         return getFoundEntities(resource).size();
     }
 
     public Double getEntitiesPValue() {
         return this.combinedResult.entitiesPValue;
+    }
+
+    public Double getEntitiesPValue(boolean importableOnly) {
+        return !importableOnly ? this.combinedResult.entitiesPValue : this.importableResult.entitiesPValue;
     }
 
     public Double getEntitiesPValue(MainResource resource) {
@@ -352,6 +423,10 @@ public class PathwayNodeData {
         return this.combinedResult.entitiesFDR;
     }
 
+    public Double getEntitiesFDR(boolean importableOnly) {
+        return !importableOnly ? this.combinedResult.entitiesFDR : this.importableResult.entitiesFDR;
+    }
+
     public Double getEntitiesFDR(MainResource resource) {
         Counter counter = this.entitiesResult.get(resource);
         if (counter != null) {
@@ -364,6 +439,11 @@ public class PathwayNodeData {
         return this.combinedResult.entitiesRatio;
     }
 
+    public Double getEntitiesRatio(boolean importableOnly) {
+        return !importableOnly ? this.combinedResult.entitiesRatio : this.importableResult.entitiesRatio;
+    }
+
+
     public Double getEntitiesRatio(MainResource resource) {
         Counter counter = this.entitiesResult.get(resource);
         if (counter != null) {
@@ -374,6 +454,10 @@ public class PathwayNodeData {
 
     public Double getInteractorsRatio() {
         return this.combinedResult.interactorsRatio;
+    }
+
+    public Double getInteractorsRatio(boolean importableOnly) {
+        return !importableOnly ? this.combinedResult.interactorsRatio : this.importableResult.interactorsRatio;
     }
 
     public Double getInteractorsRatio(MainResource resource) {
@@ -396,11 +480,20 @@ public class PathwayNodeData {
 
     // INTERACTORS Result
 
-    public Set<InteractorIdentifier> getFoundInteractors(){
+    public Set<InteractorIdentifier> getFoundInteractors() {
         return interactors.values();
     }
 
-    public Set<InteractorIdentifier> getFoundInteractors(MainResource resource){
+    public Set<InteractorIdentifier> getFoundInteractors(boolean importableOnly) {
+        return !importableOnly ?
+                interactors.values() :
+                interactors.stream()
+                        .filter(entry -> !entry.getKey().getResource().isAuxMainResource())
+                        .flatMap(entry -> entry.getValue().stream())
+                        .collect(Collectors.toSet());
+    }
+
+    public Set<InteractorIdentifier> getFoundInteractors(MainResource resource) {
         Set<InteractorIdentifier> rtn = new HashSet<>();
         for (MainIdentifier mainIdentifier : interactors.keySet()) {
             if (mainIdentifier.getResource().equals(resource)) {
@@ -410,11 +503,15 @@ public class PathwayNodeData {
         return rtn;
     }
 
-    public Integer getInteractorsCount(){
+    public Integer getInteractorsCount() {
         return this.combinedResult.totalInteractors;
     }
 
-    public Integer getInteractorsCount(MainResource resource){
+    public Integer getInteractorsCount(boolean importableOnly) {
+        return !importableOnly ? this.combinedResult.totalInteractors : this.importableResult.totalInteractors;
+    }
+
+    public Integer getInteractorsCount(MainResource resource) {
         Counter counter = this.entitiesResult.get(resource);
         if (counter != null) {
             return counter.totalInteractors;
@@ -422,7 +519,7 @@ public class PathwayNodeData {
         return 0;
     }
 
-    public Integer getInteractorsFound(){
+    public Integer getInteractorsFound() {
         Set<String> mapsTo = new HashSet<>();
         for (InteractorIdentifier interactor : getFoundInteractors()) {
             mapsTo.add(interactor.getMapsTo());
@@ -430,7 +527,16 @@ public class PathwayNodeData {
         return mapsTo.size();
     }
 
-    public Integer getInteractorsFound(MainResource resource){
+    public Integer getInteractorsFound(boolean importableOnly) {
+        return Math.toIntExact(
+                getFoundInteractors(importableOnly).stream()
+                        .map(InteractorIdentifier::getMapsTo)
+                        .distinct()
+                        .count()
+        );
+    }
+
+    public Integer getInteractorsFound(MainResource resource) {
         Set<String> mapsTo = new HashSet<>();
         for (InteractorIdentifier interactor : getFoundInteractors(resource)) {
             mapsTo.add(interactor.getMapsTo());
@@ -438,22 +544,24 @@ public class PathwayNodeData {
         return mapsTo.size();
     }
 
-    public List<ExternalInteractor> getExternalInteractors() {
+    public List<ExternalInteractor> getExternalInteractors(boolean importableOnly) {
         Map<String, ExternalInteractor> identifierMap = new HashMap<>();
         Map<String, ExternalInteraction> interactionMap = new HashMap<>();
         for (MainIdentifier mi : interactors.keySet()) {
-            ExternalMainIdentifier emi = new ExternalMainIdentifier(mi);
-            for (InteractorIdentifier interactor : interactors.getElements(mi)) {
-                String id = interactor.getId();
-                ExternalInteractor ei = identifierMap.getOrDefault(id, new ExternalInteractor(interactor));
-                identifierMap.put(id, ei);
+            if (!importableOnly || !mi.getResource().isAuxMainResource()) {
+                ExternalMainIdentifier emi = new ExternalMainIdentifier(mi);
+                for (InteractorIdentifier interactor : interactors.getElements(mi)) {
+                    String id = interactor.getId();
+                    ExternalInteractor ei = identifierMap.getOrDefault(id, new ExternalInteractor(interactor));
+                    identifierMap.put(id, ei);
 
-                String mapsTo = interactor.getMapsTo();
-                ExternalInteraction ein = interactionMap.getOrDefault(mapsTo, new ExternalInteraction(mapsTo));
-                interactionMap.put(mapsTo, ein);
+                    String mapsTo = interactor.getMapsTo();
+                    ExternalInteraction ein = interactionMap.getOrDefault(mapsTo, new ExternalInteraction(mapsTo));
+                    interactionMap.put(mapsTo, ein);
 
-                ein.addExternalMainIdentifier(emi);
-                ei.addMapsTo(ein);
+                    ein.addExternalMainIdentifier(emi);
+                    ei.addMapsTo(ein);
+                }
             }
         }
         return new ArrayList<>(identifierMap.values());
@@ -466,22 +574,34 @@ public class PathwayNodeData {
         return reactions.values();
     }
 
+    public Set<AnalysisReaction> getReactions(boolean importableOnly) {
+        return !importableOnly ?
+                reactions.values() :
+                reactions.stream()
+                        .filter(entry -> !entry.getKey().isAuxMainResource())
+                        .flatMap(entry -> entry.getValue().stream())
+                        .collect(Collectors.toSet());
+    }
+
     public Set<AnalysisReaction> getReactions(MainResource resource) {
         Set<AnalysisReaction> rtn = reactions.getElements(resource);
-        if(rtn==null){
+        if (rtn == null) {
             rtn = new HashSet<>();
         }
         return rtn;
     }
 
-    public List<ExternalAnalysisReaction> getExternalReactions() {
+    public List<ExternalAnalysisReaction> getExternalReactions(boolean importableOnly) {
         Map<Long, ExternalAnalysisReaction> map = new HashMap<>();
         for (MainResource mr : reactions.keySet()) {
-            for (AnalysisReaction rxn : reactions.getElements(mr)) {
-                ExternalAnalysisReaction erxn = map.getOrDefault(rxn.getDbId(), new ExternalAnalysisReaction(rxn));
-                map.put(rxn.getDbId(), erxn);
-                erxn.add(mr.getName());
+            if (!importableOnly || !mr.isAuxMainResource()) {
+                for (AnalysisReaction rxn : reactions.getElements(mr)) {
+                    ExternalAnalysisReaction erxn = map.getOrDefault(rxn.getDbId(), new ExternalAnalysisReaction(rxn));
+                    map.put(rxn.getDbId(), erxn);
+                    erxn.add(mr.getName());
+                }
             }
+
         }
         return new ArrayList<>(map.values());
     }
@@ -490,9 +610,13 @@ public class PathwayNodeData {
         return this.combinedResult.totalReactions;
     }
 
+    public Integer getReactionsCount(boolean importableOnly) {
+        return !importableOnly ? this.combinedResult.totalReactions : this.importableResult.totalReactions;
+    }
+
     public Integer getReactionsCount(MainResource mainResource) {
         Counter counter = this.entitiesResult.get(mainResource);
-        if(counter!=null){
+        if (counter != null) {
             return counter.totalReactions;
         }
         return 0;
@@ -504,60 +628,81 @@ public class PathwayNodeData {
 
     public Integer getInteractorsReactionsCount(MainResource mainResource) {
         Counter counter = this.entitiesResult.get(mainResource);
-        if(counter!=null){
+        if (counter != null) {
             return counter.totalReactions;
         }
         return 0;
     }
 
-    public Integer getReactionsFound(){
+    public Integer getReactionsFound() {
         return this.getReactions().size();
     }
 
-    public Integer getReactionsFound(MainResource resource){
+    public Integer getReactionsFound(boolean importableOnly) {
+        return this.getReactions(importableOnly).size();
+    }
+
+    public Integer getReactionsFound(MainResource resource) {
         return this.getReactions(resource).size();
     }
 
-    public Double getReactionsRatio(){
+    public Double getReactionsRatio() {
         return this.combinedResult.reactionsRatio;
     }
 
-    public Double getReactionsRatio(MainResource resource){
+    public Double getReactionsRatio(boolean importableOnly) {
+        return !importableOnly ? this.combinedResult.reactionsRatio : this.importableResult.reactionsRatio;
+    }
+
+    public Double getReactionsRatio(MainResource resource) {
         Counter counter = this.entitiesResult.get(resource);
-        if(counter !=null){
+        if (counter != null) {
             return counter.reactionsRatio;
         }
         return null;
     }
 
-    public Set<MainResource> getResources(){
+    public Set<MainResource> getResources() {
         return this.entitiesResult.keySet();
     }
 
-    public boolean hasResult(){
+    public boolean hasResult() {
         return !foundTotal.isEmpty();
 //        return !entities.isEmpty() || !interactors.isEmpty();
     }
 
-    public void setEntitiesFDR(Double fdr){
+    public void setEntitiesFDR(Double fdr) {
         this.combinedResult.entitiesFDR = fdr;
     }
 
-    public void setEntitiesFDR(MainResource resource, Double fdr){
+    public void setEntitiesFDR(boolean importableOnly, Double fdr) {
+        if (!importableOnly)
+            this.combinedResult.entitiesFDR = fdr;
+        else
+            this.importableResult.entitiesFDR = fdr;
+    }
+
+    public void setEntitiesFDR(MainResource resource, Double fdr) {
         this.entitiesResult.get(resource).entitiesFDR = fdr;
     }
 
     //This is only called in build time
-    void setCounters(PathwayNodeData speciesData){
+    void setCounters(PathwayNodeData speciesData) {
         Set<AnalysisReaction> totalReactions = new HashSet<>();
+        Set<AnalysisReaction> importableReactions = new HashSet<>();
         for (MainResource mainResource : reactions.keySet()) {
             Counter counter = getOrCreateCounter(mainResource);
             counter.totalReactions = reactions.getElements(mainResource).size();
+            counter.reactionsRatio = counter.totalReactions / speciesData.getReactionsCount(mainResource).doubleValue();
             totalReactions.addAll(reactions.getElements(mainResource));
-            counter.reactionsRatio = counter.totalReactions/speciesData.getReactionsCount(mainResource).doubleValue();
+            if (!mainResource.isAuxMainResource()) importableReactions.addAll(reactions.getElements(mainResource));
         }
-        combinedResult.totalReactions += totalReactions.size(); totalReactions.clear();
-        combinedResult.reactionsRatio =  combinedResult.totalReactions /speciesData.getReactionsCount().doubleValue();
+        combinedResult.totalReactions += totalReactions.size();
+        importableResult.totalReactions += importableReactions.size();
+        totalReactions.clear();
+        importableReactions.clear();
+        combinedResult.reactionsRatio = combinedResult.totalReactions / speciesData.getReactionsCount().doubleValue();
+        importableResult.reactionsRatio = importableResult.totalReactions / speciesData.getReactionsCount().doubleValue();
         reactions = new MapSet<>();
 
         MapSet<MainResource, AnalysisIdentifier> aux = new MapSet<>();
@@ -569,12 +714,16 @@ public class PathwayNodeData {
         for (MainResource mainResource : aux.keySet()) {
             Counter counter = this.getOrCreateCounter(mainResource);
             counter.totalEntities = aux.getElements(mainResource).size();
-            counter.entitiesRatio =  counter.totalEntities/speciesData.getEntitiesCount(mainResource).doubleValue();
+            counter.entitiesRatio = counter.totalEntities / speciesData.getEntitiesCount(mainResource).doubleValue();
             counter.totalFound = getEntitiesAndInteractorsFound(mainResource);
             combinedResult.totalEntities += counter.totalEntities;
+            if (!mainResource.isAuxMainResource())
+                importableResult.totalEntities += counter.totalEntities;
         }
         combinedResult.entitiesRatio = this.combinedResult.totalEntities / speciesData.getEntitiesCount().doubleValue();
-        combinedResult.totalFound = getEntitiesAndInteractorsFound();
+        importableResult.entitiesRatio = this.importableResult.totalEntities / speciesData.getEntitiesCount().doubleValue();
+        combinedResult.totalFound = getEntitiesAndInteractorsFound(false);
+        importableResult.totalFound = getEntitiesAndInteractorsFound(true);
         entities = new MapSet<>();
 
 
@@ -593,16 +742,18 @@ public class PathwayNodeData {
             Set<InteractorIdentifier> interactors = temp.getElements(mainResource);
             counter.totalInteractors = interactors == null ? 0 : interactors.size();
             counter.interactorsRatio = counter.totalFound / speciesData.getEntitiesAndInteractorsCount(mainResource).doubleValue();
-            if(counter.interactorsRatio.isNaN() || counter.interactorsRatio.isInfinite() ){
+            if (counter.interactorsRatio.isNaN() || counter.interactorsRatio.isInfinite()) {
                 counter.interactorsRatio = 0.0;
             }
             combinedResult.totalInteractors += counter.totalInteractors;
+            if (!mainResource.isAuxMainResource()) importableResult.totalInteractors += counter.totalInteractors;
         }
         combinedResult.interactorsRatio = this.combinedResult.totalFound / speciesData.getEntitiesAndInteractorsCount().doubleValue();
+        importableResult.interactorsRatio = this.importableResult.totalFound / speciesData.getEntitiesAndInteractorsCount().doubleValue();
         foundTotal = new MapSet<>();
     }
 
-    public void setResultStatistics(Map<MainResource, Integer> sampleSizePerResource, Integer notFound, boolean includeInteractors){
+    public void setResultStatistics(Map<MainResource, Integer> sampleSizePerResource, Integer notFound, boolean includeInteractors) {
         for (MainResource mainResource : this.getResources()) {
             Counter counter = this.entitiesResult.get(mainResource);
             counter.foundEntities = getEntitiesFound(mainResource);
@@ -622,41 +773,52 @@ public class PathwayNodeData {
             }
         }
 
-        Counter counter = combinedResult;
-        counter.foundEntities = getEntitiesFound();
+        setAggregatingCounterStatistics(combinedResult, sampleSizePerResource, notFound, includeInteractors, false);
+        setAggregatingCounterStatistics(importableResult, sampleSizePerResource, notFound, includeInteractors, true);
+    }
+
+    private void setAggregatingCounterStatistics(Counter counter, Map<MainResource, Integer> sampleSizePerResource, Integer notFound, boolean includeInteractors, boolean importableOnly) {
+        counter.foundEntities = getEntitiesFound(importableOnly);
         int found;
-        if(includeInteractors) {
-            counter.foundInteractors = getInteractorsFound();
-            found = getEntitiesAndInteractorsFound();
+        if (includeInteractors) {
+            counter.foundInteractors = getInteractorsFound(importableOnly);
+            found = getEntitiesAndInteractorsFound(importableOnly);
         } else {
             found = counter.foundEntities;
         }
-        if( found > 0 ){
+        if (found > 0) {
             Integer sampleSize = notFound;
             for (MainResource mainResource : sampleSizePerResource.keySet()) {
-                sampleSize += sampleSizePerResource.get(mainResource);
+                if (!importableOnly || !mainResource.isAuxMainResource()) {
+                    sampleSize += sampleSizePerResource.get(mainResource);
+                }
             }
             double ratio = includeInteractors ? counter.interactorsRatio : counter.entitiesRatio;
             counter.entitiesPValue = MathUtilities.calculatePValue(ratio, sampleSize, counter.foundEntities);
         }
-        counter.foundReactions = getReactionsFound();
+        counter.foundReactions = getReactionsFound(importableOnly);
     }
 
-    protected Double getScore(){
+
+    protected Double getScore() {
         return getScore(this.combinedResult);
     }
 
-    protected Double getScore(MainResource mainResource){
+    protected Double getScore(boolean importableOnly) {
+        return getScore(this.importableResult);
+    }
+
+    protected Double getScore(MainResource mainResource) {
         return getScore(this.entitiesResult.get(mainResource));
     }
 
-    private Double getScore(Counter counter){
+    private Double getScore(Counter counter) {
         double entitiesPercentage = counter.foundEntities / counter.totalEntities.doubleValue();
         double reactionsPercentage = counter.foundReactions / counter.totalReactions.doubleValue();
         return (0.75 * (reactionsPercentage)) + (0.25 * (entitiesPercentage));
     }
 
-    private Counter getOrCreateCounter(MainResource mainResource){
+    private Counter getOrCreateCounter(MainResource mainResource) {
         Counter counter = this.entitiesResult.get(mainResource);
         if (counter == null) {
             counter = new Counter();

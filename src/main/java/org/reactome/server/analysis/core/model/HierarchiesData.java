@@ -21,17 +21,17 @@ public class HierarchiesData {
         this.pathwayLocation = pathwayLocation;
     }
 
-    public void addNotFound(AnalysisIdentifier identifier){
+    public void addNotFound(AnalysisIdentifier identifier) {
         this.notFound.add(identifier);
     }
 
-    public List<PathwayNode> getUniqueHitPathways(SpeciesNode species){
+    public List<PathwayNode> getUniqueHitPathways(SpeciesNode species) {
         Set<SpeciesPathway> found = new HashSet<>();
         List<PathwayNode> rtn = new LinkedList<>();
         for (PathwayNode pathwayNode : this.getHitPathways()) {
-            if(species==null || pathwayNode.getSpecies().equals(species)){
+            if (species == null || pathwayNode.getSpecies().equals(species)) {
                 SpeciesPathway sp = new SpeciesPathway(pathwayNode);
-                if(!found.contains(sp)){
+                if (!found.contains(sp)) {
                     rtn.add(pathwayNode);
                     found.add(sp);
                 }
@@ -45,7 +45,7 @@ public class HierarchiesData {
         return pathwayHierarchies;
     }
 
-    private Set<PathwayNode> getHitPathways(){
+    private Set<PathwayNode> getHitPathways() {
         Set<PathwayNode> rtn = new HashSet<>();
         for (SpeciesNode species : pathwayHierarchies.keySet()) {
             rtn.addAll(pathwayHierarchies.get(species).getHitPathways());
@@ -62,7 +62,7 @@ public class HierarchiesData {
     }
 
     @SuppressWarnings("ConstantConditions")
-    public void setResultStatistics(Map<MainResource, Integer> sampleSizePerResource, Integer notFound, boolean includeInteractors){
+    public void setResultStatistics(Map<MainResource, Integer> sampleSizePerResource, Integer notFound, boolean includeInteractors) {
         for (SpeciesNode species : this.pathwayHierarchies.keySet()) {
             PathwayHierarchy hierarchy = this.pathwayHierarchies.get(species);
             for (PathwayRoot node : hierarchy.getChildren()) {
@@ -79,21 +79,32 @@ public class HierarchiesData {
             //Contains several sets of PathwayStatistic objects depending on the main resource (this one is used to calculate
             //the entities FDR result based on the entities pValues
             MapSet<MainResource, PathwayStatistic> pathwayResourceEntityPValue = new MapSet<MainResource, PathwayStatistic>();
+            MapSet<MainResource, PathwayStatistic> pathwayResourceEntityPValueImportable = new MapSet<>();
 
             //This one does not depend on main resource because is for the combined result of the entities FDR based in their pValues
-            List<PathwayStatistic> pathwayEntityPValue = new LinkedList<PathwayStatistic>();
+            List<PathwayStatistic> pathwayEntityPValue = new LinkedList<>();
+            List<PathwayStatistic> pathwayEntityPValueImportable = new LinkedList<>();
 
             //First thing we have to do, is iterate over the hit pathways and populate the lists (and MapSet) defined above
             for (PathwayNode node : hierarchy.getHitPathways()) {
                 PathwayNodeData nodeData = node.getPathwayNodeData();
 
+                boolean hasImportable = false;
+
                 for (MainResource resource : nodeData.getResources()) {
                     Double pValue = nodeData.getEntitiesPValue(resource);
-                    if(pValue!=null)
+                    if (pValue != null) {
                         pathwayResourceEntityPValue.add(resource, new PathwayStatistic(node, pValue));
+                        if (!resource.isAuxMainResource()) {
+                            hasImportable = true;
+                            pathwayResourceEntityPValueImportable.add(resource, new PathwayStatistic(node, pValue));
+                        }
+                    }
                 }
                 Double pValue = nodeData.getEntitiesPValue();
                 pathwayEntityPValue.add(new PathwayStatistic(node, pValue));
+                if (hasImportable)
+                    pathwayEntityPValueImportable.add(new PathwayStatistic(node, nodeData.getEntitiesPValue(true)));
             }
             /*
             Here we have to iterate over the different resources where the "individual" results have been found
@@ -116,8 +127,15 @@ public class HierarchiesData {
             this.setFDRWithBenjaminiHochberg(pathwayEntityPValue);
             for (PathwayStatistic pathwayStatistic : pathwayEntityPValue) {
                 PathwayNodeData nodeData = pathwayStatistic.getPathwayNode().getPathwayNodeData();
-                nodeData.setEntitiesFDR(pathwayStatistic.getFDR());
+                nodeData.setEntitiesFDR(false, pathwayStatistic.getFDR());
             }
+
+            this.setFDRWithBenjaminiHochberg(pathwayEntityPValueImportable);
+            for (PathwayStatistic pathwayStatistic : pathwayEntityPValueImportable) {
+                PathwayNodeData nodeData = pathwayStatistic.getPathwayNode().getPathwayNodeData();
+                nodeData.setEntitiesFDR(true, pathwayStatistic.getFDR());
+            }
+
         }
     }
 
@@ -125,6 +143,7 @@ public class HierarchiesData {
      * Use this method to calculate FDR from a list of pvalues using Benjamini-Hochberg
      * method. The implementation of this method is based on the source code for MEMo
      * (http://cbio.mskcc.org/tools/memo/).
+     *
      * @param list a list of PathwayStatic objects representing the hit pathways and their pValue
      */
     private void setFDRWithBenjaminiHochberg(List<PathwayStatistic> list) {
@@ -141,7 +160,7 @@ public class HierarchiesData {
         }
     }
 
-    private class PathwayStatistic implements Comparable<PathwayStatistic>{
+    private class PathwayStatistic implements Comparable<PathwayStatistic> {
         private PathwayNode pathwayNode;
         private Double pValue;
         private Double fdr;

@@ -19,22 +19,25 @@ public class ExternalPathwayNodeData {
     public ExternalPathwayNodeData() {
     }
 
-    ExternalPathwayNodeData(PathwayNodeData data) {
+    ExternalPathwayNodeData(PathwayNodeData data, boolean importableOnly) {
         this.statistics = new ArrayList<>();
 
         //if (data.getEntitiesAndInteractorsFound() > 0) {
         if (data.getEntitiesPValue() != null) {
-            this.statistics.add(new ExternalStatistics(data));
+            this.statistics.add(new ExternalStatistics(data, importableOnly));
             for (MainResource mr : data.getResources()) {
-                if (data.getEntitiesPValue(mr) != null)
+                if (data.getEntitiesPValue(mr) != null) {
+                    if (!importableOnly || !mr.isAuxMainResource()) {
+                        this.statistics.add(new ExternalStatistics(data, mr));
+                    }
+                }
                 //if (data.getEntitiesAndInteractorsFound(mr) > 0)
-                    this.statistics.add(new ExternalStatistics(data, mr));
             }
         }
 
-        this.entities = data.getExternalEntities();
-        this.interactors = data.getExternalInteractors();
-        this.reactions = data.getExternalReactions();
+        this.entities = data.getExternalEntities(importableOnly);
+        this.interactors = data.getExternalInteractors(importableOnly);
+        this.reactions = data.getExternalReactions(importableOnly);
     }
 
     public List<ExternalIdentifier> getEntities() {

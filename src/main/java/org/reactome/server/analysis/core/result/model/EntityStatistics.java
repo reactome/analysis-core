@@ -21,14 +21,14 @@ public class EntityStatistics extends Statistics {
     private List<Double> exp = null;
 
 
-    public EntityStatistics(PathwayNodeData d, boolean interactors) {
+    public EntityStatistics(PathwayNodeData d, boolean interactors, boolean importableOnly) {
         super("TOTAL",
-                interactors ? d.getEntitiesAndInteractorsCount() : d.getEntitiesCount(),
-                interactors ? d.getEntitiesAndInteractorsFound() : d.getEntitiesFound(),
-                interactors ? d.getInteractorsRatio() : d.getEntitiesRatio());
-        this.fdr = d.getEntitiesFDR();
-        this.pValue = d.getEntitiesPValue();
-        this.exp = d.getExpressionValuesAvg();
+                interactors ? d.getEntitiesAndInteractorsCount(importableOnly) : d.getEntitiesCount(importableOnly),
+                interactors ? d.getEntitiesAndInteractorsFound(importableOnly) : d.getEntitiesFound(importableOnly),
+                interactors ? d.getInteractorsRatio(importableOnly) : d.getEntitiesRatio(importableOnly));
+        this.fdr = d.getEntitiesFDR(importableOnly);
+        this.pValue = d.getEntitiesPValue(importableOnly);
+        this.exp = d.getExpressionValuesAvg(importableOnly);
         if (interactors) {
             this.curatedFound = d.getEntitiesFound();
             this.curatedTotal = d.getEntitiesCount();

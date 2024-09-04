@@ -38,7 +38,7 @@ public class AnalysisStoredResult {
     }
 
     public AnalysisStoredResult(String token, ExternalAnalysisResult result) {
-        this.summary  = new AnalysisSummary(token, result.getSummary());
+        this.summary = new AnalysisSummary(token, result.getSummary());
         this.expressionSummary = new ExpressionSummary(result.getExpressionSummary());
         this.pathways = new ArrayList<>();
         this.warnings = result.getWarnings();
@@ -77,7 +77,7 @@ public class AnalysisStoredResult {
         Integer total = 0;
         for (PathwayNode pathwayNode : pathwayNodes) {
             PathwayNodeData data = pathwayNode.getPathwayNodeData();
-            if(data.getEntitiesPValue() == null) continue;
+            if (data.getEntitiesPValue() == null) continue;
 
             total++;
             for (MainResource mr : pathwayNode.getPathwayNodeData().getResources()) {
@@ -198,38 +198,16 @@ public class AnalysisStoredResult {
         return rtn;
     }
 
-    public Set<Long> getFoundReactions(String pathwayId, String resource) {
-        Set<Long> rtn = new HashSet<>();
-        if (resource.toUpperCase().equals("TOTAL")) {
-            for (PathwayNodeSummary pathway : this.pathways) {
-                if (pathway.is(pathwayId)) {
-                    for (AnalysisReaction reaction : pathway.getData().getReactions()) {
-                        rtn.add(reaction.getDbId());
-                    }
-                }
-            }
-        } else {
-            Resource r = ResourceFactory.getResource(resource);
-            if (r instanceof MainResource) {
-                MainResource mainResource = (MainResource) r;
-                for (PathwayNodeSummary pathway : this.pathways) {
-                    if (pathway.is(pathwayId)) {
-                        for (AnalysisReaction reaction : pathway.getData().getReactions(mainResource)) {
-                            rtn.add(reaction.getDbId());
-                        }
-                    }
-                }
-            }
-        }
-        return rtn;
+    public Set<Long> getFoundReactions(String pathwayId, String resource, boolean importableOnly) {
+        return this.getFoundReactions(List.of(pathwayId), resource, importableOnly);
     }
 
-    public Set<Long> getFoundReactions(List<String> pathwayIds, String resource) {
+    public Set<Long> getFoundReactions(List<String> pathwayIds, String resource, boolean importableOnly) {
         Set<Long> rtn = new HashSet<>();
         if (resource.toUpperCase().equals("TOTAL")) {
             for (PathwayNodeSummary pathway : this.pathways) {
                 if (pathway.in(pathwayIds)) {
-                    for (AnalysisReaction reaction : pathway.getData().getReactions()) {
+                    for (AnalysisReaction reaction : pathway.getData().getReactions(importableOnly)) {
                         rtn.add(reaction.getDbId());
                     }
                 }
@@ -249,6 +227,36 @@ public class AnalysisStoredResult {
         }
         return rtn;
     }
+
+//    public Set<Long> getFoundReactions(String pathwayId, String resource, boolean importableOnly) {
+//        return this.getFoundReactions(List.of(pathwayId), resource, importableOnly);
+//    }
+
+//    public Set<Long> getFoundReactions(List<String> pathwayIds, String resource, boolean importableOnly) {
+//        Set<Long> rtn = new HashSet<>();
+//        if (resource.toUpperCase().equals("TOTAL")) {
+//            for (PathwayNodeSummary pathway : this.pathways) {
+//                if (pathway.in(pathwayIds)) {
+//                    for (AnalysisReaction reaction : pathway.getData().getReactions(importableOnly)) {
+//                        rtn.add(reaction.getDbId());
+//                    }
+//                }
+//            }
+//        } else {
+//            Resource r = ResourceFactory.getResource(resource);
+//            if (r instanceof MainResource) {
+//                MainResource mainResource = (MainResource) r;
+//                for (PathwayNodeSummary pathway : this.pathways) {
+//                    if (pathway.in(pathwayIds)) {
+//                        for (AnalysisReaction reaction : pathway.getData().getReactions(mainResource)) {
+//                            rtn.add(reaction.getDbId());
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        return rtn;
+//    }
 
     public Set<AnalysisIdentifier> getNotFound() {
         return notFound;
@@ -275,7 +283,7 @@ public class AnalysisStoredResult {
         return pathways;
     }
 
-    public int getPage(String pathwayId, String sortBy, String order, String resource, Integer pageSize){
+    public int getPage(String pathwayId, String sortBy, String order, String resource, Integer pageSize) {
         Collections.sort(this.pathways, getComparator(sortBy, order, resource));
         if (pageSize == null) pageSize = PAGE_SIZE;
         for (int i = 0; i < this.pathways.size(); i++) {
@@ -295,20 +303,19 @@ public class AnalysisStoredResult {
         return speciesSummary;
     }
 
-    public AnalysisResult getResultSummary(String resource) {
-        return getResultSummary(null, "ASC", resource, null, null);
+    public AnalysisResult getResultSummary(String resource, boolean importableOnly) {
+        return getResultSummary(null, "ASC", resource, null, null, importableOnly);
     }
 
-    public AnalysisStoredResult filterPathways(String resource) {
-        return filterPathways(resource, null, true, null, null);
+    public AnalysisStoredResult filterPathways(String resource, boolean importableOnly) {
+        return filterPathways(resource, null, true, null, null, importableOnly);
     }
 
-    public AnalysisStoredResult filterPathways(String resource, Double pValue, boolean includeDisease, Integer min, Integer max) {
-        return filterPathways(null, resource, pValue, includeDisease, min, max);
+    public AnalysisStoredResult filterPathways(String resource, Double pValue, boolean includeDisease, Integer min, Integer max, boolean importableOnly) {
+        return filterPathways(null, resource, pValue, includeDisease, min, max, importableOnly);
     }
 
-    public AnalysisStoredResult filterPathways(List<Species> species, String resource, Double pValue,
-		                               boolean includeDisease, Integer min, Integer max) {
+    public AnalysisStoredResult filterPathways(List<Species> species, String resource, Double pValue, boolean includeDisease, Integer min, Integer max, boolean importableOnly) {
         final boolean includeInteractors = summary.isInteractors();
         MainResource mr = ResourceFactory.getMainResource(resource);
         List<PathwayNodeSummary> pathways = new LinkedList<>();
@@ -323,27 +330,27 @@ public class AnalysisStoredResult {
         this.getSpeciesSummary().forEach(s -> speciesHits.put(s.getSpeciesNode(), 0));
 
         for (PathwayNodeSummary pathway : this.pathways) {
-            if(!includeDisease && pathway.isInDisease()) continue;
+            if (!includeDisease && pathway.isInDisease()) continue;
             PathwayNodeData data = pathway.getData();
 
-            Double pwypValue = (mr == null) ? data.getEntitiesPValue() : data.getEntitiesPValue(mr);
+            Double pwypValue = (mr == null) ? data.getEntitiesPValue(importableOnly) : data.getEntitiesPValue(mr);
             if (pwypValue == null) continue;
 
             boolean toAdd = pValue == null || pwypValue <= pValue;
             final int found = (mr == null) ?
-                    data.getEntitiesFound() + data.getInteractorsFound() :
+                    data.getEntitiesFound(importableOnly) + data.getInteractorsFound(importableOnly) :
                     data.getEntitiesFound(mr) + data.getInteractorsFound(mr);
             toAdd &= found > 0;
             final int size = (mr == null) ?
-                    data.getEntitiesCount() + (includeInteractors ? data.getInteractorsCount() : 0) :
+                    data.getEntitiesCount(importableOnly) + (includeInteractors ? data.getInteractorsCount(importableOnly) : 0) :
                     data.getEntitiesCount(mr) + (includeInteractors ? data.getInteractorsCount(mr) : 0);
             toAdd &= (min == null || max == null) ? size > 0 : min <= size && max >= size;
             toAdd &= species == null || species.isEmpty() || pathway.getSpecies().isIn(species);
-            if (toAdd){
+            if (toAdd) {
                 pathways.add(pathway);
                 resourceTotal += 1;
                 for (MainResource r : data.getResources()) {
-                    if (data.getEntitiesPValue(r) != null) {
+                    if ((!importableOnly || !r.isAuxMainResource()) && data.getEntitiesPValue(r) != null) {
                         resourceHits.put(r.getName(), resourceHits.getOrDefault(r.getName(), 0) + 1);
                     }
                 }
@@ -354,6 +361,33 @@ public class AnalysisStoredResult {
         this.pathways = pathways;
         setResourceSummaryFiltered(resourceHits, resourceTotal);
         setSpeciesSummaryFiltered(speciesHits);
+        return this;
+    }
+
+    public AnalysisStoredResult filterPathwaysImportableOnly(boolean importableOnly) {
+        List<PathwayNodeSummary> pathways = new LinkedList<>();
+
+        int resourceTotal = 0;
+        Map<String, Integer> resourceHits = new HashMap<>();
+        this.resourceSummary.stream()
+                .filter(rs -> rs.getPathways() > 0 && !rs.getResource().equals("TOTAL"))
+                .forEach(rs -> resourceHits.put(rs.getResource(), 0));
+
+        for (PathwayNodeSummary pathway : this.pathways) {
+            PathwayNodeData data = pathway.getData();
+
+            if (data.getResources().stream().allMatch(MainResource::isAuxMainResource)) continue;
+
+            pathways.add(pathway);
+            resourceTotal += 1;
+            for (MainResource r : data.getResources()) {
+                if (!r.isAuxMainResource() && data.getEntitiesPValue(r) != null) {
+                    resourceHits.put(r.getName(), resourceHits.getOrDefault(r.getName(), 0) + 1);
+                }
+            }
+        }
+        this.pathways = pathways;
+        setResourceSummaryFiltered(resourceHits, resourceTotal);
         return this;
     }
 
@@ -371,7 +405,7 @@ public class AnalysisStoredResult {
         }
     }
 
-    public AnalysisResult getResultSummary(String sortBy, String order, String resource, Integer pageSize, Integer page) {
+    public AnalysisResult getResultSummary(String sortBy, String order, String resource, Integer pageSize, Integer page, boolean importableOnly) {
 //        this.filterPathways(species, resource, pValue, includeDisease,  min, max);
         Collections.sort(this.pathways, getComparator(sortBy, order, resource));
         if (pageSize == null) pageSize = PAGE_SIZE;
@@ -380,11 +414,11 @@ public class AnalysisStoredResult {
             int end = (pageSize * page) > this.pathways.size() ? this.pathways.size() : (pageSize * page);
             for (int i = pageSize * (page - 1); i < end; ++i) {
                 PathwayNodeSummary pathwayNodeSummary = this.pathways.get(i);
-                rtn.add(new PathwaySummary(pathwayNodeSummary, resource.toUpperCase(), summary.isInteractors()));
+                rtn.add(new PathwaySummary(pathwayNodeSummary, resource.toUpperCase(), summary.isInteractors(), importableOnly));
             }
         } else {
             for (PathwayNodeSummary pathway : this.pathways) {
-                rtn.add(new PathwaySummary(pathway, resource.toUpperCase(), summary.isInteractors()));
+                rtn.add(new PathwaySummary(pathway, resource.toUpperCase(), summary.isInteractors(), importableOnly));
             }
         }
         return new AnalysisResult(this, rtn);
@@ -398,33 +432,33 @@ public class AnalysisStoredResult {
         return warnings;
     }
 
-    public List<PathwaySummary> filterByPathways(List<String> pathwayIds, String resource) {
-        this.filterPathways(resource);
+    public List<PathwaySummary> filterByPathways(List<String> pathwayIds, String resource, boolean importableOnly) {
+        this.filterPathways(resource, importableOnly);
         List<PathwaySummary> rtn = new LinkedList<>();
         for (PathwayNodeSummary pathway : this.pathways) {
             if (pathway.in(pathwayIds)) {
-                rtn.add(new PathwaySummary(pathway, resource.toUpperCase(), summary.isInteractors()));
+                rtn.add(new PathwaySummary(pathway, resource.toUpperCase(), summary.isInteractors(), importableOnly));
             }
         }
         return rtn;
     }
 
-    public SpeciesFilteredResult filterBySpecies(Long speciesId, String resource) {
-        return filterBySpecies(speciesId, resource, null, "ASC");
+    public SpeciesFilteredResult filterBySpecies(Long speciesId, String resource, boolean importableOnly) {
+        return filterBySpecies(speciesId, resource, null, "ASC", importableOnly);
     }
 
-    public SpeciesFilteredResult filterBySpecies(Long speciesId, String resource, String sortBy, String order) {
+    public SpeciesFilteredResult filterBySpecies(Long speciesId, String resource, String sortBy, String order, boolean importableOnly) {
         if (resource != null) {
             Resource r = ResourceFactory.getResource(resource);
 
-            this.filterPathways(resource);
+            this.filterPathways(resource, importableOnly);
             Collections.sort(this.pathways, getComparator(sortBy, order, resource));
             List<PathwayBase> rtn = new LinkedList<>();
             Double min = null, max = null;
 
             for (PathwayNodeSummary pathway : this.pathways) {
                 if (pathway.getSpecies().getSpeciesID().equals(speciesId)) {
-                    PathwaySummary aux = new PathwaySummary(pathway, resource.toUpperCase(), summary.isInteractors());
+                    PathwaySummary aux = new PathwaySummary(pathway, resource.toUpperCase(), summary.isInteractors(), importableOnly);
                     rtn.add(new PathwayBase(aux));
 
                     List<Double> exps = new LinkedList<>();
@@ -461,7 +495,7 @@ public class AnalysisStoredResult {
         speciesList = speciesList == null ? new ArrayList<>() : speciesList;
 
         for (PathwayNodeSummary pathway : pathways) {
-            if(!includeDisease && pathway.isInDisease()) continue;
+            if (!includeDisease && pathway.isInDisease()) continue;
             if (speciesList.isEmpty() || pathway.getSpecies().isIn(speciesList)) {
                 final PathwayNodeData data = pathway.getData();
                 final Double pv = (mr == null) ? data.getEntitiesPValue() : data.getEntitiesPValue(mr);

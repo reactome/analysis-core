@@ -2,6 +2,7 @@ package org.reactome.server.analysis.core.util;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
@@ -62,5 +63,9 @@ public class MapSet<S,T> implements Serializable {
 
     public int elementsCount() {
         return map.values().stream().mapToInt(Set::size).sum();
+    }
+
+    public Stream<Map.Entry<S, Set<T>>> stream() {
+        return map.entrySet().stream();
     }
 }

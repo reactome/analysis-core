@@ -19,7 +19,7 @@ public class PathwaySummary {
     private EntityStatistics entities;
     private ReactionStatistics reactions;
 
-    public PathwaySummary(PathwayNodeSummary node, String resource, boolean interactors) {
+    public PathwaySummary(PathwayNodeSummary node, String resource, boolean interactors, boolean importableOnly) {
         this.stId = node.getStId();
         this.dbId = node.getPathwayId();
 
@@ -28,16 +28,16 @@ public class PathwaySummary {
         this.llp = node.isLlp();
         this.isInDisease = node.isInDisease();
 
-        initialize(node.getData(), resource, interactors);
+        initialize(node.getData(), resource, interactors, importableOnly);
     }
 
-    private void initialize(PathwayNodeData d, String resource, boolean interactors){
-        if(resource.equals("TOTAL")){
-            this.entities = new EntityStatistics(d, interactors);
-            this.reactions = new ReactionStatistics(d);
-        }else{
+    private void initialize(PathwayNodeData d, String resource, boolean interactors, boolean importableOnly) {
+        if (resource.equals("TOTAL")) {
+                this.entities = new EntityStatistics(d, interactors, importableOnly);
+                this.reactions = new ReactionStatistics(d, importableOnly);
+        } else {
             for (MainResource mr : d.getResources()) {
-                if(mr.getName().equals(resource)){
+                if (mr.getName().equals(resource)) {
                     this.entities = new EntityStatistics(mr, d, interactors);
                     this.reactions = new ReactionStatistics(mr, d);
                     break;

@@ -6,6 +6,8 @@ import org.reactome.server.analysis.core.result.PathwayNodeSummary;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author Antonio Fabregat (fabregat@ebi.ac.uk)
@@ -22,17 +24,32 @@ public class ExternalAnalysisResult {
     }
 
     public ExternalAnalysisResult(AnalysisStoredResult result, Integer version) {
+        this(result, version, false);
+    }
+
+    public ExternalAnalysisResult(AnalysisStoredResult result, Integer version, boolean importableOnly) {
         this.summary = new ExternalAnalysisSummary(result.getSummary(), version);
         this.expressionSummary = new ExternalExpressionSummary(result.getExpressionSummary());
 
+        Set<ExternalIdentifier> filteredIdentifiers = result.getAnalysisIdentifiers().stream().map(ExternalIdentifier::new).collect(Collectors.toSet());
         this.pathways = new ArrayList<>();
         for (PathwayNodeSummary pns : result.getPathways()) {
-            this.pathways.add(new ExternalPathwayNodeSummary(pns));
+            ExternalPathwayNodeSummary e = new ExternalPathwayNodeSummary(pns, importableOnly);
+            if (!e.getData().getEntities().isEmpty()) {
+                this.pathways.add(e);
+                if (importableOnly) {
+                    e.getData().getEntities().forEach(filteredIdentifiers::remove);
+                }
+            }
+
         }
 
         this.notFound = new ArrayList<>();
         for (AnalysisIdentifier ai : result.getNotFound()) {
             this.notFound.add(new ExternalIdentifier(ai));
+        }
+        if (importableOnly) {
+            this.notFound.addAll(filteredIdentifiers);
         }
 
         if (result.getWarnings() != null) {

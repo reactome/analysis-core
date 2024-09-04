@@ -32,22 +32,22 @@ public class Main {
 
         // Program Arguments -h, -p, -u, -k
         SimpleJSAP jsap = new SimpleJSAP(Main.class.getName(), "Connect to Reactome Graph Database",
-            new Parameter[]{
-                new FlaggedOption("host", JSAP.STRING_PARSER, "bolt://localhost:7687", JSAP.NOT_REQUIRED, 'h', "host", "The neo4j host")
-                , new FlaggedOption("user", JSAP.STRING_PARSER, "neo4j", JSAP.NOT_REQUIRED, 'u', "user", "The neo4j user")
-                , new FlaggedOption("password", JSAP.STRING_PARSER, "neo4jj", JSAP.REQUIRED, 'k', "password", "The neo4j password")
-                , new FlaggedOption("output", JSAP.STRING_PARSER, JSAP.NO_DEFAULT,
-                                    JSAP.REQUIRED, 'o', "output", "The file where the results are written to")
-                , new QualifiedSwitch("test", JSAP.BOOLEAN_PARSER, null, JSAP.NOT_REQUIRED, 't', "test", "Test main species")
-                , new QualifiedSwitch("verbose", JSAP.BOOLEAN_PARSER, null, JSAP.NOT_REQUIRED, 'v', "verbose",  "Requests verbose output")
-            }
+                new Parameter[]{
+                        new FlaggedOption("host", JSAP.STRING_PARSER, "bolt://localhost:7687", JSAP.NOT_REQUIRED, 'h', "host", "The neo4j host")
+                        , new FlaggedOption("db", JSAP.STRING_PARSER, "graph.db", JSAP.NOT_REQUIRED, 'd', "db", "The neo4j database name")
+                        , new FlaggedOption("user", JSAP.STRING_PARSER, "neo4j", JSAP.NOT_REQUIRED, 'u', "user", "The neo4j user")
+                        , new FlaggedOption("password", JSAP.STRING_PARSER, "neo4jj", JSAP.REQUIRED, 'k', "password", "The neo4j password")
+                        , new FlaggedOption("output", JSAP.STRING_PARSER, JSAP.NO_DEFAULT, JSAP.REQUIRED, 'o', "output", "The file where the results are written to")
+                        , new QualifiedSwitch("test", JSAP.BOOLEAN_PARSER, null, JSAP.NOT_REQUIRED, 't', "test", "Test main species")
+                        , new QualifiedSwitch("verbose", JSAP.BOOLEAN_PARSER, null, JSAP.NOT_REQUIRED, 'v', "verbose", "Requests verbose output")
+                }
         );
 
         JSAPResult config = jsap.parse(args);
         if (jsap.messagePrinted()) System.exit(1);
 
         //Initialising ReactomeCore Neo4j configuration
-        ReactomeGraphCore.initialise(config.getString("host"), config.getString("user"), config.getString("password"), AnalysisCoreNeo4jConfig.class);
+        ReactomeGraphCore.initialise(config.getString("host"), config.getString("user"), config.getString("password"), config.getString("db"), AnalysisCoreNeo4jConfig.class);
 
         TEST_MAIN_SPECIES = config.getBoolean("test");
         VERBOSE = config.getBoolean("verbose");
@@ -84,11 +84,11 @@ public class Main {
         AnalysisDataUtils.kryoSerialisation(container, fileName);
         Long end = System.currentTimeMillis();
 
-        if(VERBOSE){
+        if (VERBOSE) {
             System.out.println("Process summary:");
-            System.out.println("\tIntermediate data structure built in " + FormatUtils.getTimeFormatted(built-start));
-            System.out.println("\tIntermediate data structure stored in " + FormatUtils.getTimeFormatted(end-built));
-            System.out.println("\tTotal time: " + FormatUtils.getTimeFormatted(end-start));
+            System.out.println("\tIntermediate data structure built in " + FormatUtils.getTimeFormatted(built - start));
+            System.out.println("\tIntermediate data structure stored in " + FormatUtils.getTimeFormatted(end - built));
+            System.out.println("\tTotal time: " + FormatUtils.getTimeFormatted(end - start));
         }
     }
 

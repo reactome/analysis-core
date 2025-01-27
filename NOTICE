@@ -1,0 +1,35 @@
+NOTICE
+
+This project is licensed under the Apache License, Version 2.0.
+You may obtain a copy of the Apache License, Version 2.0 at:
+    https://www.apache.org/licenses/LICENSE-2.0
+
+This project includes software developed by third parties, licensed under their respective terms. The following components are distributed under the GNU Lesser General Public License (LGPL):
+
+1. **JSAP** (Java Simple Argument Parser)
+   - Licensed under: LGPL 2.1
+   - Original Source: https://github.com/martiansoftware/jsap
+
+2. **Colt** (High Performance Scientific and Technical Computing Library)
+   - Licensed under: LGPL 2.1
+   - Original Source: https://dst.lbl.gov/ACSSoftware/colt/
+
+The inclusion of these libraries in this project is compliant with the LGPL. You have the right to replace or modify these libraries as permitted under the terms of the LGPL.
+
+### Your Rights Under the LGPL
+
+The LGPL provides the following key rights:
+- You may use, modify, and distribute the libraries under the terms of the LGPL.
+- You must ensure that users can replace or modify the LGPL-covered libraries used in this project.
+- If this project statically links with the LGPL libraries, you must provide the necessary object files or equivalent to enable relinking with a modified version of the libraries.
+
+For more information, refer to the LGPL license:
+- LGPL v2.1: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+
+### Attribution
+- The JSAP and Colt libraries are the property of their respective authors and contributors. We acknowledge their valuable contributions to this project.
+
+If you have questions about the licensing or your rights under the LGPL, please contact the project maintainers.
+
+---
+This file is distributed as part of Reactome. For additional details, refer to the project's LICENSE file.

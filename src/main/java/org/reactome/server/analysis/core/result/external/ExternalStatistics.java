@@ -30,23 +30,26 @@ public class ExternalStatistics {
 
     public ExternalStatistics() {
     }
-
     ExternalStatistics(PathwayNodeData data) {
+        this(data, false);
+    }
+
+    ExternalStatistics(PathwayNodeData data, boolean importableOnly) {
         this.resource = "TOTAL";
-        this.entitiesCount = data.getEntitiesCount();
-        this.entitiesFound = data.getEntitiesFound();
-        this.entitiesRatio = data.getEntitiesRatio();
-        this.entitiesPValue = data.getEntitiesPValue();
-        this.entitiesFDR = data.getEntitiesFDR();
-        this.interactorsCount = data.getInteractorsCount();
-        this.interactorsFound = data.getInteractorsFound();
-        this.interactorsRatio = data.getInteractorsRatio();
-        this.entitiesAndInteractorsCount = data.getEntitiesAndInteractorsCount();
-        this.entitiesAndInteractorsFound = data.getEntitiesAndInteractorsFound();
-        this.reactionsCount = data.getReactionsCount();
-        this.reactionsFound = data.getReactionsFound();
-        this.reactionsRatio = data.getReactionsRatio();
-        this.exp = data.getExpressionValuesAvg();
+        this.entitiesCount = data.getEntitiesCount(importableOnly);
+        this.entitiesFound = data.getEntitiesFound(importableOnly);
+        this.entitiesRatio = data.getEntitiesRatio(importableOnly);
+        this.entitiesPValue = data.getEntitiesPValue(importableOnly);
+        this.entitiesFDR = data.getEntitiesFDR(importableOnly);
+        this.interactorsCount = data.getInteractorsCount(importableOnly);
+        this.interactorsFound = data.getInteractorsFound(importableOnly);
+        this.interactorsRatio = data.getInteractorsRatio(importableOnly);
+        this.entitiesAndInteractorsCount = data.getEntitiesAndInteractorsCount(importableOnly);
+        this.entitiesAndInteractorsFound = data.getEntitiesAndInteractorsFound(importableOnly);
+        this.reactionsCount = data.getReactionsCount(importableOnly);
+        this.reactionsFound = data.getReactionsFound(importableOnly);
+        this.reactionsRatio = data.getReactionsRatio(importableOnly);
+        this.exp = data.getExpressionValuesAvg(importableOnly);
     }
     ExternalStatistics(PathwayNodeData data, MainResource mr) {
         this.resource = mr.getName();

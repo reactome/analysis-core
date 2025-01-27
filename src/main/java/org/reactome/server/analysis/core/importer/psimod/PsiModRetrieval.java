@@ -38,7 +38,16 @@ import java.util.logging.Logger;
 class PsiModRetrieval {
 
     public enum Relations {
-        self, parents, hierarchicalParents, hierarchicalAncestors, ancestors, children, hierarchicalChildren, hierarchicalDescendants, descendants, jstree
+        self,
+        parents,
+        hierarchicalParents,
+        hierarchicalAncestors,
+        ancestors,
+        children,
+        hierarchicalChildren,
+        hierarchicalDescendants,
+        descendants,
+        jstree
     }
 
     private static final int ONTOLOGY_SIZE = 20;
@@ -91,7 +100,8 @@ class PsiModRetrieval {
     }
 
     /**
-     * Consults the web service at the Onthology Lookup Service (http://www.ebi.ac.uk/ols/docs/api) to get the other PSIMOD terms with the specified relation
+     * Consults the web service at the Onthology Lookup Service (http://www.ebi.ac.uk/ols/docs/api)
+     * to get the other PSIMOD terms with the specified relation
      *
      * @param id       The PSIMOD id for the term. Ex. "00046"
      * @param relation Any value of the enum {@link Relations} Ex. "parents", "children", "hierarchicalChildren", "hierarchicalAncestors"
@@ -158,7 +168,8 @@ class PsiModRetrieval {
     }
 
     private static String createUri(String ontologyName, String term, Relations relation) {
-        return "http://www.ebi.ac.uk/ols/api/ontologies/" + ontologyName + "/terms/http%253A%252F%252Fpurl.obolibrary.org%252Fobo%252FMOD_" + term + "/" + relation + "?size=" + ONTOLOGY_SIZE;
+        return "http://www.ebi.ac.uk/ols/api/ontologies/" + ontologyName +
+               "/terms/http%253A%252F%252Fpurl.obolibrary.org%252Fobo%252FMOD_" + term + "/" + relation + "?size=" + ONTOLOGY_SIZE;
     }
 
     private static int getOntologySize(String onthologyName) {

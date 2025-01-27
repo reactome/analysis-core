@@ -1,5 +1,7 @@
 package org.reactome.server.analysis.core.result.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Set;
 
 /**
@@ -24,6 +26,11 @@ public class IdentifierMap {
 
     public Set<String> getIds() {
         return ids;
+    }
+
+    @JsonIgnore
+    public int getMappingEntitiesCount() {
+        return this.ids.size();
     }
 
     protected boolean addAll(Set<String> maps){

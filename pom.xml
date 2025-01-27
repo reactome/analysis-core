@@ -3,14 +3,21 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.reactome.maven</groupId>
+        <artifactId>reactome-parent</artifactId>
+        <version>1.0.5</version>
+    </parent>
 
     <groupId>org.reactome.server.tools</groupId>
     <artifactId>analysis-core</artifactId>
-    <version>3.3.7</version>
+    <version>3.4.10-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>${project.groupId}:${project.artifactId}</name>
-    <description>The Reactome analysis-core extracts data from the graph-database to create the intermediate data format to be kept in memory and used for the analysis-service</description>
+    <name>analysis-core</name>
+    <description>The Reactome analysis-core extracts data from the graph-database to create the intermediate data format
+        to be kept in memory and used for the analysis-service
+    </description>
     <url>https://github.com/reactome/analysis-core</url>
 
     <organization>
@@ -29,7 +36,9 @@
         <developer>
             <id>gviteri</id>
             <name>Guilherme Viteri</name>
-            <email>gviteri@ebi.ac.uk</email>
+            <roles>
+                <role>alumni</role>
+            </roles>
             <organization>The European Bioinformatics Institute</organization>
             <organizationUrl>https://www.ebi.ac.uk</organizationUrl>
         </developer>
@@ -39,6 +48,8 @@
             <roles>
                 <role>alumni</role>
             </roles>
+            <organization>The European Bioinformatics Institute</organization>
+            <organizationUrl>https://www.ebi.ac.uk</organizationUrl>
         </developer>
     </developers>
 
@@ -49,32 +60,10 @@
     </scm>
 
     <properties>
-        <!-- dependencies -->
-        <colt.version>1.2.0</colt.version>
-        <commons.codec.version>1.11</commons.codec.version>
-        <concurrent.trees.version>2.0.0</concurrent.trees.version>
-        <fileupload.version>1.3.3</fileupload.version>
-        <jasp.version>2.1</jasp.version>
-        <joda.time.version>2.3</joda.time.version>
-        <junit.version>4.13.1</junit.version>
-        <kyro.version>2.22</kyro.version>
-        <reactome.graph.core.version>1.1.24</reactome.graph.core.version>
-        <spring.version>4.3.10.RELEASE</spring.version>
-        <xml.security.version>1.0.4</xml.security.version>
-
-        <!-- build -->
-        <jdk.version>1.8</jdk.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <start.class>org.reactome.server.analysis.core.Main</start.class>
 
         <!-- maven build and plugins -->
-        <maven.assembly.version>3.1.1</maven.assembly.version>
-        <maven.compiler.version>3.5.1</maven.compiler.version>
         <maven.gpg.version>1.5</maven.gpg.version>
-        <maven.jar.version>3.1.1</maven.jar.version>
-        <maven.javadoc.version>2.9.1</maven.javadoc.version>
-        <maven.release.version>2.5.3</maven.release.version>
-        <maven.resources.version>3.0.1</maven.resources.version>
-        <maven.source.version>2.4</maven.source.version>
         <nexus-staging-maven-plugin>1.6.7</nexus-staging-maven-plugin>
     </properties>
 
@@ -83,72 +72,75 @@
         <dependency>
             <groupId>org.reactome.server.graph</groupId>
             <artifactId>graph-core</artifactId>
-            <version>${reactome.graph.core.version}</version>
         </dependency>
 
         <!--JSAP console reader-->
         <dependency>
             <groupId>com.martiansoftware</groupId>
             <artifactId>jsap</artifactId>
-            <version>${jasp.version}</version>
         </dependency>
 
         <!-- JUnit -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
 
         <!-- Kryo serialiser -->
         <dependency>
-            <groupId>com.esotericsoftware.kryo</groupId>
+            <groupId>com.esotericsoftware</groupId>
             <artifactId>kryo</artifactId>
-            <version>${kyro.version}</version>
+        </dependency>
+
+        <!-- Jackson Databind -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <!-- Apache HTTPComponents -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
         </dependency>
 
         <!-- Used for RadixTree implementation -->
         <dependency>
             <groupId>com.googlecode.concurrent-trees</groupId>
             <artifactId>concurrent-trees</artifactId>
-            <version>${concurrent.trees.version}</version>
         </dependency>
 
         <!-- CERN jet -->
         <dependency>
             <groupId>colt</groupId>
             <artifactId>colt</artifactId>
-            <version>${colt.version}</version>
         </dependency>
 
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
-            <version>${joda.time.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
-            <version>${spring.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
-            <version>${fileupload.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>${commons.codec.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>xml-security</groupId>
-            <artifactId>xml-security</artifactId>
-            <version>${xml.security.version}</version>
         </dependency>
     </dependencies>
 
@@ -181,8 +173,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven.compiler.version}</version>
                 <configuration>
-                    <source>${jdk.version}</source>
-                    <target>${jdk.version}</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
             </plugin>
 
@@ -191,18 +183,18 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>${maven.jar.version}</version>
-                <configuration>
-                    <excludes>
-                        <!--<exclude>**/config/**</exclude>-->
-                        <!--<exclude>**/importer/**</exclude>-->
-                        <!--<exclude>**/Main.**</exclude>-->
-                        <exclude>**/logback.xml</exclude>
-                    </excludes>
-                </configuration>
                 <executions>
                     <execution>
+                        <id>exec-jar</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>exec</classifier>
+                        </configuration>
+                    </execution>
+                    <execution>
                         <id>default-jar</id>
-                        <phase>install</phase>
                         <goals>
                             <goal>jar</goal>
                         </goals>
@@ -229,26 +221,19 @@
                 </configuration>
             </plugin>
 
-            <!-- Generate jar with dependencies -->
             <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>${maven.assembly.version}</version>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot.version}</version>
                 <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>org.reactome.server.analysis.core.Main</mainClass>
-                        </manifest>
-                    </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
+                    <mainClass>${start.class}</mainClass>
+                    <classifier>exec</classifier>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>make-assembly</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>single</goal>
+                            <goal>repackage</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -312,6 +297,33 @@
                     <goals>deploy</goals>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.1.1</version>
+                <dependencies>
+                    <!-- This dependency allows Checkstyle to understand Java 11 syntax -->
+                    <dependency>
+                        <groupId>com.puppycrawl.tools</groupId>
+                        <artifactId>checkstyle</artifactId>
+                        <version>8.44</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <id>checkstyle-check</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <configLocation>checkstyle.xml</configLocation>
+                    <!-- Optional: Set encoding -->
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
@@ -322,11 +334,13 @@
             <name>The EBI internal repository</name>
             <url>https://www.ebi.ac.uk/Tools/maven/repos/content/groups/ebi-repo/</url>
             <releases>
+                <enabled>true</enabled>
             </releases>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
         </repository>
+
         <!-- EBI SNAPSHOT repo -->
         <repository>
             <id>nexus-ebi-snapshot-repo</id>
@@ -336,6 +350,7 @@
                 <enabled>false</enabled>
             </releases>
             <snapshots>
+                <enabled>true</enabled>
             </snapshots>
         </repository>
     </repositories>

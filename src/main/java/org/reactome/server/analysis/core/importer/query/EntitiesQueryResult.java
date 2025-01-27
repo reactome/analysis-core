@@ -1,20 +1,20 @@
 package org.reactome.server.analysis.core.importer.query;
 
+import org.neo4j.driver.Record;
 import org.reactome.server.analysis.core.model.AnalysisReaction;
 import org.reactome.server.analysis.core.util.MapSet;
+import org.reactome.server.graph.domain.result.CustomQuery;
 
 import java.util.List;
 
 /**
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
  */
-public class EntitiesQueryResult {
+public class EntitiesQueryResult implements CustomQuery {
     private Long pathway;
     private Long physicalEntity;
     private String speciesName;
-
     private Long referenceEntity;
-
     private List<AnalysisReaction> reactions;
     private List<Mod> mods;
 
@@ -72,5 +72,17 @@ public class EntitiesQueryResult {
 
     public void setMods(List<Mod> mods) {
         this.mods = mods;
+    }
+
+    @Override
+    public CustomQuery build(Record r) {
+        EntitiesQueryResult eqr = new EntitiesQueryResult();
+        eqr.setPathway(r.get("pathway").asLong(0));
+        eqr.setPhysicalEntity(r.get("").asLong(0));
+        eqr.setReactions(r.get("reactions").asList(AnalysisReaction::build));
+        eqr.setReferenceEntity(r.get("referenceEntity").asLong(0));
+        eqr.setSpeciesName(r.get("speciesName").asString(null));
+        eqr.setMods(r.get("mods").asList(Mod::build));
+        return eqr;
     }
 }

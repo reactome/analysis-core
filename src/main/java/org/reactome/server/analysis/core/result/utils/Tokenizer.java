@@ -1,7 +1,5 @@
 package org.reactome.server.analysis.core.result.utils;
 
-import org.apache.xml.security.exceptions.Base64DecodingException;
-import org.apache.xml.security.utils.Base64;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.reactome.server.analysis.core.result.exception.ResourceNotFoundException;
@@ -14,6 +12,7 @@ import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -55,8 +54,8 @@ public abstract class Tokenizer {
                 token = aux;
                 aux = URLDecoder.decode(token, "UTF-8");
             }
-            return new String(Base64.decode(token));
-        } catch (Base64DecodingException | UnsupportedEncodingException e) {
+            return new String(Base64.getDecoder().decode(aux));
+        } catch (UnsupportedEncodingException e) {
             logger.warn("There was a problem with the token", e);
         } catch (NoClassDefFoundError e){
             logger.error(e.getMessage(), e);
@@ -103,7 +102,7 @@ public abstract class Tokenizer {
         SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
         String current = sdf.format(System.currentTimeMillis());
         String token = current + "_" + lastToken++;
-        token = Base64.encode(token.getBytes());
+        token = Base64.getEncoder().encodeToString(token.getBytes());
         try {
             return URLEncoder.encode(token, "UTF-8");
         } catch (UnsupportedEncodingException e) {

@@ -1,6 +1,7 @@
 package org.reactome.server.analysis.core.importer.query;
 
-import javax.annotation.Nonnull;
+import org.neo4j.driver.Value;
+import org.springframework.lang.NonNull;
 
 /**
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
@@ -21,7 +22,7 @@ public class XRef {
         return databaseName;
     }
 
-    public void setDatabaseName(@Nonnull String databaseName) {
+    public void setDatabaseName(@NonNull String databaseName) {
         this.databaseName = databaseName;
     }
 
@@ -29,7 +30,11 @@ public class XRef {
         return identifier;
     }
 
-    public void setIdentifier(@Nonnull String identifier) {
+    public void setIdentifier(@NonNull String identifier) {
         this.identifier = identifier;
+    }
+
+    public static XRef build(Value value) {
+        return new XRef(value.get("databaseName").asString(), value.get("identifier").asString());
     }
 }

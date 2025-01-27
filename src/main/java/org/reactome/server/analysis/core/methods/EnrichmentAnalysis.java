@@ -57,8 +57,10 @@ public class EnrichmentAnalysis {
         IdentifiersMap<EntityNode> entitiesMap = analysisData.getEntitiesMap();
         IdentifiersMap<InteractorNode> interactorsMap = analysisData.getInteractorsMap();
 
-        logger.trace("Analysing: " + originalSampleSize + " identifier(s). Including interactors: " + includeInteractors + ". Project to species: " + (speciesNode == null ? false : speciesNode.getName()));
-        long start = System.currentTimeMillis();
+        logger.trace("Analysing: {} identifier(s). Including interactors: {}. Project to species: {}",
+                     originalSampleSize, includeInteractors, (speciesNode == null ? false : speciesNode.getName()));
+
+	long start = System.currentTimeMillis();
 
         Set<MainIdentifier> newSample = new HashSet<>();
         for (AnalysisIdentifier identifier : identifiers) {
@@ -126,7 +128,9 @@ public class EnrichmentAnalysis {
         logger.trace("Final sample size is " + finalSampleSize + " identifier(s)");
         hierarchies.setResultStatistics(sampleSizePerResource, hierarchies.getNotFound().size(), includeInteractors);
         long end = System.currentTimeMillis();
-        logger.info("Analysis for " + originalSampleSize + " identifier(s) (" + finalSampleSize + " when expanded) performed in " + (end - start) + " ms");
+	logger.info("Analysis for {} identifier(s) ({} when expanded) performed in {} ms",
+                    originalSampleSize, finalSampleSize, (end - start));
+
     }
 
     private void decreaseCounter() {

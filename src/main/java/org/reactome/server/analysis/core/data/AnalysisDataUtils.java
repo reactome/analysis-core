@@ -3,9 +3,12 @@ package org.reactome.server.analysis.core.data;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import com.esotericsoftware.shaded.org.objenesis.strategy.StdInstantiatorStrategy;
+import com.esotericsoftware.kryo.serializers.FieldSerializer;
+import com.esotericsoftware.kryo.util.DefaultInstantiatorStrategy;
+import com.googlecode.concurrenttrees.radix.node.util.AtomicReferenceArrayListAdapter;
+import org.objenesis.strategy.StdInstantiatorStrategy;
 import org.reactome.server.analysis.core.Main;
-import org.reactome.server.analysis.core.model.DataContainer;
+import org.reactome.server.analysis.core.model.*;
 import org.reactome.server.analysis.core.util.FormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +17,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+
 
 /**
  * @author Antonio Fabregat <fabregat@ebi.ac.uk>
@@ -38,7 +42,10 @@ public class AnalysisDataUtils {
     public static <T> T kryoCopy(T object) {
         long start = System.currentTimeMillis();
         Kryo kryo = new Kryo();
-        kryo.setInstantiatorStrategy(new StdInstantiatorStrategy());
+        kryo.setRegistrationRequired(false);
+        kryo.setReferences(true);
+        kryo.setInstantiatorStrategy(new DefaultInstantiatorStrategy(new StdInstantiatorStrategy()));
+        kryo.register(AtomicReferenceArrayListAdapter.class, new FieldSerializer<>(kryo, AtomicReferenceArrayListAdapter.class));
         T rtn = kryo.copy(object);
         long end = System.currentTimeMillis();
         logger.trace(String.format("%s cloned in %d ms", object.getClass().getSimpleName(), end - start));
@@ -50,7 +57,14 @@ public class AnalysisDataUtils {
         if (Main.VERBOSE) System.out.print(msgPrefix + " >> Please wait...");
         try {
             Kryo kryo = new Kryo();
-            kryo.setInstantiatorStrategy(new StdInstantiatorStrategy());
+            kryo.setRegistrationRequired(false);
+            kryo.setReferences(true);
+            kryo.setInstantiatorStrategy(new DefaultInstantiatorStrategy(new StdInstantiatorStrategy()));
+            // Kryo's default registration for AtomicReferenceArrayListAdapter is CollectionSerializer(it implements List).
+            // CollectionSerializer doesn't know how to create a valid new instance of AtomicReferenceArrayListAdapter.
+            // Overrides Kryo's default registration and tells it to use FieldSerializer instead of CollectionSerializer.
+            // FieldSerializer uses reflection to read/write all fields of the class.
+            kryo.register(AtomicReferenceArrayListAdapter.class, new FieldSerializer<>(kryo, AtomicReferenceArrayListAdapter.class));
             OutputStream file = new FileOutputStream(fileName);
             Output output = new Output(file);
             kryo.writeClassAndObject(output, container);
@@ -69,7 +83,10 @@ public class AnalysisDataUtils {
         try {
             System.gc();
             Kryo kryo = new Kryo();
-            kryo.setInstantiatorStrategy(new StdInstantiatorStrategy());
+            kryo.setRegistrationRequired(false);
+            kryo.setReferences(true);
+            kryo.setInstantiatorStrategy(new DefaultInstantiatorStrategy(new StdInstantiatorStrategy()));
+            kryo.register(AtomicReferenceArrayListAdapter.class, new FieldSerializer<>(kryo, AtomicReferenceArrayListAdapter.class));
             input = new Input(new FileInputStream(fileName));
             rtn = kryo.readClassAndObject(input);
         } catch (RuntimeException ex){

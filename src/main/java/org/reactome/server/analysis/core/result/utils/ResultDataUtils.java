@@ -4,7 +4,11 @@ package org.reactome.server.analysis.core.result.utils;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import com.esotericsoftware.shaded.org.objenesis.strategy.StdInstantiatorStrategy;
+
+import com.esotericsoftware.kryo.serializers.FieldSerializer;
+import com.esotericsoftware.kryo.util.DefaultInstantiatorStrategy;
+import com.googlecode.concurrenttrees.radix.node.util.AtomicReferenceArrayListAdapter;
+import org.objenesis.strategy.StdInstantiatorStrategy;
 import org.reactome.server.analysis.core.result.AnalysisStoredResult;
 import org.reactome.server.analysis.core.result.report.AnalysisReport;
 import org.reactome.server.analysis.core.result.report.ReportParameters;
@@ -42,11 +46,13 @@ public abstract class ResultDataUtils {
         long start = System.currentTimeMillis();
         try {
             Kryo kryo = new Kryo();
-            kryo.setInstantiatorStrategy(new StdInstantiatorStrategy());
+            kryo.setRegistrationRequired(false);
+            kryo.setReferences(true);
+            kryo.setInstantiatorStrategy(new DefaultInstantiatorStrategy(new StdInstantiatorStrategy()));
+            kryo.register(AtomicReferenceArrayListAdapter.class, new FieldSerializer<>(kryo, AtomicReferenceArrayListAdapter.class));
             OutputStream file = new FileOutputStream(fileName);
             Output output = new Output(file);
             kryo.writeClassAndObject(output, result);
-
             output.close();
         } catch (FileNotFoundException e) {
             logger.error(e.getMessage(), e);
@@ -63,9 +69,12 @@ public abstract class ResultDataUtils {
         return rtn;
     }
 
-    private static Object read(InputStream file){
+    private static Object read(InputStream file) {
         Kryo kryo = new Kryo();
-        kryo.setInstantiatorStrategy(new StdInstantiatorStrategy());
+        kryo.setRegistrationRequired(false);
+        kryo.setReferences(true);
+        kryo.setInstantiatorStrategy(new DefaultInstantiatorStrategy(new StdInstantiatorStrategy()));
+        kryo.register(AtomicReferenceArrayListAdapter.class, new FieldSerializer<>(kryo, AtomicReferenceArrayListAdapter.class));
         Input input = new Input(file);
         Object obj = kryo.readClassAndObject(input);
         input.close();

@@ -1,5 +1,6 @@
 package org.reactome.server.analysis.core.model;
 
+import org.neo4j.driver.Value;
 import org.reactome.server.analysis.core.result.external.ExternalAnalysisReaction;
 
 /**
@@ -57,5 +58,9 @@ public class AnalysisReaction {
     @Override
     public String toString() {
         return stId!=null && !stId.isEmpty() ? stId : dbId.toString();
+    }
+
+    public static AnalysisReaction build(Value value) {
+        return new AnalysisReaction(value.get("dbId").asLong(), value.get("stId").asString());
     }
 }

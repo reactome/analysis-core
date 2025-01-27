@@ -18,14 +18,14 @@ public class ExternalPathwayNodeSummary {
     public ExternalPathwayNodeSummary() {
     }
 
-    ExternalPathwayNodeSummary(PathwayNodeSummary pns) {
+    ExternalPathwayNodeSummary(PathwayNodeSummary pns, boolean importableOnly) {
         this.stId = pns.getStId();
         this.dbId = pns.getPathwayId();
         this.name = pns.getName();
         this.species = new ExternalSpeciesNode(pns.getSpecies());
         this.llp = pns.isLlp();
         this.inDisease = pns.isInDisease();
-        this.data = new ExternalPathwayNodeData(pns.getData());
+        this.data = new ExternalPathwayNodeData(pns.getData(), importableOnly);
     }
 
     public String getStId() {

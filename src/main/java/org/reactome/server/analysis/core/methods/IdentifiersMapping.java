@@ -1,6 +1,5 @@
 package org.reactome.server.analysis.core.methods;
 
-
 import org.reactome.server.analysis.core.data.AnalysisData;
 import org.reactome.server.analysis.core.model.EntityNode;
 import org.reactome.server.analysis.core.model.IdentifiersMap;
@@ -10,6 +9,7 @@ import org.reactome.server.analysis.core.model.identifier.MainIdentifier;
 import org.reactome.server.analysis.core.model.resource.Resource;
 import org.reactome.server.analysis.core.result.model.MappedEntity;
 import org.reactome.server.analysis.core.result.model.MappedIdentifier;
+import org.reactome.server.analysis.core.result.utils.ExternalAnalysisResultCheck;
 import org.reactome.server.analysis.core.util.MapSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,9 +39,9 @@ public class IdentifiersMapping {
         this.analysisData = analysisData;
     }
 
-    public List<MappedEntity> run(Set<String> identifiers, SpeciesNode speciesNode, boolean includeInteractors) {
+    public List<MappedEntity> run(Set<String> identifiers, SpeciesNode speciesNode, boolean includeInteractors, boolean importableOnly) {
         this.increaseCounter();
-        MapSet<String, MappedIdentifier> mapping = getMapping(identifiers, speciesNode, includeInteractors);
+        MapSet<String, MappedIdentifier> mapping = getMapping(identifiers, speciesNode, includeInteractors, importableOnly);
         this.decreaseCounter();
         List<MappedEntity> rtn = new ArrayList<>();
         for (String identifier : mapping.keySet()) {
@@ -54,11 +54,13 @@ public class IdentifiersMapping {
         return MAPPING_COUNT;
     }
 
-    private MapSet<String, MappedIdentifier> getMapping(Set<String> identifiers, SpeciesNode speciesNode, boolean includeInteractors) {
+    private MapSet<String, MappedIdentifier> getMapping(Set<String> identifiers, SpeciesNode speciesNode, boolean includeInteractors, boolean importableOnly) {
         MapSet<String, MappedIdentifier> rtn = new MapSet<>();
 
         final int originalSampleSize = identifiers.size();
-        logger.trace("Mapping: " + originalSampleSize + " identifier(s). Including interactors: " + includeInteractors + ". Project to species: " + (speciesNode == null ? false : speciesNode.getName()));
+	logger.trace("Mapping: {} identifier(s). Including interactors: {}. Project to species: {}",
+                      originalSampleSize, includeInteractors, (speciesNode == null ? false : speciesNode.getName()));
+
         long start = System.currentTimeMillis();
 
         IdentifiersMap<EntityNode> entitiesMap = analysisData.getEntitiesMap();
@@ -68,8 +70,10 @@ public class IdentifiersMapping {
             MapSet<Resource, EntityNode> resourceEntities = entitiesMap.get(identifier);
             for (Resource resource : resourceEntities.keySet()) {
                 for (EntityNode node : resourceEntities.getElements(resource)) {
-                    if (speciesNode != null) node = node.getProjection(speciesNode);
-                    if (node != null) rtn.add(identifier, new MappedIdentifier(node.getIdentifier()));
+                    if (!importableOnly || ExternalAnalysisResultCheck.isValidResource(node.getIdentifier().getResource().getName())) {
+                        if (speciesNode != null) node = node.getProjection(speciesNode);
+                        if (node != null) rtn.add(identifier, new MappedIdentifier(node.getIdentifier()));
+                    }
                 }
             }
 
@@ -78,7 +82,7 @@ public class IdentifiersMapping {
                 MapSet<Resource, InteractorNode> interactors = interactorsMap.get(identifier);
                 for (Resource resource : interactors.keySet()) {
                     for (InteractorNode interactorNode : interactors.getElements(resource)) {
-                        Set<MainIdentifier> interactsWith = interactorNode.getInteractsWith(); //InteractorHelper.getInteractsWith(speciesNode, entitiesMap, interactorNode);
+                        Set<MainIdentifier> interactsWith = interactorNode.getInteractsWith();
                         rtn.add(identifier, new MappedIdentifier(resource, interactorNode.getAccession(), interactsWith));
                     }
                 }
@@ -90,8 +94,6 @@ public class IdentifiersMapping {
 
         return rtn;
     }
-
-
 
     private void decreaseCounter() {
         synchronized (MAPPING_SEMAPHORE) {

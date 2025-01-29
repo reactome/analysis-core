@@ -361,14 +361,14 @@
         <repository>
             <id>ossrh</id>
             <name>Sonatype Release Repository</name>
-            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2</url>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
         </repository>
 
         <!-- Sonatype SNAPSHOT repo -->
         <snapshotRepository>
             <id>ossrh</id>
             <name>Sonatype Snapshot Repository</name>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 </project>

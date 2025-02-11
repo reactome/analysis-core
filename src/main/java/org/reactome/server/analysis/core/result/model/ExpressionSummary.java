@@ -6,7 +6,7 @@ import org.reactome.server.analysis.core.result.external.ExternalExpressionSumma
 import java.util.List;
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public class ExpressionSummary {
 

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public class UserData {
     List<String> columnNames;

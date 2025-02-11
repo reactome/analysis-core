@@ -5,7 +5,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public class MapSet<S,T> implements Serializable {
 

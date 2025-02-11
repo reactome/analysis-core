@@ -5,7 +5,7 @@ import org.reactome.server.analysis.core.model.resource.MainResource;
 import org.reactome.server.analysis.core.result.PathwayNodeSummary;
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public class PathwaySummary {
 

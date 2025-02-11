@@ -4,7 +4,7 @@ import org.neo4j.driver.Record;
 import org.reactome.server.graph.domain.result.CustomQuery;
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public class OrthologyResult implements CustomQuery {
 

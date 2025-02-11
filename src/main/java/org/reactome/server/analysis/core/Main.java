@@ -20,7 +20,7 @@ import org.reactome.server.graph.utils.ReactomeGraphCore;
 import java.util.Set;
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public class Main {
 

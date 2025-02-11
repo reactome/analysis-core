@@ -9,7 +9,7 @@ import org.reactome.server.analysis.core.util.MapSet;
 import java.util.*;
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public class FoundInteractors {
 

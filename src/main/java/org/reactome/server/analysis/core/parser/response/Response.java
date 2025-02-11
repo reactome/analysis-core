@@ -6,7 +6,7 @@ import java.util.Map;
 
 /**
  * Class that builds the Response.
- * @author Guilherme Viteri <gviteri@ebi.ac.uk>
+ * @author Guilherme Viteri (gviteri@ebi.ac.uk)
  */
 public class Response {
 

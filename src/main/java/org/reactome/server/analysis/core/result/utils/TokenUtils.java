@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import java.io.FileNotFoundException;
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 @Component
 public class TokenUtils {

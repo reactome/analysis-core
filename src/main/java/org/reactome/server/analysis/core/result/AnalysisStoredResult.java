@@ -17,7 +17,7 @@ import org.reactome.server.graph.domain.model.Species;
 import java.util.*;
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public class AnalysisStoredResult {
     private static final Integer PAGE_SIZE = 20;

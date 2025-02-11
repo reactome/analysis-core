@@ -6,7 +6,7 @@ import org.reactome.server.analysis.core.model.resource.MainResource;
 import java.util.List;
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 //@ApiModel(value = "EntityStatistics", description = "Statistics for an entity type")
 public class EntityStatistics extends Statistics {

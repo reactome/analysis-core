@@ -5,7 +5,7 @@ import org.reactome.server.analysis.core.model.AnalysisType;
 import org.reactome.server.analysis.core.result.external.ExternalAnalysisSummary;
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public class AnalysisSummary {
 

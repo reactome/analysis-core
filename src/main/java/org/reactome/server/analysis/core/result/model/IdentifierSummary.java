@@ -5,7 +5,7 @@ import org.reactome.server.analysis.core.model.AnalysisIdentifier;
 import java.util.List;
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public class IdentifierSummary {
     private String id;

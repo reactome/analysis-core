@@ -12,7 +12,7 @@ import java.util.Collection;
  * This class is based on PathwayNode but removing the tree hierarchy to store/retrieve the data
  * faster from/to the hard drive.
  *
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public class PathwayNodeSummary {
     private String stId;

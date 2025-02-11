@@ -20,7 +20,7 @@ import java.util.List;
 /**
  * Parses the input to create a UserData object with the data to be analysed
  *
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 @SuppressWarnings("Duplicates")
 public abstract class InputUtils {

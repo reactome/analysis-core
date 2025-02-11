@@ -4,7 +4,7 @@ import org.neo4j.driver.Value;
 import org.springframework.lang.NonNull;
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public class Mod {
     private Long coordinate;

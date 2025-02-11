@@ -4,7 +4,7 @@ package org.reactome.server.analysis.core.result.model;
 import org.reactome.server.analysis.core.model.identifier.InteractorIdentifier;
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public class InteractorEvidence extends IdentifierSummary {
 

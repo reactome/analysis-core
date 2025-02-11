@@ -6,7 +6,7 @@ import org.reactome.server.analysis.core.result.AnalysisStoredResult;
 import java.util.List;
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public class AnalysisResult {
 

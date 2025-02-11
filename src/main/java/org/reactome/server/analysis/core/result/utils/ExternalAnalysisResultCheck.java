@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  * Aims to check inconsistencies in the provided {@link ExternalAnalysisResult} to avoid crashes when converted
  * to {@link AnalysisStoredResult}
  *
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 @Component
 public class ExternalAnalysisResultCheck {
@@ -36,6 +36,7 @@ public class ExternalAnalysisResultCheck {
     /**
      * Checks whether the {@link ExternalAnalysisResult} instance is valid.
      *
+     * @param result result to check
      * @return an empty list when true or a list of error messages otherwise
      */
     @SuppressWarnings("unused")

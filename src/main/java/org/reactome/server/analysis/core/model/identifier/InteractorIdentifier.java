@@ -5,7 +5,7 @@ import org.reactome.server.analysis.core.model.AnalysisIdentifier;
 import java.util.Objects;
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public class InteractorIdentifier extends AnalysisIdentifier {
 

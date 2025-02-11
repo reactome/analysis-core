@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public class SpeciesNode {
     private Long speciesID;

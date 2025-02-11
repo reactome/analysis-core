@@ -8,7 +8,7 @@ import org.reactome.server.graph.domain.result.CustomQuery;
 import java.util.List;
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public class InteractorsTargetQueryResult implements CustomQuery {
 

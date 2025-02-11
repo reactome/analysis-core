@@ -8,7 +8,7 @@ import java.util.List;
  * of the PathwayBrowser. By having this property in the result we avoid a previous query to retrieve
  * the type of analysis.
  *
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public class SpeciesFilteredResult {
 

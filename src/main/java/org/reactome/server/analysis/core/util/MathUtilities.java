@@ -5,7 +5,7 @@ import cern.jet.random.engine.DRand;
 import cern.jet.random.engine.RandomEngine;
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public class MathUtilities {
 

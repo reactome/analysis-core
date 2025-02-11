@@ -10,7 +10,7 @@ import java.util.Map;
  * Contains the different data structures for the binary data and also provides
  * methods to initialize the data structure after loading from file and to
  * "prepare" the data structure for serialising
- * <p/>
+ *
  * PLEASE NOTE
  * The pathway location map is kept separately because at some point splitting
  * or cloning the pathway hierarchies will be needed, so keeping a map will
@@ -19,7 +19,7 @@ import java.util.Map;
  * option that improves the binary time but makes the splitting or cloning
  * tasks MORE difficult and slow
  *
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public class DataContainer implements Serializable {
 

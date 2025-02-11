@@ -20,7 +20,7 @@ import java.io.OutputStream;
 
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public class AnalysisDataUtils {
     private static Logger logger = LoggerFactory.getLogger("analysisDataLogger");

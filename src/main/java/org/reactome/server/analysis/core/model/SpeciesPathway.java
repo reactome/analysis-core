@@ -6,7 +6,7 @@ package org.reactome.server.analysis.core.model;
  * object for obvious reasons (just in case is because a pathway can be in several
  * location and we want to take all of them into account while analysing)
  *
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 class SpeciesPathway {
 

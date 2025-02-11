@@ -4,7 +4,7 @@ import org.neo4j.driver.Value;
 import org.reactome.server.analysis.core.result.external.ExternalAnalysisReaction;
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public class AnalysisReaction {
     private Long dbId;

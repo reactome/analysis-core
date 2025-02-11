@@ -3,7 +3,7 @@ package org.reactome.server.analysis.core.parser.exception;
 import java.util.List;
 
 /**
- * @author Guilherme Viteri <gviteri@ebi.ac.uk>
+ * @author Guilherme Viteri (gviteri@ebi.ac.uk)
  */
 public class ParserException extends Exception {
 

@@ -3,7 +3,7 @@ package org.reactome.server.analysis.core.result.model;
 /**
  * Minimum amount of information per pathway related to an analysis result
  *
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public class PathwayBase {
 

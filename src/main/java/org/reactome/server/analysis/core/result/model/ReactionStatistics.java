@@ -4,7 +4,7 @@ import org.reactome.server.analysis.core.model.PathwayNodeData;
 import org.reactome.server.analysis.core.model.resource.MainResource;
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 //@ApiModel(value = "ReactionStatistics", description = "Statistics for a reaction type")
 public class ReactionStatistics extends Statistics {

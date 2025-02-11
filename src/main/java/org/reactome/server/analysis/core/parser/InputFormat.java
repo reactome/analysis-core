@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 /**
  * Parser for AnalysisData tool
  *
- * @author Guilherme Viteri <gviteri@ebi.ac.uk>
+ * @author Guilherme Viteri (gviteri@ebi.ac.uk)
  */
 public class InputFormat {
 
@@ -57,6 +57,7 @@ public class InputFormat {
      * ParserException is thrown only when there are errors.
      *
      * @param input file already converted into a String.
+     * @throws ParserException thrown if errors parsing input
      */
     public void parseData(String input) throws ParserException {
         long start = System.currentTimeMillis();

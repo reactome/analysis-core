@@ -9,7 +9,7 @@ import java.util.Set;
  * Interactors are not longer connected to a EntityNode. They are treated as main objects in the intermediate
  * data structure.
  *
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public class InteractorNode {
 

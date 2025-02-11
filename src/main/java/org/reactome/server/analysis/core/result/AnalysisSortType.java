@@ -1,7 +1,7 @@
 package org.reactome.server.analysis.core.result;
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public enum AnalysisSortType {
     NAME,

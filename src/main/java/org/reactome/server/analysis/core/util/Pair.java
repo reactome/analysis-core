@@ -1,7 +1,7 @@
 package org.reactome.server.analysis.core.util;
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public class Pair<S,T> {
     private S fst;

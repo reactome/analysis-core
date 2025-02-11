@@ -8,7 +8,7 @@ import org.reactome.server.analysis.core.result.external.ExternalMainIdentifier;
 import java.util.List;
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public class MainIdentifier extends Identifier<MainResource> {
 

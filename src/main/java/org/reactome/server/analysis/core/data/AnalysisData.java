@@ -13,17 +13,17 @@ import java.util.Map;
  * (either in a local execution or deployed in a server). The default constructor uses
  * the Kryo deserializer in AnalysisDataUtils to create the DataContainer and from this
  * moment on, the AnalysisData object is a PROXY to the DataContainer.
- * <p/>
+ *
  * *** IMPORTANT ***
  * Please note that every time that getHierarchiesData method is called, it retrieves a
  * clone of the HierarchiesData contained in DataContainer so the changes in it doesn't
  * happen to other instances of HierarchiesData
- * <p/>
+ *
  * *** NOTE ****
  * AnalysisData is the object to be used in the code, PLEASE avoid using the DataContainer
  * directly in the analysis (unless there is a good reason).
  *
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 @Component
 @Scope("singleton")

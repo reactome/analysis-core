@@ -21,7 +21,7 @@ import java.util.stream.Stream;
  * for the result, (2) The set of reactions identifiers found for each main resource and (3) the
  * result counters -and statistics- for each main resource and for the combination of all of them
  *
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public class PathwayNodeData {
     //Please note that counter is used for each main identifier and for the combinedResult

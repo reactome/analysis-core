@@ -1,7 +1,7 @@
 package org.reactome.server.analysis.core.result.model;
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public class ResourceSummary implements Comparable<ResourceSummary> {
     String resource;

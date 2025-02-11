@@ -1,7 +1,7 @@
 package org.reactome.server.analysis.core.model.resource;
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public class Resource {
 

@@ -6,7 +6,7 @@ import org.reactome.server.analysis.core.model.resource.MainResource;
 import java.util.Comparator;
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public abstract class ComparatorFactory {
 

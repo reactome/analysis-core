@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public abstract class ResultDataUtils {
 

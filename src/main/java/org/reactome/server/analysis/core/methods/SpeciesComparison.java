@@ -13,7 +13,7 @@ import java.util.LinkedList;
 import java.util.Set;
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
 @Component

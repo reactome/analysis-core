@@ -8,7 +8,7 @@ import org.reactome.server.analysis.core.result.external.ExternalSpeciesNode;
 import java.util.Objects;
 
 /**
- * @author Antonio Fabregat <fabregat@ebi.ac.uk>
+ * @author Antonio Fabregat (fabregat@ebi.ac.uk)
  */
 public class SpeciesSummary implements Comparable<SpeciesSummary> {
     private Long dbId;

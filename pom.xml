@@ -64,6 +64,7 @@
 
         <!-- maven build and plugins -->
         <maven.gpg.version>1.5</maven.gpg.version>
+        <maven.javadoc.version>3.11.2</maven.javadoc.version>
         <nexus-staging-maven-plugin>1.6.7</nexus-staging-maven-plugin>
     </properties>
 
@@ -252,6 +253,7 @@
                         </goals>
                     </execution>
                 </executions>
+
             </plugin>
 
             <!-- Generate JavaDoc jar file -->

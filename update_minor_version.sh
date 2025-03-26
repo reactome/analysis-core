@@ -1,6 +1,12 @@
 #!/bin/bash
 
-PACKAGE_NAME=analysis.core
+PACKAGE_NAME=ANALYSIS_CORE_VERSION
+
+# Check if VERSIONS_FILE_PATH is not set or empty
+if [ -z "${VERSIONS_FILE_PATH}" ]; then
+    echo "Error: Please define \${VERSIONS_FILE_PATH} in the GO-CD environment or in the server."
+    exit 1
+fi
 
 # Get the current version from Maven
 current_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
@@ -25,7 +31,7 @@ mvn versions:set -DnewVersion=$new_version
 
 
 if grep -q "^${PACKAGE_NAME}=" /var/go/versions.properties; then
-    sed -i "s/^${PACKAGE_NAME}=.*/${PACKAGE_NAME}=${new_version}/" /var/go/versions.properties
+    sed -i "s/^${PACKAGE_NAME}=.*/${PACKAGE_NAME}=${new_version}/" "${VERSIONS_FILE_PATH}"
 else
-    echo "${PACKAGE_NAME}=${new_version}" >> /var/go/versions.properties
+    echo "${PACKAGE_NAME}=${new_version}" >> "${VERSIONS_FILE_PATH}"
 fi

@@ -11,7 +11,7 @@
 
     <groupId>org.reactome.server.tools</groupId>
     <artifactId>analysis-core</artifactId>
-    <version>3.4.10-SNAPSHOT</version>
+    <version>3.5.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>analysis-core</name>

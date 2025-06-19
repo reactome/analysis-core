@@ -6,10 +6,7 @@ import org.reactome.server.analysis.core.model.PathwayNode;
 import org.reactome.server.analysis.core.model.SpeciesNode;
 import org.reactome.server.analysis.core.model.SpeciesNodeFactory;
 import org.reactome.server.analysis.core.util.MapSet;
-import org.reactome.server.graph.domain.model.Event;
-import org.reactome.server.graph.domain.model.Pathway;
-import org.reactome.server.graph.domain.model.Species;
-import org.reactome.server.graph.domain.model.TopLevelPathway;
+import org.reactome.server.graph.domain.model.*;
 import org.reactome.server.graph.service.SpeciesService;
 import org.reactome.server.graph.service.TopLevelPathwayService;
 import org.reactome.server.graph.utils.ReactomeGraphCore;
@@ -55,7 +52,7 @@ public class HierarchyBuilder {
                 for (TopLevelPathway tlp : tlpService.getTopLevelPathways(species.getTaxId())) {
                     PathwayNode node = pathwayHierarchy.addTopLevelPathway(tlp);
                     this.pathwayLocation.add(tlp.getDbId(), node);
-                    this.fillBranch(node, tlp);
+                    this.fillBranch(node, tlp, false);
                     if (Main.VERBOSE) System.out.print("."); // Indicates progress
                 }
             }
@@ -80,15 +77,15 @@ public class HierarchyBuilder {
         return rtn;
     }
 
-    private void fillBranch(PathwayNode node, Pathway pathway) {
+    private void fillBranch(PathwayNode node, Pathway pathway, boolean parentIsLLP) {
+        boolean isLLP = parentIsLLP || pathway.getHasEvent().stream().anyMatch(e -> e instanceof ReactionLikeEvent);
+        node.setLowerLevelPathway(isLLP);
         for (Event event : pathway.getHasEvent()) {
             if (event instanceof Pathway) {
                 Pathway p = (Pathway) event;
                 PathwayNode aux = node.addChild(p);
                 this.pathwayLocation.add(p.getDbId(), aux);
-                this.fillBranch(aux, p);
-            } else {
-                node.setLowerLevelPathway(true);
+                this.fillBranch(aux, p, isLLP);
             }
         }
     }

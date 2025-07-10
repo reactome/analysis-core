@@ -21,17 +21,19 @@ public class PathwayNode implements Serializable, Comparable<PathwayNode> {
     private boolean hasDiagram;
     private boolean isLowerLevelPathway = false;
     private boolean inDisease;
+    private int order;
+    private String type;
 
     private PathwayNode parent;
     private Set<PathwayNode> children;
 
     private PathwayNodeData data;
 
-    public PathwayNode(String stId, Long pathwayId, String name, boolean hasDiagram, boolean inDisease) {
-        this(null, stId, pathwayId, name, hasDiagram, inDisease);
+    public PathwayNode(String stId, Long pathwayId, String name, boolean hasDiagram, boolean inDisease, int order, String type) {
+        this(null, stId, pathwayId, name, hasDiagram, inDisease, order, type);
     }
 
-    protected PathwayNode(PathwayNode parent, String stID, Long pathwayId, String name, boolean hasDiagram, boolean inDisease) {
+    protected PathwayNode(PathwayNode parent, String stID, Long pathwayId, String name, boolean hasDiagram, boolean inDisease, int order, String type) {
         this.parent = parent;
         this.stId = stID;
         this.pathwayId = pathwayId;
@@ -40,10 +42,12 @@ public class PathwayNode implements Serializable, Comparable<PathwayNode> {
         this.inDisease = inDisease;
         this.children = new HashSet<>();
         this.data = new PathwayNodeData();
+        this.order = order;
+        this.type = type;
     }
 
-    public PathwayNode addChild(Pathway p){
-        PathwayNode node = new PathwayNode(this, p.getStId(), p.getDbId(), p.getDisplayName(), p.getHasDiagram(), p.getIsInDisease());
+    public PathwayNode addChild(Pathway p, int order) {
+        PathwayNode node = new PathwayNode(this, p.getStId(), p.getDbId(), p.getDisplayName(), p.getHasDiagram(), p.getIsInDisease(), order, p.getSchemaClass() );
         this.children.add(node);
         return node;
     }
@@ -108,6 +112,18 @@ public class PathwayNode implements Serializable, Comparable<PathwayNode> {
 
     public String getStId() {
         return stId;
+    }
+
+    public boolean isHasDiagram() {
+        return hasDiagram;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
+    public String getType() {
+        return type;
     }
 
     public void setLowerLevelPathway(boolean isLowerLevelPathway) {

@@ -86,10 +86,6 @@ public class HierarchyBuilder {
         boolean isLLP = parentIsLLP || pathway.getHasEvent().stream().anyMatch(e -> e instanceof ReactionLikeEvent);
         node.setLowerLevelPathway(isLLP);
 
-        if (node.getStId().equals("R-HSA-69895") || node.getStId().equals("R-HSA-69560")) {
-            System.out.println("Problematic node");
-        }
-
         for (HasEvent hasEvent : pathway.getEvents()) {
             if (hasEvent.getEvent() instanceof Pathway) {
                 Pathway p = (Pathway) hasEvent.getEvent();

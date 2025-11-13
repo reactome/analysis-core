@@ -12,8 +12,8 @@ import java.util.Set;
 public class PathwayRoot extends PathwayNode {
     private PathwayHierarchy pathwayHierarchy;
 
-    public PathwayRoot(PathwayHierarchy pathwayHierarchy, String stId, Long pathwayId, String name, boolean hasDiagram, boolean inDisease) {
-        super(stId, pathwayId, name, hasDiagram, inDisease);
+    public PathwayRoot(PathwayHierarchy pathwayHierarchy, String stId, Long pathwayId, String name, boolean hasDiagram, boolean inDisease, int order, String type) {
+        super(stId, pathwayId, name, hasDiagram, inDisease, order, type);
         this.pathwayHierarchy = pathwayHierarchy;
     }
 

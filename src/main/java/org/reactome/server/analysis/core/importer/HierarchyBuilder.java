@@ -6,10 +6,11 @@ import org.reactome.server.analysis.core.model.PathwayNode;
 import org.reactome.server.analysis.core.model.SpeciesNode;
 import org.reactome.server.analysis.core.model.SpeciesNodeFactory;
 import org.reactome.server.analysis.core.util.MapSet;
-import org.reactome.server.graph.domain.model.Event;
 import org.reactome.server.graph.domain.model.Pathway;
+import org.reactome.server.graph.domain.model.ReactionLikeEvent;
 import org.reactome.server.graph.domain.model.Species;
 import org.reactome.server.graph.domain.model.TopLevelPathway;
+import org.reactome.server.graph.domain.relationship.HasEvent;
 import org.reactome.server.graph.service.SpeciesService;
 import org.reactome.server.graph.service.TopLevelPathwayService;
 import org.reactome.server.graph.utils.ReactomeGraphCore;
@@ -52,10 +53,11 @@ public class HierarchyBuilder {
             if (species.getTaxId() == null || species.getTaxId().isEmpty()) {
                 logger.error("The species: " + species.getDisplayName() + " is missing the taxonomy id");
             } else {
+                int order = 0;
                 for (TopLevelPathway tlp : tlpService.getTopLevelPathways(species.getTaxId())) {
-                    PathwayNode node = pathwayHierarchy.addTopLevelPathway(tlp);
+                    PathwayNode node = pathwayHierarchy.addTopLevelPathway(tlp, order++);
                     this.pathwayLocation.add(tlp.getDbId(), node);
-                    this.fillBranch(node, tlp);
+                    this.fillBranch(node, tlp, false);
                     if (Main.VERBOSE) System.out.print("."); // Indicates progress
                 }
             }
@@ -80,15 +82,16 @@ public class HierarchyBuilder {
         return rtn;
     }
 
-    private void fillBranch(PathwayNode node, Pathway pathway) {
-        for (Event event : pathway.getHasEvent()) {
-            if (event instanceof Pathway) {
-                Pathway p = (Pathway) event;
-                PathwayNode aux = node.addChild(p);
+    private void fillBranch(PathwayNode node, Pathway pathway, boolean parentIsLLP) {
+        boolean isLLP = parentIsLLP || pathway.getHasEvent().stream().anyMatch(e -> e instanceof ReactionLikeEvent);
+        node.setLowerLevelPathway(isLLP);
+
+        for (HasEvent hasEvent : pathway.getEvents()) {
+            if (hasEvent.getEvent() instanceof Pathway) {
+                Pathway p = (Pathway) hasEvent.getEvent();
+                PathwayNode aux = node.addChild(p, hasEvent.getOrder());
                 this.pathwayLocation.add(p.getDbId(), aux);
-                this.fillBranch(aux, p);
-            } else {
-                node.setLowerLevelPathway(true);
+                this.fillBranch(aux, p, isLLP);
             }
         }
     }

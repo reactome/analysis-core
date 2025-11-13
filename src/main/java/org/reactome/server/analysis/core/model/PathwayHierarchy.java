@@ -24,8 +24,8 @@ public class PathwayHierarchy implements Serializable {
         this.data = new PathwayNodeData();
     }
 
-    public PathwayNode addTopLevelPathway(TopLevelPathway tlp){
-        PathwayRoot node = new PathwayRoot(this, tlp.getStId(), tlp.getDbId(), tlp.getDisplayName(), tlp.getHasDiagram(), tlp.getIsInDisease());
+    public PathwayNode addTopLevelPathway(TopLevelPathway tlp, int order) {
+        PathwayRoot node = new PathwayRoot(this, tlp.getStId(), tlp.getDbId(), tlp.getDisplayName(), tlp.getHasDiagram(), tlp.getIsInDisease(), order, tlp.getSchemaClass());
         this.children.add(node);
         return node;
     }
@@ -42,7 +42,7 @@ public class PathwayHierarchy implements Serializable {
         return species;
     }
 
-    protected Set<PathwayNode> getHitPathways(){
+    protected Set<PathwayNode> getHitPathways() {
         Set<PathwayNode> rtn = new HashSet<>();
         for (PathwayNode node : this.children) {
             rtn.addAll(node.getHitNodes());
@@ -50,19 +50,19 @@ public class PathwayHierarchy implements Serializable {
         return rtn;
     }
 
-    public void setCountersAndCleanUp(){
+    public void setCountersAndCleanUp() {
         this.data.setCounters(getData());
         for (PathwayRoot node : children) {
             node.setCounters(getData());
         }
     }
 
-    public void process(Identifier identifier, MainIdentifier mainIdentifier, Set<AnalysisReaction> reactions){
+    public void process(Identifier identifier, MainIdentifier mainIdentifier, Set<AnalysisReaction> reactions) {
         this.data.addEntity(identifier, mainIdentifier);
         this.data.addReactions(mainIdentifier.getResource(), reactions);
     }
 
-    public void processInteractor(InteractorIdentifier identifier, MainIdentifier mainIdentifier, Set<AnalysisReaction> reactions){
+    public void processInteractor(InteractorIdentifier identifier, MainIdentifier mainIdentifier, Set<AnalysisReaction> reactions) {
         this.data.addInteractors(mainIdentifier, identifier);
         this.data.addReactions(mainIdentifier.getResource(), reactions);
     }

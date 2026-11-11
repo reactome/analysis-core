@@ -33,8 +33,8 @@ public class InteractorsBuilder {
     //Will contain the RADIX-TREE with the map (identifiers -> [InteractorNode])
     private IdentifiersMap<InteractorNode> interactorsMap = new IdentifiersMap<>();
 
-    //Keeps track of the number of interactors that have been included
-    private int n = 0;
+    //Creates each interactor once, by its primary identifier, and records its aliases
+    private InteractorNodes interactorNodes = new InteractorNodes(interactorsMap);
 
     public void build(Set<SpeciesNode> speciesNodes, EntitiesContainer entities, InteractionsService interactionsService) {
         if (Main.VERBOSE) System.out.print("Starting creation of the interactors container...");
@@ -108,7 +108,7 @@ public class InteractorsBuilder {
                     Resource resource = ResourceFactory.getResource(interactsWith.getDatabaseName());
                     String variantIdentifier = interactor.fetchSingleValue("getVariantIdentifier");
                     String identifier = variantIdentifier != null ? variantIdentifier : interactor.getIdentifier();
-                    InteractorNode interactorNode = getOrCreate(resource, identifier);
+                    InteractorNode interactorNode = interactorNodes.getOrCreate(resource, identifier);
                     for (MapSet<Long, AnalysisReaction> prs : compressedResult.getElements(target)) {
                         for (Long pathwayId : prs.keySet()) {
                             interactorNode.addInteractsWith(pathwayId, target);
@@ -120,12 +120,12 @@ public class InteractorsBuilder {
                         ReferenceSequence rs = (ReferenceSequence) interactor;
                         if (rs.getGeneName() != null) {
                             for (String alias : rs.getGeneName()) {
-                                interactorsMap.add(alias, resource, interactorNode);
+                                interactorNodes.addAlias(alias, resource, interactorNode);
                             }
                         }
                         if (rs.getSecondaryIdentifier() != null){
                             for (String si : rs.getSecondaryIdentifier()) {
-                                if(!si.contains(" ")) interactorsMap.add(si, resource, interactorNode);
+                                if(!si.contains(" ")) interactorNodes.addAlias(si, resource, interactorNode);
                             }
                         }
                     }
@@ -133,26 +133,10 @@ public class InteractorsBuilder {
             }
         }
         if (Main.VERBOSE)
-            System.out.println("\rInteractors container successfully created >> " + n + " interactors have been added to Reactome.");
+            System.out.println("\rInteractors container successfully created >> " + interactorNodes.created() + " interactors have been added to Reactome.");
     }
 
     public IdentifiersMap<InteractorNode> getInteractorsMap() {
         return interactorsMap;
-    }
-
-    private InteractorNode getOrCreate(Resource resource, String identifier) {
-        MapSet<Resource, InteractorNode> map = interactorsMap.get(identifier);
-        Set<InteractorNode> interactors = map.getElements(resource);
-        if (interactors == null || interactors.isEmpty()) {
-            InteractorNode interactorNode = new InteractorNode(identifier);
-            interactorsMap.add(identifier, resource, interactorNode);
-            n++;
-            return interactorNode;
-        } else {
-            //Using IdentifiersMap causes this "oddity" here, but is a minor inconvenient
-            if (interactors.size() > 1)
-                   logger.error("Duplicate interactors found for " + identifier + " [" + resource.getName() + "]");
-            return interactors.iterator().next();
-        }
     }
 }
